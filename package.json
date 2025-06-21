@@ -1,0 +1,23 @@
+{
+  "name": "content-distribution",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wardcrisr/content-distribution.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wardcrisr/content-distribution/issues"
+  },
+  "homepage": "https://github.com/wardcrisr/content-distribution#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
