@@ -1,0 +1,18 @@
+<% layout('layouts/main') %>
+<div class="grid">
+  <% posts.forEach(p=> { %>
+    <div class="card">
+      <a href="/post/<%= p._id %>">
+        <img src="/static/thumbnails/<%= p.thumbnail %>" alt="">
+        <h2><%= p.title %></h2>
+      </a>
+      <small><%= p.createdAt.toLocaleDateString() %> · <%= p.views %> 次观看</small>
+    </div>
+  <% }) %>
+</div>
+
+<nav class="pagination">
+  <% for(let i=1;i<=totalPages;i++){ %>
+    <a href="/?page=<%= i %>" class="<%=  i===page?'active':'' %>"><%= i %></a>
+  <% } %>
+</nav>

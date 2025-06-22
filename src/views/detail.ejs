@@ -1,0 +1,8 @@
+<% layout('layouts/main') %>
+<article>
+  <h1><%= post.title %></h1>
+  <video controls src="<%= post.videoUrl %>" width="640"></video>
+  <p><small>发布于 <%= post.createdAt.toLocaleString() %> · 浏览 <%= post.views %> 次</small></p>
+  <p>标签：<%= post.tags.join('，') %></p>
+  <p><a href="/">← 返回首页</a></p>
+</article>

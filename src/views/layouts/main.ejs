@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title || '内容分发' %></title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">内容分发网站</a></h1>
+    <form action="/search" method="get">
+      <input type="text" name="q" placeholder="搜索关键词" value="<%= q||'' %>">
+      <button>搜索</button>
+    </form>
+  </header>
+  <main><%- body %></main>
+  <footer>© 2025 内容分发</footer>
+</body>
+</html>
