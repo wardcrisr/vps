@@ -134,45 +134,7 @@ export const adminAPI = {
   },
 };
 
-// B2 视频管理相关 API
-export const b2VideoAPI = {
-  // 获取 B2 视频列表
-  getB2Videos: (params = {}) => {
-    return api.get('/admin/b2-videos', { params });
-  },
-
-  // 上传视频到 B2（带进度监听）
-  uploadB2Video: (formData, onProgress) => {
-    return api.post('/admin/b2-videos/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.lengthComputable) {
-          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-          onProgress(progress);
-        }
-      },
-    });
-  },
-
-  // 删除 B2 视频
-  deleteB2Video: (fileName) => {
-    return api.delete(`/admin/b2-videos/${encodeURIComponent(fileName)}`);
-  },
-
-  // 生成下载链接
-  generateB2DownloadUrl: (fileName, userId) => {
-    return api.get(`/admin/b2-videos/${encodeURIComponent(fileName)}/download`, {
-      params: { userId: userId || '' }
-    });
-  },
-
-  // 获取 B2 存储统计
-  getB2StorageStats: () => {
-    return api.get('/admin/b2-videos/stats/storage');
-  },
-};
+// B2 视频管理功能已移除
 
 // 便捷的导出方法（向后兼容）
 export const getVideos = videoAPI.getVideos;
@@ -189,12 +151,7 @@ export const adminLogin = authAPI.login;
 export const getAdminStats = adminAPI.getStats;
 export const getAdminDashboard = adminAPI.getDashboardData;
 
-// B2 视频管理便捷导出
-export const getB2Videos = b2VideoAPI.getB2Videos;
-export const uploadB2Video = b2VideoAPI.uploadB2Video;
-export const deleteB2Video = b2VideoAPI.deleteB2Video;
-export const generateB2DownloadUrl = b2VideoAPI.generateB2DownloadUrl;
-export const getB2StorageStats = b2VideoAPI.getB2StorageStats;
+// B2 视频管理功能已移除，相关导出已删除
 
 // 默认导出 api 实例
 export default api; 

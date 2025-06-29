@@ -1,6 +1,6 @@
 /**
  * src/app.js
- * 内容分发平台入口（Express + EJS + Backblaze B2 + 付费下载）
+ * 内容分发平台入口（Express + EJS + 付费下载）
  */
 
 // 加载环境变量 - 优先使用生产配置
@@ -23,7 +23,7 @@ const Media          = require('./models/Media');
 const Collection     = require('./models/Collection');
 
 // 引入服务 - 使用简化版B2服务
-const b2Storage      = require('./services/b2Storage-simple');
+// B2存储服务已移除
 
 // 引入认证中间件
 const { optionalAuth, authenticateToken, requireVIP } = require('./routes/middleware/auth');
@@ -118,14 +118,8 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/contentdb',
 // });
 // app.use(adminJs.options.rootPath, AdminJSExpress.buildRouter(adminJs));
 
-// 初始化B2连接
-b2Storage.initialize().then(connected => {
-  if (connected) {
-    console.log('☁️ 云存储模式：Backblaze B2');
-  } else {
-    console.log('📁 本地存储模式：文件将保存在本地');
-  }
-});
+// 使用本地存储模式
+console.log('📁 存储模式：本地存储');
 
 // 认证路由（注册/登录）
 const authRoutes = require('./routes/auth');
@@ -135,9 +129,7 @@ app.use('/api/auth', authRoutes);
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
-// B2 视频管理路由
-const b2VideoRoutes = require('./routes/b2Videos');
-app.use('/api/admin/b2-videos', b2VideoRoutes);
+// B2 视频管理路由已移除
 
 // 直传上传路由
 const directUploadRoutes = require('./routes/directUpload');
@@ -246,24 +238,8 @@ app.get('/api/media/:id/download', authenticateToken, async (req, res) => {
       });
     }
 
-    // 生成下载令牌
-    let downloadUrl;
-    if (media.isInCloud()) {
-      const tokenResult = await b2Storage.generateDownloadToken(
-        media.cloudFileName,
-        userId,
-        24 // 24小时有效期
-      );
-
-      if (!tokenResult.success) {
-        return res.status(500).json({ error: '生成下载链接失败' });
-      }
-
-      downloadUrl = tokenResult.downloadUrl;
-    } else {
-      // 本地文件直接返回
-      downloadUrl = media.url;
-    }
+    // 使用本地文件路径
+    const downloadUrl = media.url;
 
     // 更新统计数据
     await Promise.all([
@@ -285,24 +261,7 @@ app.get('/api/media/:id/download', authenticateToken, async (req, res) => {
   }
 });
 
-// 使用下载令牌获取文件
-app.get('/api/download/:token', async (req, res) => {
-  try {
-    const token = req.params.token;
-    
-    const fileResult = await b2Storage.getFileWithToken(token);
-    if (!fileResult.success) {
-      return res.status(400).json({ error: fileResult.error });
-    }
-
-    // 重定向到实际下载链接
-    res.redirect(fileResult.downloadUrl);
-
-  } catch (error) {
-    console.error('Token download error:', error);
-    res.status(500).json({ error: '下载失败: ' + error.message });
-  }
-});
+// 下载令牌功能已移除（使用本地存储）
 
 // 搜索功能
 app.get('/search', async (req, res) => {

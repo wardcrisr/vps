@@ -2,9 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const axios = require('axios');
 const ffmpeg = require('fluent-ffmpeg');
-const b2DirectUpload = require('./b2DirectUpload');
 
 /**
  * 生成随机文件名
@@ -15,74 +13,75 @@ function randomFileName(ext = '') {
 }
 
 /**
- * 从 Backblaze B2 生成缩略图并上传至同一 Bucket
- * @param {String} fileKey 视频在 B2 中的 Key (例如 video/2025/06/xxx.mp4)
+ * 从本地视频文件生成缩略图
+ * @param {String} videoPath 本地视频文件路径
+ * @param {String} outputDir 输出目录
  * @param {Object} [options]
  * @param {Number} [options.timestamp=3] 截帧时间点(秒)
- * @returns {Promise<{thumbKey:string, thumbUrl:string}>}
+ * @returns {Promise<{thumbPath:string, thumbUrl:string}>}
  */
-async function generateThumbnail(fileKey, options = {}) {
+async function generateThumbnail(videoPath, outputDir, options = {}) {
   const { timestamp = 3 } = options;
 
-  // 1. 获取 10 分钟有效的临时下载地址
-  const dl = await b2DirectUpload.generateDownloadUrl(fileKey, 600);
-  if (!dl.success) {
-    throw new Error(`无法生成下载链接: ${dl.error}`);
+  if (!fs.existsSync(videoPath)) {
+    throw new Error(`视频文件不存在: ${videoPath}`);
   }
 
-  // 2. 准备临时文件路径
-  const tmpDir = os.tmpdir();
-  const tmpVideo = path.join(tmpDir, randomFileName(path.extname(fileKey)));
-  const tmpThumb = path.join(tmpDir, randomFileName('.jpg'));
+  // 确保输出目录存在
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
-  // 3. 下载视频到本地临时文件
-  await new Promise((resolve, reject) => {
-    axios({ method: 'get', url: dl.url, responseType: 'stream' })
-      .then(res => {
-        const write = fs.createWriteStream(tmpVideo);
-        res.data.pipe(write);
-        write.on('finish', resolve);
-        write.on('error', reject);
-      })
-      .catch(reject);
-  });
+  // 生成缩略图文件名
+  const thumbFileName = randomFileName('.jpg');
+  const thumbPath = path.join(outputDir, thumbFileName);
 
-  // 4. 使用 ffmpeg 截取缩略图
+  // 使用 ffmpeg 截取缩略图
   await new Promise((resolve, reject) => {
-    ffmpeg(tmpVideo)
+    ffmpeg(videoPath)
       .on('error', reject)
       .on('end', resolve)
       .screenshots({
         timestamps: [timestamp],
-        filename: path.basename(tmpThumb),
-        folder: path.dirname(tmpThumb),
+        filename: thumbFileName,
+        folder: outputDir,
         size: '640x360'
       });
   });
 
-  // 5. 上传缩略图到 B2 (使用与视频对应的路径)
-  const thumbKey = fileKey
-    .replace(/^video\//, 'thumb/')
-    .replace(path.extname(fileKey), '.jpg');
-
-  await b2DirectUpload.s3
-    .upload({
-      Bucket: b2DirectUpload.bucketName,
-      Key: thumbKey,
-      Body: fs.createReadStream(tmpThumb),
-      ContentType: 'image/jpeg'
-    })
-    .promise();
-
-  // 6. 清理临时文件
-  fs.unlink(tmpVideo, () => {});
-  fs.unlink(tmpThumb, () => {});
-
-  const thumbUrl = b2DirectUpload.cdnBaseUrl
-    ? `${b2DirectUpload.cdnBaseUrl}/${thumbKey}`
-    : `https://${b2DirectUpload.bucketName}.s3.${process.env.B2_ENDPOINT}/${thumbKey}`;
-
-  return { thumbKey, thumbUrl };
+  return { 
+    thumbPath, 
+    thumbFileName,
+    thumbUrl: `/uploads/thumbs/${thumbFileName}` 
+  };
 }
 
-module.exports = { generateThumbnail }; 
+/**
+ * 获取视频信息
+ * @param {String} videoPath 视频文件路径
+ * @returns {Promise<Object>} 视频信息
+ */
+async function getVideoInfo(videoPath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, (err, metadata) => {
+      if (err) {
+        reject(err);
+      } else {
+        const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
+        resolve({
+          duration: metadata.format.duration,
+          size: metadata.format.size,
+          bitrate: metadata.format.bit_rate,
+          width: videoStream?.width,
+          height: videoStream?.height,
+          codec: videoStream?.codec_name
+        });
+      }
+    });
+  });
+}
+
+module.exports = { 
+  generateThumbnail,
+  getVideoInfo
+}; 

@@ -190,11 +190,8 @@ router.delete('/videos/file/:filename', async (req, res) => {
 
     // 删除云端文件（如果存在）
     if (video.cloudFileName) {
-      const b2Storage = require('../services/b2Storage-simple');
-      const delRes = await b2Storage.deleteFile(video.cloudFileName);
-      if (!delRes.success) {
-        console.warn('云端文件删除失败:', delRes.error);
-      }
+              // B2存储服务已移除，无需删除云端文件
+        console.log('云端文件删除已跳过（B2服务已移除）');
     }
 
     await Media.deleteOne({ _id: video._id });

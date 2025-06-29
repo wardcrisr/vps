@@ -30,7 +30,7 @@
     "bootstrap": "^5.3.0",
     "bunnycdn-stream": "^2.4.3",
     "cookie-parser": "^1.4.7",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.6.1",
     "ejs": "^3.1.10",
     "ejs-mate": "^4.0.0",
     "express": "^4.19.2",
@@ -53,4 +53,3 @@
     "vite": "^4.4.0"
   }
 }
-

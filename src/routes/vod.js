@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const Media = require('../models/Media');
-const b2DirectUpload = require('../services/b2DirectUpload');
+// B2直传服务已移除
 const router = express.Router();
 
 // 视频目录路径
@@ -133,18 +133,7 @@ router.get('/video/:filename(.*)', async (req, res) => {
     });
     
     if (media) {
-      // 优先根据 cloudFileName 生成新的临时下载链接，避免过期导致 403
-      if (media.cloudFileName) {
-        try {
-          const signed = await b2DirectUpload.generateDownloadUrl(media.cloudFileName);
-          if (signed.success && signed.url) {
-            console.log(`重定向到云端视频 (签名): ${filename} -> ${signed.url}`);
-            return res.redirect(302, signed.url);
-          }
-        } catch (e) {
-          console.warn('生成临时下载链接失败:', e.message);
-        }
-      }
+      // B2服务已移除，使用原始URL（如果可用）
 
       // 回退：如果数据库中已存储绝对 URL，则直接重定向（可能已过期，但作为兜底）
       if (media.url && media.url.startsWith('http')) {

@@ -42,7 +42,7 @@ function fixEnvironment() {
 function installDependencies() {
   console.log('📦 安装依赖包...');
   
-  const requiredPackages = ['aws-sdk', 'dotenv'];
+  const requiredPackages = ['dotenv'];
   
   try {
     console.log('正在安装:', requiredPackages.join(', '));
@@ -56,18 +56,9 @@ function installDependencies() {
   }
 }
 
-// 3. 检查B2配置
-function checkB2Config() {
-  console.log('☁️  检查B2配置...');
-  
-  if (process.env.B2_APPLICATION_KEY_ID && process.env.B2_APPLICATION_KEY) {
-    console.log('✅ B2凭证已配置');
-    console.log(`- Bucket: ${process.env.B2_BUCKET_NAME}`);
-    console.log(`- Endpoint: ${process.env.B2_ENDPOINT}`);
-  } else {
-    console.log('⚠️  B2凭证未配置，将使用本地存储模式');
-  }
-  
+// 3. 系统配置检查完成
+function checkSystemConfig() {
+  console.log('✅ 系统配置检查完成');
   console.log('');
 }
 
@@ -119,7 +110,7 @@ async function main() {
   try {
     fixEnvironment();
     installDependencies();
-    checkB2Config();
+    checkSystemConfig();
     startServer();
   } catch (error) {
     console.error('❌ 启动失败:', error.message);

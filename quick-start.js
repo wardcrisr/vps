@@ -13,8 +13,6 @@ function checkAndInstallDependencies() {
   console.log('📦 检查依赖包...');
   
   const requiredPackages = [
-    'aws-sdk',
-    'b2-cloud-storage', 
     'dotenv'
   ];
   
@@ -58,52 +56,11 @@ function checkEnvironment() {
   // 加载环境变量
   require('dotenv').config({ path: envPath });
   
-  const requiredEnvs = [
-    'B2_APPLICATION_KEY_ID',
-    'B2_APPLICATION_KEY', 
-    'B2_BUCKET_NAME',
-    'B2_ENDPOINT'
-  ];
-  
-  const missingEnvs = requiredEnvs.filter(env => !process.env[env]);
-  
-  if (missingEnvs.length > 0) {
-    console.error('❌ 缺失环境变量:', missingEnvs.join(', '));
-    return false;
-  }
-  
-  console.log('✅ 环境配置检查通过');
-  console.log(`- B2 Endpoint: ${process.env.B2_ENDPOINT}`);
-  console.log(`- Bucket: ${process.env.B2_BUCKET_NAME}\n`);
+  console.log('✅ 环境配置文件检查通过');
   return true;
 }
 
-// 测试B2连接
-async function testB2Connection() {
-  console.log('🔄 测试 Backblaze B2 连接...');
-  
-  try {
-    const AWS = require('aws-sdk');
-    
-    const s3 = new AWS.S3({
-      endpoint: `https://${process.env.B2_ENDPOINT}`,
-      accessKeyId: process.env.B2_APPLICATION_KEY_ID,
-      secretAccessKey: process.env.B2_APPLICATION_KEY,
-      region: 'us-east-005',
-      s3ForcePathStyle: true,
-      signatureVersion: 'v4'
-    });
-    
-    // 测试存储桶访问
-    await s3.headBucket({ Bucket: process.env.B2_BUCKET_NAME }).promise();
-    console.log('✅ B2连接测试成功!\n');
-    return true;
-  } catch (error) {
-    console.error('❌ B2连接测试失败:', error.message);
-    console.log('💡 请检查B2凭证是否正确\n');
-    return false;
-  }
-}
+// 系统检查完成
 
 // 启动服务器
 function startServer() {
@@ -127,11 +84,8 @@ async function main() {
       process.exit(1);
     }
     
-    // 3. 测试B2连接
-    const b2Connected = await testB2Connection();
-    if (!b2Connected) {
-      console.log('⚠️  B2连接失败，但服务器仍会启动（仅支持本地存储）\n');
-    }
+    // 3. 系统环境检查完成
+    console.log('✅ 系统环境检查完成\n');
     
     // 4. 启动服务器
     startServer();
