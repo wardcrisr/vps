@@ -1,0 +1,71 @@
+<%
+  // 格式化时长
+  function formatDuration(seconds) {
+    if (!seconds) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  // 格式化数字
+  function formatNumber(num) {
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
+    }
+    return num.toString();
+  }
+  
+  // 格式化日期
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return '今天';
+    if (days === 1) return '昨天';
+    if (days < 30) return `${days}天前`;
+    
+    return date.toLocaleDateString('zh-CN');
+  }
+
+  // 获取上传者信息
+  const uploader = video.uploader || video.uploaderInfo || video.up || null;
+  const uploaderUid = uploader ? (uploader.uid || uploader._id) : 'anonymous';
+  const uploaderName = uploader ? (uploader.name || uploader.displayName || uploader.username || '匿名用户') : '匿名用户';
+  // 头像功能已删除
+%>
+
+<div class="video-card">
+  <!-- 视频缩略图区域 - 点击播放视频 -->
+  <div class="video-thumbnail" onclick="location.href='/vod/<%= video._id %>'">
+    <img src="<%= video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail' %>" 
+         alt="<%= video.title %>" loading="lazy">
+    <div class="video-duration"><%= formatDuration(video.duration) %></div>
+    <% if (video.isPremiumOnly) { %>
+      <div class="premium-badge">付费</div>
+    <% } %>
+  </div>
+  
+  <!-- 视频信息区域 -->
+  <div class="video-info">
+    <!-- 视频标题 - 点击播放视频 -->
+    <h4 class="video-title" title="<%= video.title %>" onclick="location.href='/vod/<%= video._id %>'">
+      <%= video.title %>
+    </h4>
+    
+    <!-- 上传者信息 - 点击进入上传者主页 -->
+    <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/<%= uploaderUid %>'" style="cursor: pointer; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 <%= uploaderName %></span>
+      </div>
+    </div>
+    
+    <!-- 视频统计信息 -->
+    <div class="video-stats">
+      <span class="views"><%= formatNumber(video.views) %> 播放</span>
+      <span class="danmaku"><%= formatNumber(video.danmakuCount) %> 弹幕</span>
+      <span class="date"><%= formatDate(video.createdAt) %></span>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员后台 - X福利姬</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .sidebar {
+            background: #343a40;
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: #adb5bd;
+            border-radius: 0.375rem;
+            margin: 0.125rem 0;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #495057;
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            background: #f8f9fa;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+        
+        .pagination {
+            justify-content: center;
+        }
+        
+        .modal-header {
+            background: #007bff;
+            color: white;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">X福利姬</h4>
+                        <small class="text-muted">管理后台</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i>
+                                仪表盘
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#videos" data-section="videos">
+                                <i class="fas fa-video"></i>
+                                视频管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#users" data-section="users">
+                                <i class="fas fa-users"></i>
+                                用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings" data-section="settings">
+                                <i class="fas fa-cog"></i>
+                                系统设置
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/api/auth/profile">
+                                <i class="fas fa-user"></i>
+                                个人中心
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home"></i>
+                                返回首页
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 主要内容区域 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">管理员后台</h1>
+                    <small class="text-muted">欢迎，<span class="username-display"><%= user.username %></span> 管理员</small>
+                </div>
+
+                <!-- 仪表盘 -->
+                <div id="dashboard-section" class="content-section">
+                    <div class="row" id="statsContainer">
+                        <!-- 统计卡片将在这里动态加载 -->
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h5>用户注册趋势（最近7天）</h5>
+                        <canvas id="registrationChart" width="400" height="100"></canvas>
+                    </div>
+                </div>
+
+                <!-- 视频管理 -->
+                <div id="videos-section" class="content-section" style="display: none;">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="table-card">
+                                <h5 class="card-title">📂 视频库</h5>
+                                <div id="adminVideoList" class="list-group list-group-flush mb-3" style="max-height:300px; overflow-y:auto;"></div>
+                                <hr>
+                                <h6 class="mb-2">📤 上传新视频</h6>
+                                <input type="file" id="adminVideoInput" accept="video/mp4" class="form-control mb-2">
+                                <button id="adminUploadBtn" class="btn btn-primary w-100">开始上传</button>
+                                <div id="adminUploadStatus" class="small text-muted mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div id="users-section" class="content-section" style="display: none;">
+                    <!-- 搜索筛选 -->
+                    <div class="search-box">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="搜索用户名、邮箱...">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="roleFilter">
+                                    <option value="">全部角色</option>
+                                    <option value="user">普通用户</option>
+                                    <option value="vip">VIP用户</option>
+                                    <option value="admin">管理员</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary" onclick="searchUsers()">
+                                    <i class="fas fa-search"></i> 搜索
+                                </button>
+                            </div>
+                            <div class="col-md-5 text-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-success btn-sm" onclick="batchOperation('setPremium', {isPremium: true})">
+                                        <i class="fas fa-crown"></i> 批量设为VIP
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" onclick="batchOperation('setRole', {role: 'user'})">
+                                        <i class="fas fa-user"></i> 批量设为普通用户
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="batchOperation('delete')">
+                                        <i class="fas fa-trash"></i> 批量删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户列表 -->
+                    <div class="table-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>用户列表</h5>
+                            <small class="text-muted" id="userCount">加载中...</small>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll"></th>
+                                        <th>用户名</th>
+                                        <th>邮箱</th>
+                                        <th>角色</th>
+                                        <th>会员状态</th>
+                                        <th>注册时间</th>
+                                        <th>最后登录</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- 用户数据将在这里动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页 -->
+                        <nav aria-label="用户列表分页">
+                            <ul class="pagination" id="pagination">
+                                <!-- 分页将在这里动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 用户编辑模态框 -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label class="form-label">用户角色</label>
+                            <select class="form-select" id="userRole">
+                                <option value="user">普通用户</option>
+                                <option value="vip">VIP用户</option>
+                                <option value="admin">管理员</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isPremium">
+                                <label class="form-check-label" for="isPremium">
+                                    VIP会员
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">会员到期时间</label>
+                            <input type="datetime-local" class="form-control" id="premiumExpiry">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">每日下载限制</label>
+                            <input type="number" class="form-control" id="dailyDownloadLimit" min="0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tus-js-client@3/dist/tus.min.js"></script>
+    <!-- 直接内联DirectUploader库，避免外部加载404 -->
+    <script>
+<%- include('../partials/direct-upload-inline.ejs'); %>
+    </script>
+    <script>
+        let currentPage = 1;
+        let selectedUsers = [];
+        
+        // 检查认证状态
+        function checkAuthentication() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                document.body.innerHTML = `
+                    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+                            <h3>访问受限</h3>
+                            <p class="text-muted">请先登录管理员账号</p>
+                            <a href="/api/auth/login" class="btn btn-primary">前往登录</a>
+                        </div>
+                    </div>
+                `;
+                return false;
+            }
+            
+            try {
+                const userData = JSON.parse(user);
+                if (userData.role !== 'admin') {
+                    document.body.innerHTML = `
+                        <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+                            <div class="text-center">
+                                <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
+                                <h3>权限不足</h3>
+                                <p class="text-muted">您没有管理员权限</p>
+                                <a href="/" class="btn btn-secondary">返回首页</a>
+                            </div>
+                        </div>
+                    `;
+                    return false;
+                }
+                
+                // 更新页面上显示的用户名
+                const usernameElements = document.querySelectorAll('.username-display');
+                usernameElements.forEach(el => {
+                    el.textContent = userData.username;
+                });
+                
+                return true;
+            } catch (error) {
+                console.error('用户数据解析失败:', error);
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                document.body.innerHTML = `
+                    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h3>认证错误</h3>
+                            <p class="text-muted">用户数据损坏，请重新登录</p>
+                            <a href="/api/auth/login" class="btn btn-primary">重新登录</a>
+                        </div>
+                    </div>
+                `;
+                return false;
+            }
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 首先检查认证状态
+            if (!checkAuthentication()) {
+                return;
+            }
+            loadDashboard();
+            
+            // 侧边栏导航
+            document.querySelectorAll('[data-section]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    showSection(section);
+                    
+                    // 更新活动状态
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // 全选复选框
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('input[name="userSelect"]');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateSelectedUsers();
+            });
+            
+            // 搜索框回车事件
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchUsers();
+                }
+            });
+            
+            // 角色筛选变化事件
+            document.getElementById('roleFilter').addEventListener('change', function() {
+                searchUsers();
+            });
+
+            // 初始化上传功能
+            setTimeout(async () => {
+                try {
+                    const success = await initializeUploader();
+                    if (success) {
+                        bindUploadEvents();
+                        console.log('✅ 上传功能已成功初始化');
+                    } else {
+                        console.error('❌ 上传功能初始化失败');
+                        // 显示用户友好的错误提示
+                        if (document.getElementById('adminUploadStatus')) {
+                            document.getElementById('adminUploadStatus').textContent = '上传功能加载失败，请刷新页面重试';
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ 上传功能初始化异常:', error);
+                }
+            }, 100); // 确保DOM完全加载后再初始化
+        });
+        
+        // 显示指定章节
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            document.getElementById(section + '-section').style.display = 'block';
+            
+            if (section === 'users') {
+                loadUsers();
+            } else if (section === 'dashboard') {
+                loadDashboard();
+            } else if (section === 'videos') {
+                loadAdminVideos();
+            }
+        }
+        
+        // 处理API响应错误
+        function handleApiError(response) {
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                alert('登录已过期，请重新登录');
+                window.location.href = '/api/auth/login';
+                return true;
+            }
+            return false;
+        }
+        
+        // 加载仪表盘数据
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/admin/stats', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                
+                if (handleApiError(response)) return;
+                
+                const result = await response.json();
+                if (result.success) {
+                    displayStats(result.data.summary);
+                    displayChart(result.data.chart.last7Days);
+                } else {
+                    console.error('加载统计数据失败:', result.message);
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+        
+        // 显示统计数据
+        function displayStats(stats) {
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">${stats.totalUsers}</div>
+                        <div class="stats-label">总用户数</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">${stats.premiumUsers}</div>
+                        <div class="stats-label">VIP用户</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">${stats.adminUsers}</div>
+                        <div class="stats-label">管理员</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">${stats.todayUsers}</div>
+                        <div class="stats-label">今日新增</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 显示图表
+        function displayChart(data) {
+            const ctx = document.getElementById('registrationChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: '新增用户',
+                        data: data.map(d => d.count),
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 加载用户列表
+        async function loadUsers(page = 1) {
+            try {
+                currentPage = page; // 更新当前页码
+                
+                const search = document.getElementById('searchInput').value;
+                const role = document.getElementById('roleFilter').value;
+                
+                const params = new URLSearchParams({
+                    page: page.toString(),
+                    limit: '10'
+                });
+                
+                if (search) params.append('search', search);
+                if (role) params.append('role', role);
+                
+                // 显示加载状态
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">加载中...</td></tr>';
+                
+                const response = await fetch(`/api/admin/users?${params}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                
+                if (handleApiError(response)) return;
+                
+                const result = await response.json();
+                if (result.success) {
+                    displayUsers(result.data.users);
+                    displayPagination(result.data.pagination);
+                    document.getElementById('userCount').textContent = `共 ${result.data.pagination.count} 个用户`;
+                    
+                    // 重置全选复选框
+                    document.getElementById('selectAll').checked = false;
+                    selectedUsers = [];
+                } else {
+                    console.error('加载用户列表失败:', result.message);
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">加载失败</td></tr>';
+                }
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">网络错误</td></tr>';
+            }
+        }
+        
+        // 显示用户列表
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => {
+                const roleBadge = {
+                    'admin': 'danger',
+                    'vip': 'warning',
+                    'user': 'secondary'
+                }[user.role] || 'secondary';
+                
+                const premiumBadge = user.isPremium ? 
+                    '<span class="badge bg-success">VIP</span>' : 
+                    '<span class="badge bg-light text-dark">普通</span>';
+                
+                return `
+                    <tr>
+                        <td><input type="checkbox" name="userSelect" value="${user._id}" onchange="updateSelectedUsers()"></td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td><span class="badge bg-${roleBadge}">${user.role}</span></td>
+                        <td>${premiumBadge}</td>
+                        <td>${new Date(user.joinDate).toLocaleDateString('zh-CN')}</td>
+                        <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('zh-CN') : '从未登录'}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="editUser('${user._id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteUser('${user._id}')" 
+                                        ${user.role === 'admin' ? 'disabled' : ''}>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // 显示分页
+        function displayPagination(pagination) {
+            const paginationEl = document.getElementById('pagination');
+            let html = '';
+            
+            // 上一页
+            if (pagination.current > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadUsers(${pagination.current - 1})">上一页</a></li>`;
+            }
+            
+            // 页码
+            for (let i = Math.max(1, pagination.current - 2); i <= Math.min(pagination.total, pagination.current + 2); i++) {
+                html += `<li class="page-item ${i === pagination.current ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="loadUsers(${i})">${i}</a>
+                </li>`;
+            }
+            
+            // 下一页
+            if (pagination.current < pagination.total) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadUsers(${pagination.current + 1})">下一页</a></li>`;
+            }
+            
+            paginationEl.innerHTML = html;
+        }
+        
+        // 搜索用户
+        function searchUsers() {
+            loadUsers(1);
+        }
+        
+        // 清空搜索
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            loadUsers(1);
+        }
+        
+        // 更新选中的用户
+        function updateSelectedUsers() {
+            const checkboxes = document.querySelectorAll('input[name="userSelect"]:checked');
+            selectedUsers = Array.from(checkboxes).map(cb => cb.value);
+        }
+        
+        // 编辑用户
+        async function editUser(userId) {
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    const user = result.data;
+                    document.getElementById('userId').value = user._id;
+                    document.getElementById('userRole').value = user.role;
+                    document.getElementById('isPremium').checked = user.isPremium;
+                    document.getElementById('dailyDownloadLimit').value = user.dailyDownloadLimit;
+                    
+                    if (user.premiumExpiry) {
+                        const date = new Date(user.premiumExpiry);
+                        document.getElementById('premiumExpiry').value = date.toISOString().slice(0, 16);
+                    }
+                    
+                    new bootstrap.Modal(document.getElementById('userModal')).show();
+                }
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
+            }
+        }
+        
+        // 保存用户
+        async function saveUser() {
+            try {
+                const userId = document.getElementById('userId').value;
+                const data = {
+                    role: document.getElementById('userRole').value,
+                    isPremium: document.getElementById('isPremium').checked,
+                    premiumExpiry: document.getElementById('premiumExpiry').value,
+                    dailyDownloadLimit: parseInt(document.getElementById('dailyDownloadLimit').value)
+                };
+                
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('用户信息更新成功');
+                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                    loadUsers(currentPage);
+                } else {
+                    alert('更新失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('保存用户失败:', error);
+                alert('保存失败');
+            }
+        }
+        
+        // 删除用户
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除这个用户吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('用户删除成功');
+                    loadUsers(currentPage);
+                } else {
+                    alert('删除失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('删除用户失败:', error);
+                alert('删除失败');
+            }
+        }
+        
+        // 批量操作
+        async function batchOperation(action, data = {}) {
+            if (selectedUsers.length === 0) {
+                alert('请先选择要操作的用户');
+                return;
+            }
+            
+            const actionNames = {
+                'setPremium': '设置VIP',
+                'setRole': '设置角色',
+                'delete': '删除'
+            };
+            
+            if (!confirm(`确定要对 ${selectedUsers.length} 个用户执行"${actionNames[action]}"操作吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/users/batch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify({
+                        action,
+                        userIds: selectedUsers,
+                        data
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    selectedUsers = [];
+                    document.getElementById('selectAll').checked = false;
+                    loadUsers(currentPage);
+                } else {
+                    alert('操作失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('批量操作失败:', error);
+                alert('操作失败');
+            }
+        }
+
+        // ==================== 视频管理功能 ====================
+        const adminPlayer = document.getElementById('adminVideoPlayer');
+        const adminInfo = document.getElementById('adminVideoInfo');
+        const adminList = document.getElementById('adminVideoList');
+        const adminUploadInput = document.getElementById('adminVideoInput');
+        const adminUploadBtn = document.getElementById('adminUploadBtn');
+        const adminUploadStatus = document.getElementById('adminUploadStatus');
+        let adminVideos = [];
+        let currentAdminFile = null;
+
+        // 加载管理员视频列表
+        async function loadAdminVideos() {
+            try {
+                const res = await fetch('/vod/videos');
+                const data = await res.json();
+                if (data.success) {
+                    adminVideos = data.videos;
+                    renderAdminVideoList();
+                }
+            } catch (e) {
+                console.error('加载视频失败', e);
+            }
+        }
+
+        // 渲染管理员视频列表
+        function renderAdminVideoList() {
+            adminList.innerHTML = adminVideos.map((v, i) => `
+                <a href="#" class="list-group-item list-group-item-action ${v.filename === currentAdminFile ? 'active' : ''}" data-idx="${i}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-play-circle me-1"></i>${v.name}
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAdminVideo('${v.filename}', event)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // 管理员视频列表点击事件
+        adminList.addEventListener('click', e => {
+            const item = e.target.closest('a');
+            if (!item) return;
+            const idx = item.dataset.idx;
+            const video = adminVideos[idx];
+            playAdminVideo(video);
+        });
+
+        // 播放管理员视频
+        function playAdminVideo(video) {
+            currentAdminFile = video.filename;
+            const videoSrc = video.playUrl || video.url || '/vod/video/' + video.filename;
+            adminPlayer.src = videoSrc;
+            adminPlayer.load();
+            adminInfo.textContent = '正在播放: ' + video.name + ' (' + (video.source === 'cloud' ? '云端' : '本地') + ')';
+            renderAdminVideoList();
+            console.log('管理员播放视频:', video.name, '源:', videoSrc);
+        }
+
+        // 删除管理员视频
+        async function deleteAdminVideo(filename, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            if (!confirm('确定要删除这个视频吗？')) return;
+            
+            try {
+                const res = await fetch('/api/admin/videos/' + filename, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('视频删除成功');
+                    loadAdminVideos();
+                } else {
+                    alert('删除失败: ' + data.message);
+                }
+            } catch (e) {
+                console.error('删除视频失败', e);
+                alert('删除失败');
+            }
+        }
+
+        // 重写上传逻辑（使用直传接口）
+        let uploader = null;
+
+        // 动态加载脚本（备用方案）
+        function loadDirectUploadScript() {
+            return new Promise((resolve, reject) => {
+                if (typeof DirectUploader !== 'undefined') {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = `/js/direct-upload.js?v=${Date.now()}&force=1`;
+                script.onload = () => {
+                    console.log('DirectUploader脚本重新加载成功');
+                    setTimeout(() => {
+                        if (typeof DirectUploader !== 'undefined') {
+                            resolve();
+                        } else {
+                            reject(new Error('脚本加载后DirectUploader仍未定义'));
+                        }
+                    }, 100);
+                };
+                script.onerror = () => {
+                    reject(new Error('脚本加载失败'));
+                };
+                
+                // 移除旧脚本
+                const oldScript = document.querySelector('script[src*="direct-upload.js"]');
+                if (oldScript) {
+                    oldScript.remove();
+                }
+                
+                document.head.appendChild(script);
+            });
+        }
+
+        // 初始化上传器（在页面加载完成后）
+        async function initializeUploader() {
+            try {
+                // 检查DirectUploader是否已定义
+                if (typeof DirectUploader === 'undefined') {
+                    console.warn('DirectUploader未定义，尝试重新加载脚本...');
+                    await loadDirectUploadScript();
+                }
+
+                uploader = new DirectUploader({
+                    onProgress: ({ percent, current, total }) => {
+                        adminUploadStatus.textContent = `上传进度: ${percent}% (${current}/${total || 1}个分片)`;
+                        adminUploadStatus.className = 'small text-info mt-2';
+                    },
+                    onSuccess: (res) => {
+                        console.log('✅ 上传成功:', res);
+                        adminUploadStatus.textContent = '✅ 上传成功，正在刷新视频列表...';
+                        adminUploadStatus.className = 'small text-success mt-2';
+                        // 通知后端更新媒体状态
+                        fetch(`/api/bunny-update/${res.videoId}`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ size: res.size, mimetype: res.mimetype })
+                        }).then(()=>{
+                          loadAdminVideos();
+                        });
+                        adminUploadInput.value = '';
+                    },
+                    onError: (err) => {
+                        console.error('DirectUpload error', err);
+                        adminUploadStatus.textContent = '❌ 上传失败: ' + err.message;
+                        adminUploadStatus.className = 'small text-danger mt-2';
+                    }
+                });
+                
+                console.log('✅ DirectUploader初始化成功');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ DirectUploader初始化失败:', error);
+                adminUploadStatus.textContent = '❌ 初始化失败: ' + error.message;
+                adminUploadStatus.className = 'small text-danger mt-2';
+                return false;
+            }
+        }
+
+        // 绑定上传按钮事件
+        async function bindUploadEvents() {
+            const uploadBtn = document.getElementById('adminUploadBtn');
+            if (uploadBtn) {
+                // 移除旧的事件监听器
+                const newUploadBtn = uploadBtn.cloneNode(true);
+                uploadBtn.parentNode.replaceChild(newUploadBtn, uploadBtn);
+
+                newUploadBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    
+                    try {
+                        // 检查上传器是否已初始化
+                        if (!uploader) {
+                            adminUploadStatus.textContent = '正在初始化上传器...';
+                            adminUploadStatus.className = 'small text-warning mt-2';
+                            
+                            const initialized = await initializeUploader();
+                            if (!initialized) {
+                                throw new Error('上传功能初始化失败，请刷新页面重试');
+                            }
+                        }
+
+                        // 检查文件选择
+                        if (!adminUploadInput.files || !adminUploadInput.files.length) {
+                            alert('请先选择要上传的视频文件！');
+                            return;
+                        }
+                        
+                        const file = adminUploadInput.files[0];
+                        
+                        // 文件大小检查
+                        const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
+                        if (file.size > maxSize) {
+                            alert(`文件过大！最大支持 ${(maxSize/1024/1024/1024).toFixed(1)}GB`);
+                            return;
+                        }
+                        
+                        // 文件类型检查
+                        if (!file.type.startsWith('video/')) {
+                            if (!confirm('这不是标准的视频文件格式，确定要上传吗？')) {
+                                return;
+                            }
+                        }
+                        
+                        // ====================== 直传 Bunny (tus) ======================
+                        newUploadBtn.disabled = true;
+                        newUploadBtn.textContent = '上传准备...';
+                        adminUploadStatus.textContent = '⏳ 创建视频条目...';
+                        adminUploadStatus.className = 'small text-info mt-2';
+
+                        // 1. 获取签名 & 直传信息
+                        const signRes = await fetch('/api/bunny-sign', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ title: file.name })
+                        });
+                        const signData = await signRes.json();
+                        if (!signData.success) throw new Error(signData.error || '获取签名失败');
+
+                        const { videoId, libraryId, signature, expires, tusUrl } = signData;
+
+                        newUploadBtn.textContent = '上传中...';
+
+                        const upload = new tus.Upload(file, {
+                          endpoint: tusUrl,
+                          headers: {
+                            AuthorizationSignature: signature,
+                            AuthorizationExpire: expires,
+                            LibraryId: libraryId,
+                            VideoId: videoId
+                          },
+                          metadata: {
+                            filetype: file.type,
+                            title: file.name
+                          },
+                          chunkSize: 5 * 1024 * 1024,
+                          retryDelays: [0, 3000, 5000, 10000],
+                          onError: err => {
+                            console.error('tus error', err);
+                            adminUploadStatus.textContent = '❌ 上传失败: ' + err.message;
+                            adminUploadStatus.className = 'small text-danger mt-2';
+                          },
+                          onProgress: (bytesSent, bytesTotal) => {
+                            const percent = ((bytesSent / bytesTotal) * 100).toFixed(1);
+                            adminUploadStatus.textContent = `上传进度: ${percent}% (${(bytesSent/1048576).toFixed(1)} / ${(bytesTotal/1048576).toFixed(1)} MB)`;
+                            adminUploadStatus.className = 'small text-info mt-2';
+                          },
+                          onSuccess: () => {
+                            console.log('✅ 直传完成');
+                            adminUploadStatus.textContent = '✅ 上传完成，后台转码中...';
+                            adminUploadStatus.className = 'small text-success mt-2';
+                            // 通知后端更新媒体状态
+                            fetch(`/api/bunny-update/${videoId}`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ size: file.size, mimetype: file.type })
+                            }).then(()=>{
+                              loadAdminVideos();
+                            });
+                            adminUploadInput.value = '';
+                          }
+                        });
+
+                        // 断点续传
+                        const previous = await upload.findPreviousUploads();
+                        if (previous.length) upload.resumeFromPreviousUpload(previous[0]);
+
+                        upload.start();
+                        // ==================================================================
+                        
+                    } catch (error) {
+                        console.error('❌ 上传过程出错:', error);
+                        adminUploadStatus.textContent = `❌ 上传失败: ${error.message}`;
+                        adminUploadStatus.className = 'small text-danger mt-2';
+                        alert(`上传失败: ${error.message}`);
+                        
+                    } finally {
+                        // 恢复按钮状态
+                        newUploadBtn.disabled = false;
+                        newUploadBtn.textContent = '开始上传';
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

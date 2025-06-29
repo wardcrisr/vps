@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - X福利姬</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .navbar {
+            background: #ffffff !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6b35 !important;
+        }
+        
+        .profile-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .profile-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .profile-icon {
+            width: 120px;
+            height: 120px;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+            border-radius: 15px;
+        }
+        
+        .profile-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .profile-info p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .profile-main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .profile-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #666;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #f8f9fa;
+            color: #007bff;
+        }
+        
+        .sidebar-menu i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        .profile-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: none;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-main {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">X福利姬</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">首页</a>
+                <a class="nav-link" href="/logout">退出登录</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <!-- 用户信息头部 -->
+        <div class="profile-header">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="profile-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="profile-info">
+                        <h3><%= user.displayName || user.username %>
+                            <% if (user.isPremium) { %>
+                                <span class="premium-badge">VIP会员</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">普通用户</span>
+                            <% } %>
+                        </h3>
+                        <p><strong>用户名：</strong><%= user.username %></p>
+                        <p><strong>注册时间：</strong><%= new Date(user.joinDate).toLocaleDateString('zh-CN') %></p>
+                        <p><strong>最后登录：</strong><%= new Date(user.lastLogin).toLocaleDateString('zh-CN') %></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-number"><%= user.totalDownloads || 0 %></div>
+                            <div class="stat-label">总下载数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number"><%= user.dailyDownloadLimit - (user.downloadCount || 0) %></div>
+                            <div class="stat-label">今日剩余</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="profile-main">
+            <!-- 侧边栏菜单 -->
+            <div class="profile-sidebar">
+                <ul class="sidebar-menu">
+                    <li><a href="#basic-info" class="menu-link active"><i class="fas fa-user"></i>基本信息</a></li>
+                    <li><a href="#account-bind" class="menu-link"><i class="fas fa-link"></i>账户绑定</a></li>
+                    <li><a href="#password-change" class="menu-link"><i class="fas fa-lock"></i>密码修改</a></li>
+                    <li><a href="#my-balance" class="menu-link"><i class="fas fa-wallet"></i>我的余额</a></li>
+                    <li><a href="#my-vip" class="menu-link"><i class="fas fa-crown"></i>我的会员</a></li>
+                    <li><a href="#my-orders" class="menu-link"><i class="fas fa-receipt"></i>我的订单</a></li>
+                    <li><a href="#my-favorites" class="menu-link"><i class="fas fa-heart"></i>我的收藏</a></li>
+                    <li><a href="#my-referrals" class="menu-link"><i class="fas fa-users"></i>我的推广</a></li>
+                    <li><a href="#my-workbench" class="menu-link"><i class="fas fa-tools"></i>我的工单</a></li>
+                    <li><a href="#logout" class="menu-link"><i class="fas fa-sign-out-alt"></i>退出登录</a></li>
+                </ul>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="profile-content">
+                <div id="alertContainer"></div>
+
+                <!-- 基本信息 -->
+                <div id="basic-info" class="content-section">
+                    <h4 class="section-title">基本信息</h4>
+                    <form id="basicInfoForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">显示昵称</label>
+                                    <input type="text" class="form-control" name="displayName" 
+                                           value="<%= user.displayName || '' %>" placeholder="请输入显示昵称">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">联系QQ</label>
+                                    <input type="text" class="form-control" name="qq" 
+                                           value="<%= user.qq || '' %>" placeholder="请输入QQ号">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">个人介绍</label>
+                            <textarea class="form-control" name="bio" rows="4" 
+                                      placeholder="介绍一下自己吧..."><%= user.bio || '' %></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">保存资料</button>
+                    </form>
+                </div>
+
+                <!-- 账户绑定 -->
+                <div id="account-bind" class="content-section" style="display: none;">
+                    <h4 class="section-title">账户绑定</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">当前邮箱</label>
+                                <input type="email" class="form-control" value="<%= user.email %>" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">新邮箱地址</label>
+                                <div class="input-group">
+                                    <input type="email" class="form-control" placeholder="请输入新邮箱">
+                                    <button class="btn btn-outline-secondary">确认修改邮箱</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 密码修改 -->
+                <div id="password-change" class="content-section" style="display: none;">
+                    <h4 class="section-title">密码修改</h4>
+                    <form id="passwordForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">当前密码</label>
+                                    <input type="password" class="form-control" name="currentPassword" 
+                                           placeholder="请输入当前密码" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">新密码</label>
+                                    <input type="password" class="form-control" name="newPassword" 
+                                           placeholder="请输入新密码" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">确认新密码</label>
+                                    <input type="password" class="form-control" name="confirmPassword" 
+                                           placeholder="请再次输入新密码" required>
+                                </div>
+                                <button type="submit" class="btn btn-danger">确认修改密码</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 菜单切换
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有活动状态
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+                
+                // 添加当前活动状态
+                this.classList.add('active');
+                
+                // 显示对应内容
+                const target = this.getAttribute('href').substring(1);
+                const section = document.getElementById(target);
+                if (section) {
+                    section.style.display = 'block';
+                }
+                
+                // 处理特殊链接
+                if (target === 'logout') {
+                    if (confirm('确定要退出登录吗？')) {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('user');
+                        window.location.href = '/';
+                    }
+                }
+            });
+        });
+
+        // 基本信息表单提交
+        document.getElementById('basicInfoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/auth/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', result.message);
+                } else {
+                    showAlert('danger', result.message);
+                }
+            } catch (error) {
+                showAlert('danger', '更新失败，请稍后重试');
+            }
+        });
+
+        // 密码修改表单提交
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            if (data.newPassword !== data.confirmPassword) {
+                showAlert('danger', '两次输入的新密码不一致');
+                return;
+            }
+            
+            delete data.confirmPassword;
+            
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', result.message);
+                    e.target.reset();
+                } else {
+                    showAlert('danger', result.message);
+                }
+            } catch (error) {
+                showAlert('danger', '修改失败，请稍后重试');
+            }
+        });
+
+        // 显示提示消息
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 

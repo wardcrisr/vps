@@ -1,0 +1,89 @@
+<%
+/**
+ * EJS 辅助函数
+ * 用于格式化时间、日期等
+ */
+
+// 格式化视频时长（秒转分:秒）
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '00:00';
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+// 格式化日期（YYYY-MM-DD格式）
+function formatDate(date) {
+  if (!date) return '';
+  
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const day = d.getDate().toString().padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+}
+
+// 格式化相对时间（多久前）
+function formatRelativeTime(date) {
+  if (!date) return '';
+  
+  const now = new Date();
+  const targetDate = new Date(date);
+  const diffMs = now - targetDate;
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+
+  if (diffSecs < 60) return '刚刚';
+  if (diffMins < 60) return `${diffMins}分钟前`;
+  if (diffHours < 24) return `${diffHours}小时前`;
+  if (diffDays < 30) return `${diffDays}天前`;
+  if (diffMonths < 12) return `${diffMonths}个月前`;
+  return `${diffYears}年前`;
+}
+
+// 格式化数字（万为单位）
+function formatNumber(num) {
+  if (!num || num === 0) return '0';
+  
+  if (num >= 100000000) {
+    return (num / 100000000).toFixed(1) + '亿';
+  }
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + '万';
+  }
+  return num.toString();
+}
+
+// 截断文本
+function truncateText(text, maxLength = 30) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
+// 头像功能已删除
+
+// 获取默认封面
+function getDefaultCover() {
+  return '/api/placeholder/video-thumbnail';
+}
+
+// 检查URL是否有效
+function isValidUrl(url) {
+  if (!url) return false;
+  return url.startsWith('http') || url.startsWith('/');
+}
+
+// 安全的URL处理
+function safeUrl(url, fallback = '') {
+  return isValidUrl(url) ? url : fallback;
+}
+
+%> 

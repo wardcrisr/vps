@@ -1,0 +1,243 @@
+<%- contentFor('head') %>
+<link rel="stylesheet" href="/css/space.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<%- contentFor('body') %>
+
+<div class="space-container">
+  <!-- 顶部横幅 -->
+  <div class="space-header">
+    <%- include('partials/space-banner', { uploader: uploader }) %>
+  </div>
+
+  <!-- 主内容区域 -->
+  <div class="space-content">
+    <div class="main-content">
+      <!-- 导航标签页 -->
+      <div class="space-tabs">
+        <%- include('partials/space-tabs', { activeTab: activeTab }) %>
+      </div>
+
+      <!-- 视频网格区域 -->
+      <div id="videos-container" class="videos-grid">
+        <% if (videos && videos.length > 0) { %>
+          <div class="video-grid" id="video-grid">
+            <% videos.forEach(video => { %>
+              <%- include('partials/video-card', { video: video }) %>
+            <% }) %>
+          </div>
+          
+          <!-- 分页组件 -->
+          <div class="pagination-wrapper">
+            <%- include('partials/pagination', { pagination: pagination, uid: uploader.uid }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <p>暂无视频内容</p>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- 合集板块 -->
+      <% if (collections && collections.length > 0) { %>
+        <div class="collections-section">
+          <h3 class="section-title">视频合集</h3>
+          <div class="collections-grid">
+            <% collections.forEach(collection => { %>
+              <%- include('partials/collection-card', { collection: collection }) %>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+      <%- include('partials/space-sidebar', { uploader: uploader, user: user }) %>
+    </div>
+  </div>
+</div>
+
+<!-- 加载更多按钮 -->
+<div id="load-more-container" class="load-more-container" style="display: none;">
+  <button id="load-more-btn" class="btn btn-primary">加载更多</button>
+</div>
+
+<script>
+// 空间页JavaScript逻辑
+window.SPACE_CONFIG = {
+  currentPage: <%= pagination.current %>,
+  totalPages: <%= pagination.total %>,
+  uid: '<%= uploader.uid %>'
+};
+
+const SpacePage = {
+  currentPage: window.SPACE_CONFIG.currentPage,
+  totalPages: window.SPACE_CONFIG.totalPages,
+  currentSort: 'newest',
+  uid: window.SPACE_CONFIG.uid,
+  loading: false,
+
+  init() {
+    this.bindTabEvents();
+    this.bindPaginationEvents();
+    this.bindLoadMoreEvents();
+  },
+
+  // 绑定标签页切换事件
+  bindTabEvents() {
+    const tabs = document.querySelectorAll('.tab-item');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sort = tab.dataset.sort;
+        this.switchTab(sort);
+      });
+    });
+  },
+
+  // 切换标签页
+  async switchTab(sort) {
+    if (this.loading || this.currentSort === sort) return;
+    
+    this.currentSort = sort;
+    this.currentPage = 1;
+    
+    // 更新标签页样式
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelector(`[data-sort="${sort}"]`).classList.add('active');
+    
+    // 加载视频
+    await this.loadVideos(1, sort, true);
+  },
+
+  // 加载视频列表
+  async loadVideos(page, sort, replace = false) {
+    this.loading = true;
+    try {
+      const response = await axios.get(`/space/${this.uid}/videos`, {
+        params: { page, sort, limit: 12 }
+      });
+
+      if (response.data.success) {
+        const { videos, pagination } = response.data.data;
+        this.updateVideoGrid(videos, replace);
+        this.updatePagination(pagination);
+      }
+    } catch (error) {
+      console.error('加载视频失败:', error);
+    } finally {
+      this.loading = false;
+    }
+  },
+
+  // 更新视频网格
+  updateVideoGrid(videos, replace = false) {
+    const grid = document.getElementById('video-grid');
+    
+    if (replace) {
+      grid.innerHTML = '';
+    }
+    
+    videos.forEach(video => {
+      const videoCard = this.createVideoCard(video);
+      grid.appendChild(videoCard);
+    });
+  },
+
+  // 创建视频卡片
+  createVideoCard(video) {
+    const div = document.createElement('div');
+    div.className = 'video-card';
+    div.innerHTML = `
+      <div class="video-thumbnail">
+        <img src="${video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail'}" 
+             alt="${video.title}" loading="lazy">
+        <div class="video-duration">${this.formatDuration(video.duration)}</div>
+      </div>
+      <div class="video-info">
+        <h4 class="video-title">${video.title}</h4>
+        <div class="video-stats">
+          <span class="views">${this.formatNumber(video.views)} 播放</span>
+          <span class="danmaku">${this.formatNumber(video.danmakuCount)} 弹幕</span>
+          <span class="date">${this.formatDate(video.createdAt)}</span>
+        </div>
+      </div>
+    `;
+    
+    // 点击跳转到视频播放页
+    div.addEventListener('click', () => {
+      window.location.href = `/vod/${video._id}`;
+    });
+    
+    return div;
+  },
+
+  // 绑定分页事件
+  bindPaginationEvents() {
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('.page-link')) {
+        e.preventDefault();
+        const page = parseInt(e.target.dataset.page);
+        if (page && page !== this.currentPage) {
+          this.loadVideos(page, this.currentSort, true);
+          this.currentPage = page;
+        }
+      }
+    });
+  },
+
+  // 绑定加载更多事件
+  bindLoadMoreEvents() {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        if (this.currentPage < this.totalPages) {
+          this.loadVideos(this.currentPage + 1, this.currentSort, false);
+          this.currentPage++;
+        }
+      });
+    }
+  },
+
+  // 更新分页信息
+  updatePagination(pagination) {
+    this.totalPages = pagination.total;
+    // 这里可以更新分页组件的显示
+  },
+
+  // 工具函数
+  formatDuration(seconds) {
+    if (!seconds) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  },
+
+  formatNumber(num) {
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
+    }
+    return num.toString();
+  },
+
+  formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return '今天';
+    if (days === 1) return '昨天';
+    if (days < 30) return `${days}天前`;
+    
+    return date.toLocaleDateString('zh-CN');
+  }
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+  SpacePage.init();
+});
+</script> 

@@ -1,0 +1,33 @@
+<%
+  function formatNumber(num) {
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
+    }
+    return num.toString();
+  }
+%>
+
+<div class="collection-card" onclick="location.href='/collection/<%= collection._id %>'">
+  <div class="collection-cover">
+    <% if (collection.coverUrl) { %>
+      <img src="<%= collection.coverUrl %>" alt="<%= collection.title %>" loading="lazy">
+    <% } else if (collection.videoIds && collection.videoIds.length > 0) { %>
+      <img src="<%= collection.videoIds[0].coverUrl || collection.videoIds[0].thumbnail || '/api/placeholder/video-thumbnail' %>" 
+           alt="<%= collection.title %>" loading="lazy">
+    <% } else { %>
+      <img src="/api/placeholder/video-thumbnail" alt="<%= collection.title %>">
+    <% } %>
+    <div class="collection-count">
+      <span><%= collection.videoIds ? collection.videoIds.length : 0 %>个视频</span>
+    </div>
+  </div>
+  <div class="collection-info">
+    <h4 class="collection-title" title="<%= collection.title %>"><%= collection.title %></h4>
+    <div class="collection-stats">
+      <span class="play-count"><%= formatNumber(collection.playCount) %> 播放</span>
+    </div>
+    <% if (collection.description) { %>
+      <p class="collection-description"><%= collection.description %></p>
+    <% } %>
+  </div>
+</div> 

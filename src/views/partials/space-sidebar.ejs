@@ -1,0 +1,105 @@
+<div class="space-sidebar">
+  <!-- 关注按钮 -->
+  <div class="follow-section">
+    <% if (user && user._id.toString() !== uploader._id.toString()) { %>
+      <button class="btn btn-follow" id="follow-btn" data-uid="<%= uploader.uid %>">
+        <span class="follow-text">+ 关注</span>
+        <span class="followed-text" style="display: none;">已关注</span>
+      </button>
+    <% } else if (user && user._id.toString() === uploader._id.toString()) { %>
+      <a href="/profile/edit" class="btn btn-edit-profile">编辑资料</a>
+    <% } else { %>
+      <a href="/login" class="btn btn-follow">登录后关注</a>
+    <% } %>
+  </div>
+
+  <!-- UP主简介 -->
+  <div class="intro-section">
+    <h3 class="section-title">个人简介</h3>
+    <div class="intro-content">
+      <% if (uploader.uploaderDescription) { %>
+        <p><%= uploader.uploaderDescription %></p>
+      <% } else { %>
+        <p class="no-intro">这个UP主很懒，什么都没有留下~</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- 统计信息 -->
+  <div class="stats-section">
+    <h3 class="section-title">数据统计</h3>
+    <div class="stats-list">
+      <div class="stat-row">
+        <span class="stat-label">粉丝数</span>
+        <span class="stat-value"><%= uploader.fansCount.toLocaleString() %></span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">获赞数</span>
+        <span class="stat-value"><%= uploader.likeCount.toLocaleString() %></span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">播放量</span>
+        <span class="stat-value"><%= uploader.playCount.toLocaleString() %></span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">等级</span>
+        <span class="stat-value">LV<%= uploader.level %></span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">加入时间</span>
+        <span class="stat-value"><%= new Date(uploader.joinDate).toLocaleDateString('zh-CN') %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 其他信息 -->
+  <div class="additional-info">
+    <% if (uploader.qq) { %>
+      <div class="contact-item">
+        <span class="contact-label">QQ：</span>
+        <span class="contact-value"><%= uploader.qq %></span>
+      </div>
+    <% } %>
+    <% if (uploader.email && uploader.role === 'admin') { %>
+      <div class="contact-item">
+        <span class="contact-label">邮箱：</span>
+        <span class="contact-value"><%= uploader.email %></span>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+// 关注功能
+document.addEventListener('DOMContentLoaded', function() {
+  const followBtn = document.getElementById('follow-btn');
+  if (followBtn) {
+    followBtn.addEventListener('click', async function() {
+      const uid = this.dataset.uid;
+      try {
+        const response = await axios.post(`/api/users/${uid}/follow`);
+        if (response.data.success) {
+          // 更新按钮状态
+          const followText = this.querySelector('.follow-text');
+          const followedText = this.querySelector('.followed-text');
+          
+          if (response.data.isFollowing) {
+            followText.style.display = 'none';
+            followedText.style.display = 'inline';
+            this.classList.add('followed');
+          } else {
+            followText.style.display = 'inline';
+            followedText.style.display = 'none';
+            this.classList.remove('followed');
+          }
+        }
+      } catch (error) {
+        console.error('关注操作失败:', error);
+        if (error.response && error.response.status === 401) {
+          window.location.href = '/login';
+        }
+      }
+    });
+  }
+});
+</script> 

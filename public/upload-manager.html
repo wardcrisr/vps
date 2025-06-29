@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容上传和管理 - X福利姬</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            background: #f0f8ff;
+            border-color: #5a6fd8;
+        }
+        
+        .upload-zone.dragover {
+            background: #e6f3ff;
+            border-color: #4285f4;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .auth-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .content-list {
+            margin-top: 30px;
+        }
+        
+        .content-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        
+        .content-info {
+            flex: 1;
+        }
+        
+        .content-title {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .content-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 内容上传和管理</h1>
+        
+        <!-- 认证部分 -->
+        <div class="auth-section" id="authSection">
+            <h3>管理员登录</h3>
+            <div class="form-group">
+                <label for="email">邮箱:</label>
+                <input type="email" id="email" placeholder="输入管理员邮箱">
+            </div>
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" placeholder="输入密码">
+            </div>
+            <button class="upload-btn" onclick="login()">登录</button>
+        </div>
+        
+        <!-- 状态显示 -->
+        <div id="status" class="status"></div>
+        
+        <!-- 上传功能已禁用 -->
+        <div class="upload-section" id="uploadSection" style="display: none;">
+            <h3>📂 上传功能已禁用</h3>
+            <div style="padding: 20px; text-align: center; color: #666;">
+                <p>上传功能暂时不可用</p>
+            </div>
+        </div>
+        
+        <!-- 内容列表 -->
+        <div class="content-list" id="contentSection" style="display: none;">
+            <h3>📋 内容管理</h3>
+            <div id="contentList"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('authToken');
+        let selectedFiles = [];
+        
+        // 页面加载时检查登录状态
+        if (authToken) {
+            showUploadSection();
+            loadContent();
+        }
+        
+        // 登录函数
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showStatus('请填写邮箱和密码', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    authToken = result.token;
+                    localStorage.setItem('authToken', authToken);
+                    showStatus('登录成功！', 'success');
+                    showUploadSection();
+                    loadContent();
+                } else {
+                    showStatus(result.message || '登录失败', 'error');
+                }
+            } catch (error) {
+                showStatus('登录请求失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示上传区域
+        function showUploadSection() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('contentSection').style.display = 'block';
+        }
+        
+        // 上传功能已禁用
+        function selectFiles() {
+            // 上传功能已禁用
+        }
+        
+        function handleFiles(files) {
+            // 上传功能已禁用
+        }
+        
+        function displayFileList() {
+            // 上传功能已禁用
+        }
+        
+        function removeFile(index) {
+            // 上传功能已禁用
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            // 上传功能已禁用
+        }
+        
+        function handleDragLeave(e) {
+            // 上传功能已禁用
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            // 上传功能已禁用
+        }
+        
+        // 上传文件功能已禁用
+        async function uploadFiles() {
+            showStatus('上传功能已禁用', 'error');
+            return;
+        }
+        
+        // 加载内容列表
+        async function loadContent() {
+            try {
+                const response = await fetch('/api/admin/videos?page=1&limit=20', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayContentList(result.data.videos);
+                } else {
+                    showStatus('加载内容失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showStatus('加载内容请求失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示内容列表
+        function displayContentList(videos) {
+            const contentList = document.getElementById('contentList');
+            
+            if (videos.length === 0) {
+                contentList.innerHTML = '<p>暂无内容</p>';
+                return;
+            }
+            
+            contentList.innerHTML = videos.map(video => `
+                <div class="content-item">
+                    <div class="content-info">
+                        <div class="content-title">${video.title}</div>
+                        <div class="content-meta">
+                            类型: ${video.type} | 大小: ${(video.size / 1024 / 1024).toFixed(2)} MB | 
+                            上传时间: ${new Date(video.createdAt).toLocaleString('zh-CN')}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteContent('${video._id}', '${video.title}')">删除</button>
+                </div>
+            `).join('');
+        }
+        
+        // 删除内容
+        async function deleteContent(id, title) {
+            if (!confirm(`确认删除 "${title}" 吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            try {
+                showStatus('正在删除...', 'info');
+                
+                const response = await fetch(`/api/admin/videos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('删除成功！', 'success');
+                    loadContent(); // 重新加载内容列表
+                } else {
+                    showStatus('删除失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showStatus('删除请求失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示状态
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // 3秒后自动隐藏成功和信息消息
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html> 

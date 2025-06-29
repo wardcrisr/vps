@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= uploader ? uploader.displayName || uploader.username : '用户' %> - X福利姬</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      background: #f4f5f7;
+      min-height: 100vh;
+      font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .navbar {
+      background: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid #e3e5e7;
+      padding: 12px 0;
+    }
+    
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #00aeec !important;
+    }
+    
+    .main-container {
+      padding-top: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* 用户横幅样式 */
+    .user-banner {
+      background: linear-gradient(135deg, #00aeec 0%, #0084c7 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 32px rgba(0, 174, 236, 0.2);
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    
+    .user-details h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .user-details p {
+      opacity: 0.9;
+      margin-bottom: 0;
+    }
+    
+    .user-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    /* 分类导航 */
+    .category-nav {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .category-nav .nav-link {
+      color: #61666d;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: none;
+    }
+    
+    .category-nav .nav-link.active {
+      background: #00aeec;
+      color: white;
+    }
+    
+    /* 主内容区域 */
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    
+    @media (max-width: 768px) {
+      .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    
+    /* 视频网格 - 与主页相同的样式 */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    @media (min-width: 1200px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+    
+    .video-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid #e3e5e7;
+    }
+    
+    .video-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+    
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      background: #f0f0f0;
+      overflow: hidden;
+    }
+    
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .video-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    
+    .premium-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #ff6b35;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+    
+    .video-info {
+      padding: 12px;
+    }
+    
+    .video-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #18191c;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 2.8em;
+    }
+    
+    .uploader-info {
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .video-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #9499a0;
+      font-size: 0.8rem;
+    }
+    
+    /* 侧边栏 */
+    .sidebar {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+    
+    .sidebar h5 {
+      margin-bottom: 16px;
+      color: #18191c;
+      font-weight: bold;
+    }
+    
+    .sidebar .stat-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .sidebar .stat-item:last-child {
+      border-bottom: none;
+    }
+    
+    /* 合集区域 */
+    .collections-section {
+      margin-top: 40px;
+    }
+    
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #18191c;
+      margin-bottom: 20px;
+      padding-left: 8px;
+      border-left: 4px solid #00aeec;
+    }
+    
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    
+    .collection-card {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid #e3e5e7;
+    }
+    
+    .collection-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9499a0;
+      grid-column: 1 / -1;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+    
+    /* 分页 */
+    .pagination-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-play-circle me-2"></i>X福利姬
+      </a>
+      
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">
+          <i class="fas fa-home me-1"></i>首页
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要内容区域 -->
+  <div class="main-container">
+    <!-- 用户横幅 -->
+    <div class="user-banner">
+      <div class="user-info">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+          <h1><%= uploader ? (uploader.displayName || uploader.username || '匿名用户') : '用户空间' %></h1>
+          <p><%= uploader && uploader.bio ? uploader.bio : '这个UP主很懒，什么都没有留下~' %></p>
+        </div>
+      </div>
+      
+      <div class="user-stats">
+        <div class="stat-item">
+          <span class="stat-number"><%= uploader && uploader.followers ? uploader.followers : 0 %></span>
+          <span class="stat-label">粉丝</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number"><%= uploader && uploader.following ? uploader.following : 0 %></span>
+          <span class="stat-label">关注</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number"><%= videos ? videos.length : 0 %></span>
+          <span class="stat-label">视频</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">LV<%= uploader && uploader.level ? uploader.level : 1 %></span>
+          <span class="stat-label">等级</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分类导航 -->
+    <div class="category-nav">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link <%= activeTab === 'videos' ? 'active' : '' %>" href="#videos">最新发布</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activeTab === 'popular' ? 'active' : '' %>" href="#popular">最多播放</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activeTab === 'collections' ? 'active' : '' %>" href="#collections">视频收藏</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="content-wrapper">
+      <!-- 视频内容区域 -->
+      <div class="main-content">
+        <!-- 视频网格区域 -->
+        <div id="videos-container">
+          <% if (videos && videos.length > 0) { %>
+            <div class="video-grid" id="video-grid">
+              <% videos.forEach(video => { %>
+                <%- include('partials/video-card', { video: video }) %>
+              <% }) %>
+            </div>
+            
+            <!-- 分页组件 -->
+            <% if (pagination && pagination.totalPages > 1) { %>
+              <div class="pagination-wrapper">
+                <%- include('partials/pagination', { pagination: pagination, uid: uploader.uid }) %>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="video-grid">
+              <div class="empty-state">
+                <i class="fas fa-video-slash"></i>
+                <h5>暂无视频内容</h5>
+                <p>这个UP主还没有上传任何视频</p>
+              </div>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- 合集板块 -->
+        <% if (collections && collections.length > 0) { %>
+          <div class="collections-section">
+            <h3 class="section-title">视频合集</h3>
+            <div class="collections-grid">
+              <% collections.forEach(collection => { %>
+                <%- include('partials/collection-card', { collection: collection }) %>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- 侧边栏 -->
+      <div class="sidebar">
+        <h5>个人简介</h5>
+        <p><%= uploader && uploader.bio ? uploader.bio : '这个UP主很懒，什么都没有留下~' %></p>
+        
+        <h5 class="mt-4">数据统计</h5>
+        <div class="stat-item">
+          <span>粉丝数</span>
+          <span><%= uploader && uploader.followers ? uploader.followers : 0 %></span>
+        </div>
+        <div class="stat-item">
+          <span>获赞数</span>
+          <span><%= uploader && uploader.likes ? uploader.likes : 0 %></span>
+        </div>
+        <div class="stat-item">
+          <span>播放量</span>
+          <span><%= uploader && uploader.totalViews ? uploader.totalViews : 0 %></span>
+        </div>
+        <div class="stat-item">
+          <span>等级</span>
+          <span>LV<%= uploader && uploader.level ? uploader.level : 1 %></span>
+        </div>
+        <div class="stat-item">
+          <span>加入时间</span>
+          <span><%= uploader && uploader.createdAt ? new Date(uploader.createdAt).toLocaleDateString('zh-CN') : '2025/6/25' %></span>
+        </div>
+        <div class="stat-item">
+          <span>邮箱</span>
+          <span><%= uploader && uploader.email ? uploader.email : 'admin@xfuliji.com' %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/space.js"></script>
+</body>
+</html> 

@@ -1,0 +1,35 @@
+<div class="space-banner">
+  <div class="banner-bg">
+    <div class="banner-content">
+      <div class="uploader-info">
+        <div class="avatar-container">
+          <div class="user-icon">👤</div>
+        </div>
+        <div class="uploader-details">
+          <h1 class="uploader-name"><%= uploader.name || uploader.displayName || uploader.username %></h1>
+          <div class="uploader-meta">
+            <span class="level-badge">LV<%= uploader.level %></span>
+            <span class="uid">UID: <%= uploader.uid %></span>
+          </div>
+          <div class="uploader-stats">
+            <div class="stat-item">
+              <span class="stat-number"><%= uploader.fansCount.toLocaleString() %></span>
+              <span class="stat-label">粉丝</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number"><%= uploader.likeCount.toLocaleString() %></span>
+              <span class="stat-label">获赞</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number"><%= uploader.playCount.toLocaleString() %></span>
+              <span class="stat-label">播放</span>
+            </div>
+          </div>
+          <% if (uploader.uploaderDescription) { %>
+            <p class="uploader-description"><%= uploader.uploaderDescription %></p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

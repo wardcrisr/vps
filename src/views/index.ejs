@@ -1,18 +1,697 @@
-<% layout('layouts/main') %>
-<div class="grid">
-  <% posts.forEach(p=> { %>
-    <div class="card">
-      <a href="/post/<%= p._id %>">
-        <img src="/static/thumbnails/<%= p.thumbnail %>" alt="">
-        <h2><%= p.title %></h2>
-      </a>
-      <small><%= p.createdAt.toLocaleDateString() %> · <%= p.views %> 次观看</small>
-    </div>
-  <% }) %>
-</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>X福利姬 - 视频分享平台</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f4f5f7;
+      min-height: 100vh;
+      font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .navbar {
+      background: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid #e3e5e7;
+      padding: 12px 0;
+    }
+    
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #00aeec !important;
+    }
+    
+    .search-box {
+      width: 480px;
+    }
+    
+    .search-input {
+      border-radius: 8px;
+      padding: 8px 15px;
+      border: 1px solid #e3e5e7;
+      font-size: 0.9rem;
+      background: #f9f9f9;
+    }
+    
+    .search-input:focus {
+      background: #ffffff;
+      border-color: #00aeec;
+      box-shadow: 0 0 0 0.2rem rgba(0, 174, 236, 0.25);
+    }
+    
+    .search-btn {
+      background: #00aeec;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      margin-left: 8px;
+    }
+    
+    .main-container {
+      padding-top: 80px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .category-nav {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .category-nav .nav-link {
+      color: #61666d;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: none;
+    }
+    
+    .category-nav .nav-link.active {
+      background: #00aeec;
+      color: white;
+    }
+    
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 0 16px;
+      margin-bottom: 40px;
+    }
+    
+    /* B站风格网格布局优化 */
+    @media (min-width: 1200px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+        padding: 0 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 8px;
+      }
+    }
+    
+    .video-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid #e3e5e7;
+    }
+    
+    .video-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+    
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 160px;
+      background: #f0f0f0;
+      overflow: hidden;
+    }
+    
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .video-thumbnail video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .video-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    
+    .video-info {
+      padding: 12px;
+    }
+    
+    .video-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #18191c;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 2.8em;
+    }
+    
+    .video-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #9499a0;
+      font-size: 0.8rem;
+    }
+    
+    .video-stats i {
+      margin-right: 4px;
+    }
+    
 
-<nav class="pagination">
-  <% for(let i=1;i<=totalPages;i++){ %>
-    <a href="/?page=<%= i %>" class="<%=  i===page?'active':'' %>"><%= i %></a>
-  <% } %>
-</nav>
+    
+    .loading-skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9499a0;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+    
+    /* 视频播放器模态框 */
+    .video-modal .modal-dialog {
+      max-width: 1000px;
+    }
+    
+    .video-modal .modal-body {
+      padding: 0;
+    }
+    
+    .video-modal video {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .search-box {
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+        padding: 0 12px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+        padding: 0 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-play-circle me-2"></i>X福利姬
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="mx-auto">
+          <div class="search-box">
+            <div class="d-flex">
+              <input type="text" class="form-control search-input" placeholder="" id="searchInput">
+              <button class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <ul class="navbar-nav">
+          <% if (typeof user === 'undefined' || !user) { %>
+            <li class="nav-item"><a class="nav-link" href="/api/auth/login">登录</a></li>
+            <li class="nav-item"><a class="nav-link" href="/api/auth/register">注册</a></li>
+          <% } else { %>
+            <% if (user.role === 'admin') { %>
+              <li class="nav-item">
+                <a class="nav-link text-primary" href="/api/admin/dashboard">
+                  <i class="fas fa-cog"></i> 管理后台
+                </a>
+              </li>
+            <% } %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle"></i> <%= user.username %>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/api/auth/profile">个人中心</a></li>
+                <li><a class="dropdown-item" href="/settings">设置</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/api/auth/logout">退出登录</a></li>
+              </ul>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要内容区域 -->
+  <div class="main-container">
+    <!-- 分类导航 -->
+    <div class="category-nav">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-category="all">全部</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-category="new">最新</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-category="hot">热门</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-category="education">教育</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-category="entertainment">娱乐</a>
+        </li>
+      </ul>
+    </div>
+
+
+
+    <!-- 视频网格 -->
+    <div id="videoContainer">
+      <div class="video-grid" id="videoGrid">
+        <!-- B站风格视频卡片 -->
+        <% if (videos && videos.length > 0) { %>
+          <% videos.forEach(function(video) { %>
+            <%- include('partials/videoCard', { video: video }) %>
+          <% }); %>
+        <% } else { %>
+          <!-- 空状态 -->
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="fas fa-video-slash"></i>
+            <h5>暂无视频</h5>
+            <p>目前还没有上传任何视频</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <i class="fas fa-video-slash"></i>
+      <h5>暂无视频</h5>
+      <p>目前还没有上传任何视频</p>
+    </div>
+
+    <!-- 加载更多 -->
+    <div class="text-center mt-4" id="loadMoreContainer" style="display: none;">
+      <button class="btn btn-outline-primary" id="loadMoreBtn">
+        <i class="fas fa-arrow-down me-2"></i>加载更多
+      </button>
+    </div>
+  </div>
+
+  <!-- 视频播放模态框 -->
+  <div class="modal fade video-modal" id="videoModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="videoModalTitle">视频播放</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- ★ Bunny Stream 视频嵌入 ★ -->
+          <div style="position: relative; padding-top: 56.25%;">
+            <iframe id="modalVideo"
+              src=""
+              loading="lazy"
+              style="border:none;position:absolute;top:0;left:0;width:100%;height:100%;"
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <!-- ★ 视频嵌入结束 ★ -->
+          <div class="mt-3">
+            <h6 id="modalVideoTitle"></h6>
+            <div class="d-flex align-items-center gap-3 text-muted">
+              <span><i class="fas fa-eye me-1"></i><span id="modalVideoViews">0</span> 次观看</span>
+              <span><i class="fas fa-clock me-1"></i><span id="modalVideoDate">刚刚</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- HLS.js 用于播放 .m3u8 视频流 -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.0/dist/hls.min.js"></script>
+  <script>
+    let currentCategory = 'all';
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = true;
+    let allVideos = [];
+
+    // 全局 Hls 实例（模态框关闭或切换视频时需要销毁）
+    let hlsInstance = null;
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      loadVideos();
+      initializeEventListeners();
+    });
+
+    // 初始化事件监听器
+    function initializeEventListeners() {
+      // 搜索功能
+      document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+
+      document.getElementById('searchBtn').addEventListener('click', performSearch);
+
+      // 分类切换
+      document.querySelectorAll('[data-category]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          switchCategory(this.dataset.category, this);
+        });
+      });
+
+
+
+      // 加载更多
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMoreVideos);
+      }
+    }
+
+    // 加载视频列表
+    async function loadVideos(reset = true) {
+      if (isLoading) return;
+      
+      isLoading = true;
+      if (reset) {
+        currentPage = 1;
+        hasMore = true;
+        showLoadingSkeleton();
+      }
+
+      try {
+        const response = await fetch(`/vod/videos?page=${currentPage}&category=${currentCategory}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const videos = data.videos || [];
+          
+          if (reset) {
+            allVideos = videos;
+          } else {
+            allVideos = [...allVideos, ...videos];
+          }
+
+          renderVideos(allVideos, reset);
+          
+          hasMore = videos.length >= 20; // 假设每页20个
+          toggleLoadMore();
+          
+          if (videos.length === 0 && reset) {
+            showEmptyState();
+          }
+        } else {
+          console.error('加载视频失败:', data.message);
+          if (reset) showEmptyState();
+        }
+      } catch (error) {
+        console.error('加载视频失败:', error);
+        if (reset) showEmptyState();
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    // 渲染视频列表
+    function renderVideos(videos, reset = true) {
+      const grid = document.getElementById('videoGrid');
+      const emptyState = document.getElementById('emptyState');
+      
+      emptyState.style.display = 'none';
+      
+      if (reset) {
+        grid.innerHTML = '';
+      }
+
+      videos.forEach(video => {
+        if (reset || !document.querySelector(`[data-video-id="${video.filename}"]`)) {
+          const videoCard = createVideoCard(video);
+          grid.appendChild(videoCard);
+        }
+      });
+    }
+
+    // 创建视频卡片
+    function createVideoCard(video) {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.setAttribute('data-video-id', video.filename || video._id);
+      
+      const thumbnailSrc = video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail';
+      const duration = formatDuration(video.duration || 0);
+      const views = formatNumber(video.views || 0);
+      const uploadDate = formatDate(video.createdAt || video.uploadDate || new Date());
+      
+      // 获取上传者信息
+      const uploader = video.uploader || video.uploaderInfo || video.up || {};
+      const uploaderUid = uploader.uid || uploader._id || 'anonymous';
+      const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
+
+      card.innerHTML = `
+        <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
+          <img src="${thumbnailSrc}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
+          <div class="video-duration">${duration}</div>
+          ${video.isPremiumOnly ? '<div class="premium-badge">付费</div>' : ''}
+        </div>
+        <div class="video-info">
+          <div class="video-title" title="${video.title || video.name}" onclick="location.href='/video/${video._id || video.id}'" style="cursor: pointer;">
+            ${video.title || video.name}
+          </div>
+          <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+            </div>
+          </div>
+          <div class="video-stats">
+            <span><i class="fas fa-eye"></i>${views}</span>
+            <span><i class="fas fa-clock"></i>${uploadDate}</span>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // 播放视频（Bunny Stream 版本）
+    async function playVideo(video) {
+      const modal = new bootstrap.Modal(document.getElementById('videoModal'));
+      const iframe = document.getElementById('modalVideo');
+      const modalTitle = document.getElementById('videoModalTitle');
+      const modalVideoTitle = document.getElementById('modalVideoTitle');
+      const modalVideoViews = document.getElementById('modalVideoViews');
+      const modalVideoDate = document.getElementById('modalVideoDate');
+
+      // 关闭时清空 src，避免后台继续加载
+      const cleanup = () => {
+        iframe.removeAttribute('src');
+      };
+
+      document.getElementById('videoModal').addEventListener('hidden.bs.modal', cleanup, { once: true });
+
+      // 根据 bunnyId 调用后端签名接口获取 embedUrl
+      try {
+        const bunnyId = video.bunnyId || video.videoId || video.id;
+        const res = await fetch(`/api/bunny-embed/${bunnyId}`);
+        const data = await res.json();
+        if (data.success && data.embedUrl) {
+          iframe.src = `${data.embedUrl}&autoplay=true`;
+        } else if (video.embedUrl) {
+          iframe.src = video.embedUrl;
+        } else {
+          console.warn('未获取到有效的 embedUrl');
+        }
+      } catch (err) {
+        console.error('获取 Bunny Embed URL 失败:', err);
+        // 回退到已有 embedUrl
+        if (video.embedUrl) {
+          iframe.src = video.embedUrl;
+        }
+      }
+
+      modalTitle.textContent = video.name || video.title;
+      modalVideoTitle.textContent = video.name || video.title;
+      modalVideoViews.textContent = formatNumber(video.views || 0);
+      modalVideoDate.textContent = formatDate(video.uploadDate || video.createdAt || new Date());
+
+      modal.show();
+
+      // 观看次数
+      incrementViews(video.filename || video.id);
+    }
+
+    // 增加观看次数
+    async function incrementViews(filename) {
+      try {
+        await fetch(`/api/videos/${filename}/view`, { method: 'POST' });
+      } catch (error) {
+        console.error('增加观看次数失败:', error);
+      }
+    }
+
+    // 搜索功能
+    function performSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (query) {
+        // 实现搜索逻辑
+        currentCategory = 'search';
+        loadVideos(true);
+      }
+    }
+
+    // 切换分类
+    function switchCategory(category, element) {
+      document.querySelectorAll('[data-category]').forEach(link => link.classList.remove('active'));
+      element.classList.add('active');
+      
+      currentCategory = category;
+      loadVideos(true);
+    }
+
+    // 加载更多视频
+    function loadMoreVideos() {
+      if (hasMore && !isLoading) {
+        currentPage++;
+        loadVideos(false);
+      }
+    }
+
+    // 显示加载骨架屏
+    function showLoadingSkeleton() {
+      const grid = document.getElementById('videoGrid');
+      grid.innerHTML = '';
+      
+      for (let i = 0; i < 8; i++) {
+        const skeleton = document.createElement('div');
+        skeleton.className = 'video-card';
+        skeleton.innerHTML = `
+          <div class="video-thumbnail loading-skeleton"></div>
+          <div class="video-info">
+            <div class="loading-skeleton mb-2" style="height: 40px;"></div>
+            <div class="loading-skeleton" style="height: 20px; width: 60%;"></div>
+          </div>
+        `;
+        grid.appendChild(skeleton);
+      }
+    }
+
+    // 显示空状态
+    function showEmptyState() {
+      const grid = document.getElementById('videoGrid');
+      const emptyState = document.getElementById('emptyState');
+      
+      grid.innerHTML = '';
+      emptyState.style.display = 'block';
+    }
+
+    // 切换加载更多按钮
+    function toggleLoadMore() {
+      const container = document.getElementById('loadMoreContainer');
+      container.style.display = hasMore ? 'block' : 'none';
+    }
+
+
+
+    // 工具函数
+    function formatDuration(seconds) {
+      if (!seconds) return '00:30';
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function formatNumber(num) {
+      if (num >= 10000) {
+        return (num / 10000).toFixed(1) + '万';
+      }
+      return num.toString();
+    }
+
+    function formatDate(date) {
+      const now = new Date();
+      const diff = now - new Date(date);
+      const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+      
+      if (days === 0) return '今天';
+      if (days === 1) return '昨天';
+      if (days < 7) return `${days}天前`;
+      if (days < 30) return `${Math.floor(days / 7)}周前`;
+      return `${Math.floor(days / 30)}月前`;
+    }
+  </script>
+</body>
+</html>
+
