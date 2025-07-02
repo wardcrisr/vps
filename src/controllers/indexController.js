@@ -74,6 +74,13 @@ exports.renderIndex = async (req, res) => {
 
     // 处理没有UP主信息的视频
     const processedVideos = videos.map(video => {
+      // 修复缺失或相对路径封面 URL
+      if (!video.coverUrl || video.coverUrl.trim() === '') {
+        video.coverUrl = '/api/placeholder/video-thumbnail';
+      } else if (!video.coverUrl.startsWith('http') && !video.coverUrl.startsWith('/')) {
+        video.coverUrl = '/' + video.coverUrl.replace(/^\/+/, '');
+      }
+
       if (!video.up.uid) {
         video.up = {
           uid: 'anonymous',
@@ -87,6 +94,8 @@ exports.renderIndex = async (req, res) => {
     res.render('index', {
       title: 'X福利姬 - 视频分享平台',
       videos: processedVideos,
+      activeTag: 'home',
+      disableDynamicLoad: false,
       user: req.user || null
     });
 
@@ -171,6 +180,13 @@ exports.getMoreVideos = async (req, res) => {
 
     // 处理数据
     const processedVideos = videos.map(video => {
+      // 修复缺失或相对路径封面 URL
+      if (!video.coverUrl || video.coverUrl.trim() === '') {
+        video.coverUrl = '/api/placeholder/video-thumbnail';
+      } else if (!video.coverUrl.startsWith('http') && !video.coverUrl.startsWith('/')) {
+        video.coverUrl = '/' + video.coverUrl.replace(/^\/+/, '');
+      }
+
       if (!video.up.uid) {
         video.up = {
           uid: 'anonymous',

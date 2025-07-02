@@ -18,18 +18,6 @@ router.post('/', async (req, res) => {
     const sigPayload = `${libraryId}${apiKey}${expires}${videoId}`;
     const signature = crypto.createHash('sha256').update(sigPayload).digest('hex');
 
-    // 2. 预存媒体记录（状态 uploading）
-    await Media.create({
-      title,
-      originalName: title,
-      mimetype: 'video/mp4',
-      size: 0,
-      type: 'video',
-      bunnyId: videoId,
-      url: `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`,
-      cloudStatus: 'uploading',
-    });
-
     res.json({
       success: true,
       videoId,

@@ -9,7 +9,11 @@ const JWT_SECRET = process.env.JWT_SECRET || '请设为复杂字符串';
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    let token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    // 如果 header 中没有，则尝试从 cookie 获取
+    if (!token && req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
 
     if (!token) {
       return res.status(401).json({ success: false, message: '访问被拒绝，请提供有效的token' });

@@ -23,6 +23,9 @@ const UserSchema = new mongoose.Schema({
   joinDate: { type: Date, default: Date.now },
   lastLogin: { type: Date, default: Date.now },
   
+  // 金币余额
+  coins: { type: Number, default: 0 },
+  
   // UP主相关字段
   uid: { type: String, unique: true, sparse: true }, // UP主唯一ID
   name: { type: String, default: '' },               // UP主名称

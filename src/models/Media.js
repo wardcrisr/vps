@@ -57,10 +57,11 @@ const MediaSchema = new mongoose.Schema({
     enum: ['image', 'video'], 
     required: true 
   },
-  category: { 
-    type: String, 
-    enum: ['new', 'exclusive', 'resources', 'models', 'show'], 
-    default: 'new' 
+  category: {
+    type: String,
+    enum: ['free', 'paid', 'member', 'new', 'exclusive', 'resources', 'models', 'show'], // 保留旧分类兼容
+    default: 'free',
+    required: true
   },
   uploader: { 
     type: mongoose.Schema.Types.ObjectId, 
@@ -111,6 +112,11 @@ const MediaSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // 解锁价格（金币）
+  priceCoins: {
+    type: Number,
+    default: 0
+  },
   coverUrl: {  // 视频封面（别名）
     type: String,
     default: ''
@@ -118,7 +124,8 @@ const MediaSchema = new mongoose.Schema({
   // Bunny Stream 视频ID
   bunnyId: {
     type: String,
-    required: false
+    unique: true,
+    required: true
   },
   // 云存储状态
   cloudStatus: {
@@ -181,5 +188,7 @@ MediaSchema.methods.incrementView = function() {
   this.views += 1;
   return this.save();
 };
+
+MediaSchema.index({ bunnyId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Media', MediaSchema); 

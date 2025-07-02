@@ -83,7 +83,7 @@
     
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 20px;
       padding: 0 16px;
       margin-bottom: 40px;
@@ -92,7 +92,7 @@
     /* B站风格网格布局优化 */
     @media (min-width: 1200px) {
       .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 24px;
       }
     }
@@ -114,26 +114,25 @@
     }
     
     .video-card {
-      background: white;
-      border-radius: 8px;
+      background: transparent;
+      border: none;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      transition: all 0.3s ease;
+      box-shadow: none;
+      transition: transform 0.2s ease;
       cursor: pointer;
-      border: 1px solid #e3e5e7;
     }
     
     .video-card:hover {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
     }
     
     .video-thumbnail {
       position: relative;
       width: 100%;
-      height: 160px;
+      aspect-ratio: 16 / 9;
       background: #f0f0f0;
       overflow: hidden;
+      border-radius: 12px;
     }
     
     .video-thumbnail img {
@@ -164,31 +163,29 @@
     }
     
     .video-title {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #18191c;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f0f0f;
       line-height: 1.4;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      height: 2.8em;
+      height: auto;
     }
     
     .video-stats {
       display: flex;
       align-items: center;
-      gap: 12px;
-      color: #9499a0;
-      font-size: 0.8rem;
+      gap: 6px;
+      color: #606060;
+      font-size: 0.85rem;
     }
     
     .video-stats i {
       margin-right: 4px;
     }
-    
-
     
     .loading-skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -292,7 +289,7 @@
                 <i class="fas fa-user-circle"></i> <%= user.username %>
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/api/auth/profile">个人中心</a></li>
+                <li><a class="dropdown-item" href="/user">个人中心</a></li>
                 <li><a class="dropdown-item" href="/settings">设置</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="/api/auth/logout">退出登录</a></li>
@@ -310,24 +307,16 @@
     <div class="category-nav">
       <ul class="nav nav-pills">
         <li class="nav-item">
-          <a class="nav-link active" href="#" data-category="all">全部</a>
+          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'free') ? 'active' : '' %>" href="/free">免费视频</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-category="new">最新</a>
+          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'paid') ? 'active' : '' %>" href="/paid">付费视频</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" data-category="hot">热门</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-category="education">教育</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-category="entertainment">娱乐</a>
+          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'vip') ? 'active' : '' %>" href="/vip">会员视频</a>
         </li>
       </ul>
     </div>
-
-
 
     <!-- 视频网格 -->
     <div id="videoContainer">
@@ -410,7 +399,10 @@
 
     // 页面加载完成后初始化
     document.addEventListener('DOMContentLoaded', function() {
-      loadVideos();
+      // 根据后端变量决定是否自动加载视频
+      <% if (!disableDynamicLoad) { %>
+        loadVideos();
+      <% } %>
       initializeEventListeners();
     });
 
@@ -432,8 +424,6 @@
           switchCategory(this.dataset.category, this);
         });
       });
-
-
 
       // 加载更多
       const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -458,7 +448,16 @@
         const data = await response.json();
 
         if (data.success) {
-          const videos = data.videos || [];
+          let videos = data.videos || [];
+          // ========= 前端去重：按 _id 唯一 ==========
+          const uniqMap = new Map();
+          videos.forEach(v => {
+            const key = v._id || v.id || v.filename;
+            if (!uniqMap.has(key)) {
+              uniqMap.set(key, v);
+            }
+          });
+          videos = Array.from(uniqMap.values());
           
           if (reset) {
             allVideos = videos;
@@ -512,6 +511,15 @@
       card.setAttribute('data-video-id', video.filename || video._id);
       
       const thumbnailSrc = video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail';
+      // 若为相对路径，补全前导"/"
+      let fixedThumbnail = thumbnailSrc;
+      if (fixedThumbnail && !fixedThumbnail.startsWith('http') && !fixedThumbnail.startsWith('/')) {
+        fixedThumbnail = '/' + fixedThumbnail.replace(/^\/+/, '');
+      }
+      if (!fixedThumbnail) {
+        fixedThumbnail = '/api/placeholder/video-thumbnail';
+      }
+      
       const duration = formatDuration(video.duration || 0);
       const views = formatNumber(video.views || 0);
       const uploadDate = formatDate(video.createdAt || video.uploadDate || new Date());
@@ -523,7 +531,7 @@
 
       card.innerHTML = `
         <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
-          <img src="${thumbnailSrc}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
+          <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
           <div class="video-duration">${duration}</div>
           ${video.isPremiumOnly ? '<div class="premium-badge">付费</div>' : ''}
         </div>
@@ -662,8 +670,6 @@
       const container = document.getElementById('loadMoreContainer');
       container.style.display = hasMore ? 'block' : 'none';
     }
-
-
 
     // 工具函数
     function formatDuration(seconds) {

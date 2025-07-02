@@ -12,7 +12,18 @@ function getDefaultCover() {
   <a href="/video/<%= video.id %>" class="video-link">
     <div class="coverwrapper">
       <img 
-        src="<%= (video.coverUrl && (video.coverUrl.startsWith('http') || video.coverUrl.startsWith('/')) ? video.coverUrl : getDefaultCover()) %>" 
+        src="<%=
+          (function() {
+            if (!video.coverUrl || video.coverUrl.trim() === '') {
+              return getDefaultCover();
+            }
+            if (video.coverUrl.startsWith('http') || video.coverUrl.startsWith('/')) {
+              return video.coverUrl;
+            }
+            // 补全前导 '/'
+            return '/' + video.coverUrl.replace(/^\/+/, '');
+          })()
+        %>" 
         alt="<%= video.title %>" 
         class="coverimg"
         loading="lazy"
@@ -70,26 +81,25 @@ function getDefaultCover() {
 .videocard {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid #e5e9ef;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.2s ease;
   height: 100%;
 }
 
 .videocard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 /* 封面容器 */
 .coverwrapper {
   position: relative;
   width: 100%;
-  height: 160px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #f4f5f7;
+  background: #f9f9f9;
+  border-radius: 12px;
 }
 
 .coverimg {
@@ -145,13 +155,7 @@ function getDefaultCover() {
 
 /* UP主图标 */
 .up-icon {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 16px;
+  display: none;
 }
 
 .video-details {
@@ -162,12 +166,12 @@ function getDefaultCover() {
 /* 视频标题 */
 .videotitle {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #18191c;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f0f0f;
   text-decoration: none;
   line-height: 1.4;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -176,30 +180,30 @@ function getDefaultCover() {
 }
 
 .videotitle:hover {
-  color: #00aeec;
+  color: #065fd4;
 }
 
 /* UP主名称 */
 .upname {
   display: block;
-  font-size: 12px;
-  color: #9499a0;
+  font-size: 14px;
+  color: #606060;
   text-decoration: none;
   margin-bottom: 4px;
   line-height: 1.2;
 }
 
 .upname:hover {
-  color: #00aeec;
+  color: #065fd4;
 }
 
 /* 统计信息 */
 .video-stats {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #9499a0;
+  gap: 6px;
+  font-size: 13px;
+  color: #606060;
   line-height: 1;
 }
 
@@ -210,7 +214,7 @@ function getDefaultCover() {
 }
 
 .stat-item i {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .stat-separator {
@@ -235,24 +239,11 @@ function getDefaultCover() {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .coverwrapper {
-    height: 140px;
-  }
-  
-  .meta {
-    padding: 10px;
-  }
-  
   .videotitle {
-    font-size: 13px;
+    font-size: 14px;
   }
-  
-  .upname {
-    font-size: 11px;
-  }
-  
-  .video-stats {
-    font-size: 10px;
+  .upname, .video-stats {
+    font-size: 12px;
   }
 }
 </style> 

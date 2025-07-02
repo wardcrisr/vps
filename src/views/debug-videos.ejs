@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    .id-cell {
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .invalid {
+      background-color: #ffdddd;
+    }
+    .valid {
+      background-color: #ddffdd;
+    }
+  </style>
+</head>
+<body>
+  <h1>视频调试页面</h1>
+  <p>总视频数: <%= videos.length %></p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>序号</th>
+        <th>标题</th>
+        <th>ID</th>
+        <th>ID长度</th>
+        <th>有效性</th>
+        <th>链接</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% videos.forEach((video, index) => { 
+        const idStr = video._id.toString();
+        const isValid = idStr.length === 24 && /^[a-fA-F0-9]{24}$/.test(idStr);
+      %>
+        <tr class="<%= isValid ? 'valid' : 'invalid' %>">
+          <td><%= index + 1 %></td>
+          <td><%= video.title || '无标题' %></td>
+          <td class="id-cell"><%= idStr %></td>
+          <td><%= idStr.length %></td>
+          <td><%= isValid ? '✓' : '✗' %></td>
+          <td>
+            <a href="/video/<%= idStr %>" target="_blank">/video/<%= idStr %></a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  
+  <div style="margin-top: 20px;">
+    <a href="/">返回首页</a>
+  </div>
+</body>
+</html> 

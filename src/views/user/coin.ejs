@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {background:#f4f5f7;font-family:'Microsoft YaHei',-apple-system,BlinkMacSystemFont,sans-serif;}
+    .sidebar{background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.05);padding:24px;}
+    .sidebar .avatar{width:80px;height:80px;border-radius:50%;background:#e9ecef;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#6c757d;margin:0 auto 12px;}
+    .sidebar .nav-link{color:#333;padding:6px 0;}
+    .sidebar .nav-link.active{color:#007bff;font-weight:600;}
+    .banner{background:#fffbe6;border-radius:6px;padding:24px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:24px;}
+    .banner .amount{font-size:32px;font-weight:700;color:#ff9800;}
+    .section-box{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:24px;margin-bottom:24px;}
+    .section-title{font-weight:700;margin-bottom:16px;font-size:1.1rem;}
+    .cdk-input{max-width:300px;}
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container"><a class="navbar-brand" href="/">X福利姬</a><div><a href="/user" class="btn btn-sm btn-outline-primary">返回个人中心</a></div></div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="row g-4">
+      <!-- 左侧侧边栏 -->
+      <div class="col-md-3">
+        <div class="sidebar">
+          <div class="avatar"><i class="fas fa-user"></i></div>
+          <h5 class="text-center mb-1"><%= user.username %></h5>
+          <p class="text-center text-muted" style="font-size:.85rem;">普通用户</p>
+          <div class="bg-light text-center rounded p-2 my-3">
+            <small>每日可下载(<%= user.dailyDownloadLimit||20 %>)</small><br>
+            <span class="badge bg-primary mt-1">今日剩余(<%= user.todayRemainingDownloads||20 %>)</span>
+          </div>
+          <nav class="nav flex-column">
+            <a class="nav-link" href="/user">基本信息</a>
+            <a class="nav-link active" href="/user/coin">我的余额</a>
+            <a class="nav-link" href="#">我的会员</a>
+            <a class="nav-link" href="#">我的订单</a>
+            <a class="nav-link" href="#">下载记录</a>
+            <a class="nav-link" href="#">我的收藏</a>
+            <a class="nav-link" href="#">我的推广</a>
+            <a class="nav-link" href="#">我的工单</a>
+            <a class="nav-link" href="#">我的投稿</a>
+            <hr>
+            <a class="nav-link text-danger" href="/api/auth/logout">退出登录</a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- 右侧内容 -->
+      <div class="col-md-9">
+        <!-- 余额Banner -->
+        <div class="banner">
+          <div>当前账户余额</div>
+          <div class="amount"><i class="fas fa-coins me-1"></i><span id="coinAmount">加载中...</span></div>
+        </div>
+
+        <!-- 充值余额 -->
+        <div class="section-box">
+          <div class="section-title">充值余额</div>
+          <div class="input-group" style="max-width:240px;">
+            <input type="number" id="rechargeAmount" class="form-control" placeholder="充值金额(元)" value="100" min="1">
+            <button id="recharge-btn" class="btn btn-warning"><i class="fas fa-qrcode me-1"></i>立即充值</button>
+          </div>
+          <div class="mt-3">
+            <h6 class="mb-2">充值说明</h6>
+            <ol class="small text-muted mb-0">
+              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
+              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
+              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- 金币兑换 -->
+        <div class="section-box">
+          <div class="section-title">金币兑换</div>
+          <p class="text-muted">使用 CDK 码兑换站内币</p>
+          <form class="row g-2 align-items-center">
+            <div class="col-auto">
+              <input type="text" class="form-control cdk-input" placeholder="兑换码/CDK卡号" disabled>
+            </div>
+            <div class="col-auto">
+              <input type="text" class="form-control" placeholder="验证码" style="width:140px;" disabled>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-secondary" disabled>获取验证码</button>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-auto">
+              <button class="btn btn-danger" type="button" disabled><i class="fas fa-exchange-alt me-1"></i>立即兑换</button>
+            </div>
+            <div class="col-auto">
+              <a href="https://fk.51gwl.com/shop/T6RXX4SR" class="btn btn-warning" target="_blank"><i class="fas fa-shopping-cart me-1"></i>购买CDK</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    async function loadProfile(){
+      try{
+        const headers = {};
+        if(localStorage.authToken){ headers['Authorization'] = 'Bearer '+localStorage.authToken; }
+        const res = await fetch('/api/user/profile', { credentials:'include', headers });
+        const json = await res.json();
+        if(json.success){
+          document.getElementById('coinAmount').innerText = json.data.coins + ' 金币';
+        }else{
+          document.getElementById('coinAmount').innerText = '获取失败';
+        }
+      }catch(e){
+        console.error('loadProfile error', e);
+        document.getElementById('coinAmount').innerText = '网络错误';
+      }
+    }
+    loadProfile();
+
+    async function topUp(amountYuan){
+      try{
+        const { success, payUrl, message, error } = await fetch('/api/idatariver/createorder', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ amount: Math.round(amountYuan*100) })
+        }).then(r=>r.json());
+        if(!success){ alert(message || error || '创建订单失败'); return; }
+        if(!payUrl){ alert('未返回支付链接'); return; }
+        window.location.href = payUrl;
+      }catch(e){ console.error('topUp error',e); alert('网络错误'); }
+    }
+
+    document.getElementById('recharge-btn').addEventListener('click', ()=>{
+      const val = Number(document.getElementById('rechargeAmount').value);
+      if(!val || val<=0){ alert('请输入有效金额'); return; }
+      topUp(val);
+    });
+  </script>
+</body>
+</html> 

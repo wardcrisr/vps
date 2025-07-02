@@ -3,7 +3,8 @@
  * 内容分发平台入口（Express + EJS + 付费下载）
  */
 
-// 加载环境变量 - 优先使用生产配置
+// 先加载默认 .env，再加载 production 覆盖（如有）
+require('dotenv').config();
 require('dotenv').config({ path: './src/config/production.env' });
 
 const path           = require('path');
@@ -14,6 +15,18 @@ const expressLayouts = require('express-ejs-layouts');
 const mongoose       = require('mongoose');
 const multer         = require('multer');
 const fs             = require('fs');
+
+// Stripe 初始化：在未设置密钥时给出警告，避免应用崩溃
+let stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+} else {
+  console.warn('⚠️  未检测到 STRIPE_SECRET_KEY，已禁用与 Stripe 相关的支付功能');
+  // 用一个空对象占位，防止后续代码直接调用时报错
+  stripe = {
+    disabled: true,
+  };
+}
 
 // 引入模型
 const Post           = require('./models/Post');
@@ -77,11 +90,13 @@ const upload = multer({
 app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ extended: true, limit: '1gb' }));
 
+// ============================================================
+// Stripe PaymentIntent - 调试临时路由
+// TODO: 替换为真正的 Stripe 实现
+
+// ============================================================
 // Cookie 解析中间件
 app.use(cookieParser());
-
-// 增加原始body处理支持
-app.use(express.raw({ type: 'application/octet-stream', limit: '500mb' }));
 
 // 静态文件服务（本地文件）
 app.use('/uploads', express.static(uploadDir));
@@ -143,6 +158,24 @@ app.use('/api/bunny-sign', bunnySignRoutes);
 const bunnyUpdateRoutes = require('./routes/bunnyUpdate');
 app.use('/api/bunny-update', bunnyUpdateRoutes);
 
+// 金币充值 & 付费点播
+const paymentRoutes   = require('./routes/payment');
+app.use('/api/payment', paymentRoutes);
+
+const videoPaymentRoutes = require('./routes/videoPayment');
+app.use('/api/video', videoPaymentRoutes);
+
+// 金币解锁观看路由
+const unlockRoutes = require('./routes/unlock');
+app.use('/api/unlock', unlockRoutes);
+
+// 视频预览路由
+// const previewRoutes = require('./routes/preview');
+// app.use('/api/preview', previewRoutes);
+
+const adminCoinRoutes  = require('./routes/adminCoin');
+app.use('/api/admin', adminCoinRoutes);
+
 // VOD视频点播路由
 const vodRoutes = require('./routes/vod');
 app.use('/vod', vodRoutes);
@@ -155,12 +188,22 @@ app.use('/video', videoRoutes);
 const videosRoutes = require('./routes/videos');
 app.use('/api/videos', videosRoutes);
 
+// 新增：用户API路由（实时资料）
+const userApiRoutes = require('./routes/userApi');
+app.use('/api/user', userApiRoutes);
+
+// 用户个人中心路由
+const userRoutes = require('./routes/user');
+app.use('/user', userRoutes);
+
 // UP主空间页路由
 const spaceRoutes = require('./routes/space');
 app.use('/space', spaceRoutes);
 
 // 首页控制器
 const indexController = require('./controllers/indexController');
+// 新增：标签页控制器（免费视频/付费/VIP）
+const tagController   = require('./controllers/tagController');
 
 // API健康检查
 app.get('/api/health', (req, res) => {
@@ -171,8 +214,150 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// 测试视频ID有效性
+app.get('/api/test/video/:id', async (req, res) => {
+  const mongoose = require('mongoose');
+  const videoId = req.params.id;
+  
+  try {
+    // 检查是否是有效的ObjectId
+    const isValidId = mongoose.Types.ObjectId.isValid(videoId);
+    
+    if (!isValidId) {
+      return res.json({
+        success: false,
+        message: 'Invalid video ID format',
+        providedId: videoId,
+        expectedLength: 24,
+        actualLength: videoId.length
+      });
+    }
+    
+    // 尝试查找视频
+    const video = await Media.findById(videoId);
+    
+    res.json({
+      success: true,
+      isValidId: isValidId,
+      videoExists: !!video,
+      videoTitle: video ? video.title : null
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+      providedId: videoId
+    });
+  }
+});
+
+// 调试：检查所有视频ID格式
+app.get('/api/debug/video-ids', async (req, res) => {
+  try {
+    const videos = await Media.find({ type: 'video' }).limit(20);
+    const videoIds = videos.map(v => ({
+      _id: v._id.toString(),
+      title: v.title,
+      isValidId: mongoose.Types.ObjectId.isValid(v._id),
+      idLength: v._id.toString().length
+    }));
+    
+    // 查找格式异常的ID
+    const invalidIds = videoIds.filter(v => v.idLength !== 24);
+    
+    res.json({
+      success: true,
+      totalVideos: videoIds.length,
+      invalidIds: invalidIds,
+      sampleIds: videoIds.slice(0, 5)
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// 调试页面：显示所有视频链接
+app.get('/debug/videos', async (req, res) => {
+  try {
+    const videos = await Media.find({ type: 'video' }).limit(50);
+    res.render('debug-videos', {
+      title: '视频调试页面',
+      videos: videos,
+      user: null
+    });
+  } catch (error) {
+    res.status(500).send('Error: ' + error.message);
+  }
+});
+
+// 测试特定视频ID的清理
+app.get('/debug/test-id/:id', (req, res) => {
+  const originalId = req.params.id;
+  const cleanedId = originalId.replace(/[^a-fA-F0-9]/g, '').substring(0, 24);
+  
+  res.json({
+    originalId: originalId,
+    originalLength: originalId.length,
+    cleanedId: cleanedId,
+    cleanedLength: cleanedId.length,
+    isValidOriginal: mongoose.Types.ObjectId.isValid(originalId),
+    isValidCleaned: mongoose.Types.ObjectId.isValid(cleanedId),
+    removedChars: originalId.replace(cleanedId, ''),
+    analysis: {
+      hasLetters: /[a-zA-Z]/.test(originalId),
+      hasNumbers: /[0-9]/.test(originalId),
+      hasSpecialChars: /[^a-fA-F0-9]/.test(originalId),
+      suspiciousPart: originalId.slice(24)
+    }
+  });
+});
+
+// 调试首页视频数据
+app.get('/debug/homepage-videos', async (req, res) => {
+  try {
+    const indexController = require('./controllers/indexController');
+    const videos = await Media.aggregate([
+      { $match: { type: 'video', isPublic: true } },
+      { $limit: 5 },
+      { $project: {
+          _id: 1,
+          id: '$_id',
+          title: 1,
+          'idAsString': { $toString: '$_id' }
+        }
+      }
+    ]);
+    
+    res.json({
+      success: true,
+      videos: videos.map(v => ({
+        _id: v._id,
+        id: v.id,
+        idType: typeof v.id,
+        idAsString: v.idAsString,
+        title: v.title,
+        analysis: {
+          isObjectId: v._id instanceof mongoose.Types.ObjectId,
+          idLength: v.idAsString.length,
+          hasInvalidChars: /[^a-fA-F0-9]/.test(v.idAsString)
+        }
+      }))
+    });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // 首页路由
 app.get('/', optionalAuth, indexController.renderIndex);
+
+// 标签页路由
+app.get('/free', optionalAuth, tagController.renderFree);
+app.get('/paid', optionalAuth, tagController.renderPaid);
+app.get('/vip',  optionalAuth, tagController.renderVIP);
 
 // 获取更多视频API
 app.get('/api/videos', indexController.getMoreVideos);
@@ -493,6 +678,10 @@ app.use('/css', express.static(path.join(__dirname, '../public/css')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use(express.static(path.join(__dirname, '../public')));
 
+// === iDataRiver 支付路由 ===
+const idataRiverRoutes = require('./routes/idataRiver');
+app.use('/api/idatariver', idataRiverRoutes);
+
 // 404 处理
 app.use((req, res) => {
   res.status(404).json({
@@ -548,15 +737,56 @@ app.use((req, res, next) => {
   next();
 });
 
+// 禁用etag
+app.disable('etag');
+
 // 启动服务器
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+/* const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(`📁 Upload directory: ${uploadDir}`);
   console.log(`🔗 直传演示 - http://localhost:${PORT}/direct-upload-demo`);
-  // console.log(`🔧 AdminJS at http://localhost:${PORT}${adminJs.options.rootPath}`);
+  console.log(`🔧 AdminJS at http://localhost:${PORT}${adminJs.options.rootPath}`);
+ });
+*/
+ module.exports = app;
+
+// …前面已有 express.json()、路由等配置…
+
+// 仅当直接执行 `node src/app.js` 时才启动监听
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+}
+
+// 导出 app 实例，供 Supertest 或其它模块引用
+module.exports = app;
+
+app.post('/api/createpaymentintent', async (req, res) => {
+  console.log('▶ Received /api/createpaymentintent, body =', req.body);
+  // 如果未配置Stripe密钥, 返回假数据避免测试404
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.json({ clientSecret: 'test_dummy_secret' });
+  }
+  try {
+    const { amount = 1000, currency = 'usd' } = req.body;
+    const pi = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      automatic_payment_methods: { enabled: true },
+    });
+    return res.json({ clientSecret: pi.client_secret });
+  } catch (err) {
+    console.error('createPaymentIntent error:', err);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
-module.exports = app;
+const bunnyEmbedRoutes = require('./routes/bunnyEmbed');
+app.use('/api/bunny-embed', bunnyEmbedRoutes);
+
+
 
 

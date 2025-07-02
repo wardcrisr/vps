@@ -27,17 +27,16 @@
 </head>
 <body>
     <div class="container">
-        <!-- ★ Bunny Stream 视频嵌入 ★ -->
-        <div style="position: relative; padding-top: 56.25%;">
-          <iframe id="bunny-stream-embed"
-            src=""
-            loading="lazy"
-            style="border:none;position:absolute;top:0;left:0;width:100%;height:100%;"
-            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-            allowfullscreen>
-          </iframe>
+        <!-- ★ HTML5 播放器 + HLS.js ★ -->
+        <div style="position: relative; padding-top: 56.25%;" id="playerContainer">
+          <video id="videoPlayer" controls style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000;"></video>
+          <!-- 遮罩层 -->
+          <div id="payOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);color:#fff;align-items:center;justify-content:center;flex-direction:column;">
+            <p style="font-size:20px;margin-bottom:20px;">试看已结束，支付后继续观看</p>
+            <button id="buyBtn" style="padding:10px 20px;font-size:16px;cursor:pointer;background:#ff5722;border:none;color:#fff;border-radius:4px;">立即购买</button>
+          </div>
         </div>
-        <!-- ★ 视频嵌入结束 ★ -->
+        <!-- ★ 播放器结束 ★ -->
         
         <div class="video-info">
             <h1 class="video-title"><%= video.title %></h1>
@@ -83,20 +82,189 @@
             <a href="/" style="color: #1890ff; text-decoration: none;">← 返回首页</a>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.0/dist/hls.min.js"></script>
     <script>
-      (async function(){
-        const iframe=document.getElementById('bunny-stream-embed');
-        const bunnyId='<%= video.bunnyId || "" %>';
-        if(bunnyId){
-          try{
-            const res=await fetch(`/api/bunny-embed/${bunnyId}`);
-            const data=await res.json();
-            if(data.success){iframe.src=data.embedUrl;return;}
-          }catch(e){console.error(e);}
+      const VIDEO_ID = '<%= video.id %>';
+      const PRICE  = <%= (Number.isFinite(video.priceCoins) ? video.priceCoins : 0) %>;
+      // 判断是否付费视频：价格>0 或 分类为 paid
+      const IS_PAID_VIDEO = (PRICE > 0) || ('<%= video.category %>'.trim() === 'paid');
+      // 后端已渲染出的播放地址（对免费或已处理签名的资源最可靠）
+      const DEFAULT_PLAY_URL = '<%= video.playUrl ? video.playUrl : "" %>';
+      const IS_LOGIN = <%= user ? 'true' : 'false' %>;
+      let hasPurchase = false; // 后端可渲染已购状态
+
+      const player   = document.getElementById('videoPlayer');
+      const overlay  = document.getElementById('payOverlay');
+      const buyBtn   = document.getElementById('buyBtn');
+
+      const PREVIEW_SECONDS = 30;
+
+      // 追踪预览媒介（video 或 iframe）
+      let previewIsIframe = false;
+      let previewIframe   = null;
+
+      function showPayOverlay(){
+        overlay.style.display = 'flex';
+        if(previewIsIframe && previewIframe){
+          // 停止 iframe 播放
+          previewIframe.remove();
+          previewIframe = null;
+        }else{
+          // 暂停本地 video
+          player.pause();
         }
-        // 回退
-        iframe.src='<%= video.embedUrl %>';
-      })();
+      }
+
+      // 监听试看限制（HTML5播放器）
+      player.addEventListener('timeupdate', ()=>{
+        if(IS_PAID_VIDEO && !hasPurchase && player.currentTime >= PREVIEW_SECONDS){
+          showPayOverlay();
+        }
+      });
+
+      // 试看计时器
+      let previewTimer = null;
+      function startPreviewCountdown(){
+        if(previewTimer){ clearTimeout(previewTimer); }
+        if(IS_PAID_VIDEO && !hasPurchase){
+          previewTimer = setTimeout(()=>{
+            showPayOverlay();
+          }, PREVIEW_SECONDS * 1000);
+        }
+      }
+
+      // 当 HTML5 视频真正开始播放后再启动计时，避免用户未点击播放计时先结束
+      player.addEventListener('play', ()=>{
+        if(!previewIsIframe){
+          startPreviewCountdown();
+        }
+      });
+
+      async function getPreviewUrl(){
+        const res = await fetch(`/api/video/${VIDEO_ID}/preview`);
+        const j   = await res.json();
+        return j.data.url;
+      }
+
+      async function getPlayUrl(){
+        const res = await fetch(`/api/video/${VIDEO_ID}/play`,{
+          headers:{ 'Authorization':'Bearer '+ (localStorage.authToken||'') }
+        });
+        if(res.status===403){
+          return null; // 未购买
+        }
+        const j = await res.json();
+        return j.data && j.data.url;
+      }
+
+      function loadSource(url){
+        if(url.includes('iframe.mediadelivery.net/embed')){
+          const container = document.getElementById('playerContainer');
+          // 创建并插入 iframe，而不替换整个容器，以保留遮罩层
+          const iframe = document.createElement('iframe');
+          iframe.src = url;
+          iframe.allow = 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture';
+          iframe.allowFullscreen = true;
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+
+          // 隐藏原生 video 元素，避免同时播放
+          player.style.display = 'none';
+
+          // 先插入 iframe，再把 overlay 置于最上层
+          container.appendChild(iframe);
+          overlay.style.zIndex = '9999';
+          container.appendChild(overlay); // appendChild 会将已存在的节点移动到末尾
+
+          // 记录状态
+          previewIsIframe = true;
+          previewIframe   = iframe;
+
+          // 开始 iframe 试看计时
+          startPreviewCountdown();
+          return;
+        }
+
+        const isHls = url.includes('.m3u8');
+        if(isHls && Hls.isSupported()){
+          const hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(player);
+        }else{
+          player.src = url;
+        }
+      }
+
+      async function unlockVideo(){
+        const res = await fetch(`/api/unlock/${VIDEO_ID}`,{
+          method:'POST',
+          headers:{
+            'Authorization':'Bearer '+(localStorage.authToken||''),
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({ hoursValid: 72 })
+        });
+        const j = await res.json();
+        return j.iframe; // 字段名为 iframe
+      }
+
+      async function init(){
+        console.log('DEFAULT_PLAY_URL:', DEFAULT_PLAY_URL, 'IS_PAID_VIDEO:', IS_PAID_VIDEO);
+        let url;
+
+        if(IS_PAID_VIDEO){
+          // 如果已登录且已购买可直接获取完整播放地址，否则回退到试看地址
+          url = await getPlayUrl();
+          if(!url){
+            url = await getPreviewUrl();
+          }
+        }else{
+          // 免费视频直接使用后端渲染出的最终播放地址，避免 403
+          url = DEFAULT_PLAY_URL;
+        }
+
+        loadSource(url);
+        // 触发浏览器开始加载元数据
+        player.load();
+        // 免费视频尝试静音自动播放，减少用户点击步骤
+        if(!IS_PAID_VIDEO){
+          player.muted = true;
+          player.play().catch(()=>{});
+        }
+      }
+
+      buyBtn.addEventListener('click', async ()=>{
+        if(!IS_LOGIN){ alert('请先登录'); return; }
+        try{
+          const iframeUrl = await unlockVideo();
+          if(iframeUrl){
+            // 购买成功：切换到完整版播放
+            hasPurchase = true;
+
+            // 清理计时器 & 任何预览 iframe
+            if(previewTimer){ clearTimeout(previewTimer); previewTimer = null; }
+            if(previewIsIframe && previewIframe){ previewIframe.remove(); previewIframe = null; }
+
+            // 隐藏遮罩并清理计时
+            overlay.style.display = 'none';
+
+            // 加载完整版（带 token 的 iframe）
+            const container = document.getElementById('playerContainer');
+            container.innerHTML = '';
+            player.style.display = 'none';
+            previewIsIframe = false;
+            loadSource(iframeUrl);
+          }else{
+            alert('解锁失败');
+          }
+        }catch(e){console.error(e);alert('购买失败');}
+      });
+
+      init();
     </script>
 </body>
 </html>

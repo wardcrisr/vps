@@ -60,7 +60,10 @@ router.get('/:id', optionalAuth, async (req, res) => {
           cloudFileName: 1,
           cdnUrl: 1,
           bunnyId: 1,
-          embedUrl: '$url'
+          embedUrl: '$url',
+          priceCoins: 1,
+          category: 1,
+          filename: 1
         }
       }
     ]);
@@ -90,15 +93,40 @@ router.get('/:id', optionalAuth, async (req, res) => {
     .limit(8)
     .select('_id title coverUrl thumbnail duration views');
 
-    // 统一走 /vod/video/:filename，让 VOD 路由自动处理本地/云端与签名。
-    let playUrl;
+    // 生成可播放地址：按优先级依次使用 streamUrl → cdnUrl → url → /vod/video/:filename
+    let playUrl = null;
+
     if (videoData.streamUrl) {
-      playUrl = videoData.streamUrl; // 已完成HLS
+      playUrl = videoData.streamUrl; // HLS 已就绪
     } else if (videoData.cdnUrl && videoData.cdnUrl.startsWith('http')) {
-      playUrl = videoData.cdnUrl; // 走CDN MP4
-    } else {
+      playUrl = videoData.cdnUrl; // CDN MP4
+    } else if (videoData.url) {
+      playUrl = videoData.url; // 原始 URL（/uploads/... 或外链）
+    }
+
+    // 对于本地未签名 MP4，再统一走 VOD 代理，以支持 Range
+    if (!playUrl) {
       const fileKey = videoData.cloudFileName || videoData.filename;
-      playUrl = `/vod/video/${fileKey}`; // 本地或签名MP4
+      if (fileKey) {
+        playUrl = `/vod/video/${encodeURIComponent(fileKey)}`;
+      }
+    }
+
+    // 对 Bunny Stream 嵌入（可能403）自动添加签名 token（免费视频无需购买）
+    if (playUrl && playUrl.includes('iframe.mediadelivery.net/embed') && process.env.BUNNY_SECRET) {
+      const crypto = require('crypto');
+      try {
+        const expires = Math.floor(Date.now() / 1000) + 3600 * 24 * 7; // 7 天
+        const raw     = `${process.env.BUNNY_SECRET}${videoData.bunnyId}${expires}`;
+        const token   = crypto.createHash('sha256').update(raw).digest('hex');
+        if(!playUrl.includes('token=')){
+          playUrl += `${playUrl.includes('?') ? '&' : '?'}token=${token}&expires=${expires}`;
+        }
+      } catch(e) { console.error('生成 Bunny 签名失败', e); }
+    }
+
+    if (!playUrl) {
+      playUrl = '';
     }
 
     res.render('video-detail', {

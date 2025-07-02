@@ -3,6 +3,9 @@ const User = require('../models/User');
 const Media = require('../models/Media');
 const { authenticateToken, requireAdmin } = require('./middleware/auth');
 const router = express.Router();
+const path = require('path');
+const fs   = require('fs');
+const multer = require('multer');
 
 // ——— 显示管理员后台页面（不需要token验证，由前端JavaScript处理） ———
 router.get('/dashboard', (req, res) => {
@@ -14,6 +17,74 @@ router.get('/dashboard', (req, res) => {
 // 应用认证中间件到其他管理员API路由
 router.use(authenticateToken);
 router.use(requireAdmin);
+
+// ========== 文件上传（封面图片） ==========
+// 复用 app.js 中的 uploads 静态目录，保存到 /uploads/covers
+const baseUploadDir = path.join(__dirname, '../uploads');
+const coversDir = path.join(baseUploadDir, 'covers');
+fs.mkdirSync(coversDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, coversDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e6);
+    const ext = path.extname(file.originalname);
+    cb(null, uniqueSuffix + ext);
+  }
+});
+
+const uploadCover = multer({ storage });
+
+// POST /api/admin/upload-cover  ->  返回 { success, url }
+router.post('/upload-cover', uploadCover.single('cover'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: '未检测到封面文件' });
+    }
+    // 静态访问路径 /uploads/covers/<filename>
+    const publicUrl = `/uploads/covers/${req.file.filename}`;
+    res.json({ success: true, url: publicUrl });
+  } catch (err) {
+    console.error('上传封面失败:', err);
+    res.status(500).json({ success: false, message: '上传封面失败' });
+  }
+});
+
+// ========== 新增视频（保存元数据） ==========
+// POST /api/admin/videos  { title, videoUrl, coverUrl, category }
+router.post('/videos', async (req, res) => {
+  try {
+    const { title, videoUrl, coverUrl, category, videoId } = req.body;
+
+    if (!title || !videoUrl || !coverUrl || !category || !videoId) {
+      return res.status(400).json({ success: false, message: '缺少必要字段' });
+    }
+
+    const updateFields = {
+      title,
+      originalName: title,
+      mimetype: 'video/mp4',
+      size: 0,
+      type: 'video',
+      url: videoUrl,
+      coverUrl,
+      category,
+      cloudStatus: 'uploaded',
+      isPublic: true
+    };
+
+    const media = await Media.findOneAndUpdate(
+      { bunnyId: videoId },
+      { $set: updateFields },
+      { upsert: true, new: true }
+    );
+
+    res.json({ success: true, data: media });
+  } catch (err) {
+    console.error('保存视频记录失败:', err);
+    res.status(500).json({ success: false, message: '保存视频记录失败' });
+  }
+});
 
 // ——— 视频管理相关 API ———
 

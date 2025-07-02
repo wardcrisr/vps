@@ -181,7 +181,15 @@
                                 <div id="adminVideoList" class="list-group list-group-flush mb-3" style="max-height:300px; overflow-y:auto;"></div>
                                 <hr>
                                 <h6 class="mb-2">📤 上传新视频</h6>
-                                <input type="file" id="adminVideoInput" accept="video/mp4" class="form-control mb-2">
+                                <input type="file" id="adminVideoInput" accept="video/mp4" class="form-control mb-2" required>
+                                <input type="file" id="adminCoverInput" accept="image/*" class="form-control mb-2" required>
+                                <select id="adminCategorySelect" class="form-select mb-2" required>
+                                    <option value="" disabled selected>请选择分区/付费类型</option>
+                                    <option value="free">免费</option>
+                                    <option value="paid">付费</option>
+                                    <option value="member">会员</option>
+                                </select>
+                                <input type="number" id="adminPriceInput" class="form-control mb-2" placeholder="所需金币" min="1" max="9999" style="display:none;">
                                 <button id="adminUploadBtn" class="btn btn-primary w-100">开始上传</button>
                                 <div id="adminUploadStatus" class="small text-muted mt-2"></div>
                             </div>
@@ -444,6 +452,18 @@
                     console.error('❌ 上传功能初始化异常:', error);
                 }
             }, 100); // 确保DOM完全加载后再初始化
+
+            // 根据分区显示或隐藏金币输入
+            const adminPriceInput = document.getElementById('adminPriceInput');
+            const adminCategorySelect = document.getElementById('adminCategorySelect');
+            adminCategorySelect.addEventListener('change', () => {
+              if (adminCategorySelect.value === 'paid') {
+                adminPriceInput.style.display = 'block';
+              } else {
+                adminPriceInput.style.display = 'none';
+                adminPriceInput.value = '';
+              }
+            });
         });
         
         // 显示指定章节
@@ -821,6 +841,8 @@
         const adminInfo = document.getElementById('adminVideoInfo');
         const adminList = document.getElementById('adminVideoList');
         const adminUploadInput = document.getElementById('adminVideoInput');
+        const adminCoverInput = document.getElementById('adminCoverInput');
+        const adminCategorySelect = document.getElementById('adminCategorySelect');
         const adminUploadBtn = document.getElementById('adminUploadBtn');
         const adminUploadStatus = document.getElementById('adminUploadStatus');
         let adminVideos = [];
@@ -1009,35 +1031,59 @@
                             }
                         }
 
-                        // 检查文件选择
+                        // ========== 表单校验 ==========
                         if (!adminUploadInput.files || !adminUploadInput.files.length) {
                             alert('请先选择要上传的视频文件！');
                             return;
                         }
-                        
-                        const file = adminUploadInput.files[0];
-                        
-                        // 文件大小检查
-                        const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
-                        if (file.size > maxSize) {
-                            alert(`文件过大！最大支持 ${(maxSize/1024/1024/1024).toFixed(1)}GB`);
+                        if (!adminCoverInput.files || !adminCoverInput.files.length) {
+                            alert('请先选择封面图片！');
+                            return;
+                        }
+                        if (!adminCategorySelect.value) {
+                            alert('请选择视频分区！');
                             return;
                         }
                         
-                        // 文件类型检查
-                        if (!file.type.startsWith('video/')) {
-                            if (!confirm('这不是标准的视频文件格式，确定要上传吗？')) {
+                        // 若选择付费分区，需校验价格
+                        if (adminCategorySelect.value === 'paid') {
+                            const price = parseInt(adminPriceInput.value, 10);
+                            if (!price || price < 1 || price > 9999) {
+                                alert('请输入 1-9999 的金币价格！');
                                 return;
                             }
                         }
                         
-                        // ====================== 直传 Bunny (tus) ======================
-                        newUploadBtn.disabled = true;
-                        newUploadBtn.textContent = '上传准备...';
-                        adminUploadStatus.textContent = '⏳ 创建视频条目...';
-                        adminUploadStatus.className = 'small text-info mt-2';
+                        const file = adminUploadInput.files[0];
+                        const coverFile = adminCoverInput.files[0];
 
-                        // 1. 获取签名 & 直传信息
+                        // 1️⃣ 先上传封面图片
+                        adminUploadStatus.textContent = '⏳ 正在上传封面图片...';
+                        let coverUrl = '';
+                        try {
+                            const formData = new FormData();
+                            formData.append('cover', coverFile);
+                            const coverRes = await fetch('/api/admin/upload-cover', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                                },
+                                body: formData
+                            });
+                            const coverData = await coverRes.json();
+                            if (!coverData.success) throw new Error(coverData.message || '封面上传失败');
+                            coverUrl = coverData.url;
+                            adminUploadStatus.textContent = '✅ 封面上传完成';
+                        } catch (coverErr) {
+                            console.error('封面上传失败', coverErr);
+                            adminUploadStatus.textContent = '❌ 封面上传失败: ' + coverErr.message;
+                            adminUploadStatus.className = 'small text-danger mt-2';
+                            newUploadBtn.disabled = false;
+                            return;
+                        }
+
+                        // 2️⃣ 创建 Bunny 签名 & 开始上传视频
+                        adminUploadStatus.textContent = '⏳ 创建 Bunny 视频条目...';
                         const signRes = await fetch('/api/bunny-sign', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
@@ -1048,55 +1094,85 @@
 
                         const { videoId, libraryId, signature, expires, tusUrl } = signData;
 
-                        newUploadBtn.textContent = '上传中...';
+                        adminUploadStatus.textContent = '⏳ 正在上传视频...';
 
-                        const upload = new tus.Upload(file, {
-                          endpoint: tusUrl,
-                          headers: {
-                            AuthorizationSignature: signature,
-                            AuthorizationExpire: expires,
-                            LibraryId: libraryId,
-                            VideoId: videoId
-                          },
-                          metadata: {
-                            filetype: file.type,
-                            title: file.name
-                          },
-                          chunkSize: 5 * 1024 * 1024,
-                          retryDelays: [0, 3000, 5000, 10000],
-                          onError: err => {
-                            console.error('tus error', err);
-                            adminUploadStatus.textContent = '❌ 上传失败: ' + err.message;
-                            adminUploadStatus.className = 'small text-danger mt-2';
-                          },
-                          onProgress: (bytesSent, bytesTotal) => {
-                            const percent = ((bytesSent / bytesTotal) * 100).toFixed(1);
-                            adminUploadStatus.textContent = `上传进度: ${percent}% (${(bytesSent/1048576).toFixed(1)} / ${(bytesTotal/1048576).toFixed(1)} MB)`;
-                            adminUploadStatus.className = 'small text-info mt-2';
-                          },
-                          onSuccess: () => {
-                            console.log('✅ 直传完成');
-                            adminUploadStatus.textContent = '✅ 上传完成，后台转码中...';
-                            adminUploadStatus.className = 'small text-success mt-2';
-                            // 通知后端更新媒体状态
-                            fetch(`/api/bunny-update/${videoId}`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ size: file.size, mimetype: file.type })
-                            }).then(()=>{
-                              loadAdminVideos();
-                            });
-                            adminUploadInput.value = '';
-                          }
+                        await new Promise((resolveUpload, rejectUpload) => {
+                          const upload = new tus.Upload(file, {
+                            endpoint: tusUrl,
+                            headers: {
+                              AuthorizationSignature: signature,
+                              AuthorizationExpire: expires,
+                              LibraryId: libraryId,
+                              VideoId: videoId
+                            },
+                            metadata: {
+                              filetype: file.type,
+                              title: file.name
+                            },
+                            chunkSize: 5 * 1024 * 1024,
+                            retryDelays: [0, 3000, 5000, 10000],
+                            onError: err => {
+                              console.error('tus error', err);
+                              adminUploadStatus.textContent = '❌ 上传失败: ' + err.message;
+                              adminUploadStatus.className = 'small text-danger mt-2';
+                              rejectUpload(err);
+                            },
+                            onProgress: (bytesSent, bytesTotal) => {
+                              const percent = ((bytesSent / bytesTotal) * 100).toFixed(1);
+                              adminUploadStatus.textContent = `视频上传进度: ${percent}% (${(bytesSent/1048576).toFixed(1)} / ${(bytesTotal/1048576).toFixed(1)} MB)`;
+                              adminUploadStatus.className = 'small text-info mt-2';
+                            },
+                            onSuccess: () => {
+                              console.log('✅ 视频直传完成');
+                              resolveUpload();
+                            }
+                          });
+
+                          // 断点续传
+                          upload.findPreviousUploads().then(previous => {
+                            if (previous.length) upload.resumeFromPreviousUpload(previous[0]);
+                            upload.start();
+                          });
                         });
 
-                        // 断点续传
-                        const previous = await upload.findPreviousUploads();
-                        if (previous.length) upload.resumeFromPreviousUpload(previous[0]);
+                        // 通知后端更新媒体状态
+                        await fetch(`/api/bunny-update/${videoId}`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ size: file.size, mimetype: file.type })
+                        });
 
-                        upload.start();
-                        // ==================================================================
-                        
+                        // 3️⃣ 保存视频元数据到数据库
+                        try {
+                          const saveRes = await fetch('/api/admin/videos', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                            },
+                            body: JSON.stringify({
+                              title: file.name,
+                              videoUrl: `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`,
+                              coverUrl: coverUrl,
+                              category: adminCategorySelect.value,
+                              videoId: videoId,
+                              priceCoin: adminCategorySelect.value === 'paid' ? parseInt(adminPriceInput.value,10) : 0
+                            })
+                          });
+                          const saveData = await saveRes.json();
+                          if (!saveData.success) throw new Error(saveData.message || '保存视频信息失败');
+                          adminUploadStatus.textContent = '✅ 视频信息保存成功！';
+                          loadAdminVideos();
+                        } catch (saveErr) {
+                          console.error('保存视频信息失败', saveErr);
+                          adminUploadStatus.textContent = '❌ 保存视频信息失败: ' + saveErr.message;
+                          adminUploadStatus.className = 'small text-danger mt-2';
+                        }
+
+                        adminUploadInput.value = '';
+                        adminCoverInput.value = '';
+                        adminCategorySelect.selectedIndex = 0;
+                        adminPriceInput.value = '';
                     } catch (error) {
                         console.error('❌ 上传过程出错:', error);
                         adminUploadStatus.textContent = `❌ 上传失败: ${error.message}`;

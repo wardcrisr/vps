@@ -13,9 +13,10 @@ if (!fs.existsSync(VIDEOS_DIR)) {
   fs.mkdirSync(VIDEOS_DIR, { recursive: true });
 }
 
-// 获取视频文件列表 - 合并本地文件和数据库记录
+// 获取视频文件列表 - 合并本地文件和数据库记录（支持 ?category=<free|paid|member>）
 router.get('/videos', async (req, res) => {
   try {
+    const { category } = req.query;
     // 1. 获取本地videos目录中的文件
     const localFiles = [];
     if (fs.existsSync(VIDEOS_DIR)) {
@@ -37,10 +38,15 @@ router.get('/videos', async (req, res) => {
     }
 
     // 2. 获取数据库中的视频记录
-    const dbVideos = await Media.find({ 
+    const dbQuery = {
       type: 'video',
       cloudStatus: { $in: ['uploaded', 'local', 'failed'] }
-    }).sort({ createdAt: -1 });
+    };
+    if (category && ['free', 'paid', 'member'].includes(category)) {
+      dbQuery.category = category; // 严格相等匹配
+    }
+
+    const dbVideos = await Media.find(dbQuery).sort({ createdAt: -1 });
 
     const dbVideoList = dbVideos.map(video => ({
       _id      : video._id,          // 添加MongoDB ID
@@ -58,8 +64,17 @@ router.get('/videos', async (req, res) => {
       mimetype : video.mimetype
     }));
 
-    // 3. 合并并去重
-    const allVideos = [...localFiles, ...dbVideoList];
+    // 3. 合并并去重（按 MongoDB _id 或 filename 去重）
+    const allVideosMap = new Map();
+
+    [...localFiles, ...dbVideoList].forEach(v => {
+      const key = v._id ? v._id.toString() : v.filename;
+      if (!allVideosMap.has(key)) {
+        allVideosMap.set(key, v);
+      }
+    });
+
+    const allVideos = Array.from(allVideosMap.values());
     
     console.log(`📹 VOD API: 返回 ${allVideos.length} 个视频 (本地: ${localFiles.length}, 数据库: ${dbVideoList.length})`);
     
