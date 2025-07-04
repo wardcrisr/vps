@@ -9,6 +9,15 @@ const upload = multer();
 // POST /api/bunny-upload
 router.post('/', upload.single('video'), async (req, res) => {
   try {
+    // 校验 Bunny Stream 凭证，若缺失则直接返回
+    if (!process.env.BUNNY_API_KEY || !process.env.BUNNY_VIDEO_LIBRARY) {
+      console.error('[bunny-upload] 缺少 BUNNY_API_KEY 或 BUNNY_VIDEO_LIBRARY 环境变量');
+      return res.status(500).json({
+        success: false,
+        error: '服务器未配置 Bunny Stream 凭证(BUNNY_API_KEY / BUNNY_VIDEO_LIBRARY)'
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No video file uploaded' });
     }

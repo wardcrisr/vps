@@ -674,6 +674,17 @@ app.use('/js', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, '../public/js')));
 
+// 简易 favicon 处理，避免浏览器 403/404
+app.get('/favicon.ico', (req, res) => {
+  try {
+    const iconPath = path.join(__dirname, '../public/favicon.ico');
+    return res.sendFile(iconPath);
+  } catch (e) {
+    // 若文件不存在则返回204
+    return res.status(204).end();
+  }
+});
+
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use(express.static(path.join(__dirname, '../public')));
