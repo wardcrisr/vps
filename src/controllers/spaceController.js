@@ -125,7 +125,7 @@ exports.getUploaderVideos = async (req, res) => {
     .limit(parseInt(limit))
     .skip(skip)
             .populate('uploader', 'uid name')
-    .select('title coverUrl thumbnail duration views danmakuCount favoriteCount createdAt url');
+    .select('title duration views danmakuCount favoriteCount createdAt url bunnyId guid');
 
     // 获取总数
     const total = await Media.countDocuments({ 
@@ -134,10 +134,30 @@ exports.getUploaderVideos = async (req, res) => {
       isPublic: true 
     });
 
+    // 处理视频数据，添加 previewUrl 并删除旧字段
+    const processedVideos = videos.map(video => {
+      const obj = video.toObject();
+      delete obj.coverUrl;
+      delete obj.thumbnail;
+      
+      // 添加 previewUrl 字段
+      if (obj.bunnyId || obj.guid) {
+        const videoGuid = obj.bunnyId || obj.guid;
+        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+      }
+      
+      return obj;
+    });
+
+    // 调试断言：确保输出无旧字段
+    if (processedVideos.some(x => x.coverUrl || x.thumbnail)) {
+      console.warn('❌ spaceController API still contains cover/thumbnail');
+    }
+
     res.json({
       success: true,
       data: {
-        videos,
+        videos: processedVideos,
         pagination: {
           current: parseInt(page),
           total: Math.ceil(total / parseInt(limit)),

@@ -10,25 +10,19 @@ function getDefaultCover() {
 <div class="videocard">
   <!-- 视频封面区域 -->
   <a href="/video/<%= video.id %>" class="video-link">
-    <div class="coverwrapper">
-      <img 
-        src="<%=
-          (function() {
-            if (!video.coverUrl || video.coverUrl.trim() === '') {
-              return getDefaultCover();
-            }
-            if (video.coverUrl.startsWith('http') || video.coverUrl.startsWith('/')) {
-              return video.coverUrl;
-            }
-            // 补全前导 '/'
-            return '/' + video.coverUrl.replace(/^\/+/, '');
-          })()
-        %>" 
-        alt="<%= video.title %>" 
-        class="coverimg"
-        loading="lazy"
-        onerror="this.src='<%= getDefaultCover() %>'"
-      >
+    <div class="coverwrapper video-thumbnail">
+      <picture>
+        <% if (video.previewUrl) { %>
+          <source srcset="<%= video.previewUrl %>" type="image/webp">
+        <% } %>
+        <img 
+          src="<%= video.previewUrl || getDefaultCover() %>" 
+          alt="<%= video.title %>" 
+          class="coverimg"
+          loading="lazy"
+          onerror="this.src='<%= getDefaultCover() %>'"
+        >
+      </picture>
       <!-- 时长显示 -->
       <span class="duration"><%= formatDuration(video.duration) %></span>
       

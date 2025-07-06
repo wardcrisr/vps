@@ -31,21 +31,20 @@ exports.renderIndex = async (req, res) => {
           preserveNullAndEmptyArrays: true
         }
       },
-      // 选择需要的字段
+      // 选择需要的字段，明确排除旧字段
       {
         $project: {
           _id: 1,
           id: '$_id',
           title: 1,
-          coverUrl: {
-            $ifNull: ['$coverUrl', '$thumbnail']
-          },
           duration: 1,
           createdAt: 1,
           views: 1,
           likes: 1,
           danmakuCount: 1,
           isPremiumOnly: 1,
+          bunnyId: 1,
+          guid: 1,
           up: {
             uid: '$uploaderInfo.uid',
             name: {
@@ -74,11 +73,14 @@ exports.renderIndex = async (req, res) => {
 
     // 处理没有UP主信息的视频
     const processedVideos = videos.map(video => {
-      // 修复缺失或相对路径封面 URL
-      if (!video.coverUrl || video.coverUrl.trim() === '') {
-        video.coverUrl = '/api/placeholder/video-thumbnail';
-      } else if (!video.coverUrl.startsWith('http') && !video.coverUrl.startsWith('/')) {
-        video.coverUrl = '/' + video.coverUrl.replace(/^\/+/, '');
+      // 删除旧的封面字段
+      delete video.coverUrl;
+      delete video.thumbnail;
+      
+      // 添加 previewUrl 字段
+      if (video.bunnyId || video.guid) {
+        const videoGuid = video.bunnyId || video.guid;
+        video.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
       }
 
       if (!video.up.uid) {
@@ -89,6 +91,11 @@ exports.renderIndex = async (req, res) => {
       }
       return video;
     });
+
+    // 调试断言：确保输出无旧字段
+    if (processedVideos.some(x => x.coverUrl || x.thumbnail)) {
+      console.warn('❌ indexController renderIndex still contains cover/thumbnail');
+    }
 
     // 渲染首页
     res.render('index', {
@@ -148,15 +155,14 @@ exports.getMoreVideos = async (req, res) => {
           _id: 1,
           id: '$_id',
           title: 1,
-          coverUrl: {
-            $ifNull: ['$coverUrl', '$thumbnail']
-          },
           duration: 1,
           createdAt: 1,
           views: 1,
           likes: 1,
           danmakuCount: 1,
           isPremiumOnly: 1,
+          bunnyId: 1,
+          guid: 1,
           up: {
             uid: '$uploaderInfo.uid',
             name: {
@@ -180,11 +186,14 @@ exports.getMoreVideos = async (req, res) => {
 
     // 处理数据
     const processedVideos = videos.map(video => {
-      // 修复缺失或相对路径封面 URL
-      if (!video.coverUrl || video.coverUrl.trim() === '') {
-        video.coverUrl = '/api/placeholder/video-thumbnail';
-      } else if (!video.coverUrl.startsWith('http') && !video.coverUrl.startsWith('/')) {
-        video.coverUrl = '/' + video.coverUrl.replace(/^\/+/, '');
+      // 删除旧的封面字段
+      delete video.coverUrl;
+      delete video.thumbnail;
+      
+      // 添加 previewUrl 字段
+      if (video.bunnyId || video.guid) {
+        const videoGuid = video.bunnyId || video.guid;
+        video.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
       }
 
       if (!video.up.uid) {
@@ -195,6 +204,11 @@ exports.getMoreVideos = async (req, res) => {
       }
       return video;
     });
+
+    // 调试断言：确保输出无旧字段
+    if (processedVideos.some(x => x.coverUrl || x.thumbnail)) {
+      console.warn('❌ indexController getMoreVideos still contains cover/thumbnail');
+    }
 
     res.json({
       success: true,

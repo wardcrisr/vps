@@ -182,7 +182,6 @@
                                 <hr>
                                 <h6 class="mb-2">📤 上传新视频</h6>
                                 <input type="file" id="adminVideoInput" accept="video/mp4" class="form-control mb-2" required>
-                                <input type="file" id="adminCoverInput" accept="image/*" class="form-control mb-2" required>
                                 <select id="adminCategorySelect" class="form-select mb-2" required>
                                     <option value="" disabled selected>请选择分区/付费类型</option>
                                     <option value="free">免费</option>
@@ -841,7 +840,6 @@
         const adminInfo = document.getElementById('adminVideoInfo');
         const adminList = document.getElementById('adminVideoList');
         const adminUploadInput = document.getElementById('adminVideoInput');
-        const adminCoverInput = document.getElementById('adminCoverInput');
         const adminCategorySelect = document.getElementById('adminCategorySelect');
         const adminUploadBtn = document.getElementById('adminUploadBtn');
         const adminUploadStatus = document.getElementById('adminUploadStatus');
@@ -1036,10 +1034,6 @@
                             alert('请先选择要上传的视频文件！');
                             return;
                         }
-                        if (!adminCoverInput.files || !adminCoverInput.files.length) {
-                            alert('请先选择封面图片！');
-                            return;
-                        }
                         if (!adminCategorySelect.value) {
                             alert('请选择视频分区！');
                             return;
@@ -1055,34 +1049,11 @@
                         }
                         
                         const file = adminUploadInput.files[0];
-                        const coverFile = adminCoverInput.files[0];
+                        
+                        // 使用默认封面图片
+                        const coverUrl = '/api/placeholder/video-thumbnail';
 
-                        // 1️⃣ 先上传封面图片
-                        adminUploadStatus.textContent = '⏳ 正在上传封面图片...';
-                        let coverUrl = '';
-                        try {
-                            const formData = new FormData();
-                            formData.append('cover', coverFile);
-                            const coverRes = await fetch('/api/admin/upload-cover', {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-                                },
-                                body: formData
-                            });
-                            const coverData = await coverRes.json();
-                            if (!coverData.success) throw new Error(coverData.message || '封面上传失败');
-                            coverUrl = coverData.url;
-                            adminUploadStatus.textContent = '✅ 封面上传完成';
-                        } catch (coverErr) {
-                            console.error('封面上传失败', coverErr);
-                            adminUploadStatus.textContent = '❌ 封面上传失败: ' + coverErr.message;
-                            adminUploadStatus.className = 'small text-danger mt-2';
-                            newUploadBtn.disabled = false;
-                            return;
-                        }
-
-                        // 2️⃣ 创建 Bunny 签名 & 开始上传视频
+                        // 1️⃣ 创建 Bunny 签名 & 开始上传视频
                         adminUploadStatus.textContent = '⏳ 创建 Bunny 视频条目...';
                         const signRes = await fetch('/api/bunny-sign', {
                           method: 'POST',
@@ -1170,7 +1141,6 @@
                         }
 
                         adminUploadInput.value = '';
-                        adminCoverInput.value = '';
                         adminCategorySelect.selectedIndex = 0;
                         adminPriceInput.value = '';
                     } catch (error) {

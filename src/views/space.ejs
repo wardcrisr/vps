@@ -152,7 +152,7 @@ const SpacePage = {
     div.className = 'video-card';
     div.innerHTML = `
       <div class="video-thumbnail">
-        <img src="${video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail'}" 
+        <img src="${video.previewUrl || '/api/placeholder/video-thumbnail'}" 
              alt="${video.title}" loading="lazy">
         <div class="video-duration">${this.formatDuration(video.duration)}</div>
       </div>

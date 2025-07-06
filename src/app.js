@@ -48,6 +48,7 @@ const { optionalAuth, authenticateToken, requireVIP } = require('./routes/middle
 
 // 创建 Express 实例
 const app = express();
+app.set('view cache', false);
 
 // 确保上传目录存在（临时存储）
 const uploadDir = path.join(__dirname, '../uploads');

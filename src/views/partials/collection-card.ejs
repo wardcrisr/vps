@@ -12,8 +12,13 @@
     <% if (collection.coverUrl) { %>
       <img src="<%= collection.coverUrl %>" alt="<%= collection.title %>" loading="lazy">
     <% } else if (collection.videoIds && collection.videoIds.length > 0) { %>
-      <img src="<%= collection.videoIds[0].coverUrl || collection.videoIds[0].thumbnail || '/api/placeholder/video-thumbnail' %>" 
-           alt="<%= collection.title %>" loading="lazy">
+      <picture>
+        <% if (collection.videoIds[0].previewUrl) { %>
+          <source srcset="<%= collection.videoIds[0].previewUrl %>" type="image/webp">
+        <% } %>
+        <img src="<%= collection.videoIds[0].previewUrl || '/api/placeholder/video-thumbnail' %>" 
+             alt="<%= collection.title %>" loading="lazy">
+      </picture>
     <% } else { %>
       <img src="/api/placeholder/video-thumbnail" alt="<%= collection.title %>">
     <% } %>

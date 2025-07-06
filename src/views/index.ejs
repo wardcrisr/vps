@@ -510,15 +510,9 @@
       card.className = 'video-card';
       card.setAttribute('data-video-id', video.filename || video._id);
       
-      const thumbnailSrc = video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail';
-      // 若为相对路径，补全前导"/"
+      // 使用 previewUrl 作为主要封面源
+      const thumbnailSrc = video.previewUrl || '/api/placeholder/video-thumbnail';
       let fixedThumbnail = thumbnailSrc;
-      if (fixedThumbnail && !fixedThumbnail.startsWith('http') && !fixedThumbnail.startsWith('/')) {
-        fixedThumbnail = '/' + fixedThumbnail.replace(/^\/+/, '');
-      }
-      if (!fixedThumbnail) {
-        fixedThumbnail = '/api/placeholder/video-thumbnail';
-      }
       
       const duration = formatDuration(video.duration || 0);
       const views = formatNumber(video.views || 0);
@@ -530,6 +524,7 @@
       const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
 
       card.innerHTML = `
+      
         <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
           <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
           <div class="video-duration">${duration}</div>
@@ -550,7 +545,7 @@
           </div>
         </div>
       `;
-
+      card.__data__ = video; // 供全局脚本读取
       return card;
     }
 
@@ -697,6 +692,29 @@
       if (days < 30) return `${Math.floor(days / 7)}周前`;
       return `${Math.floor(days / 30)}月前`;
     }
+
+// 引入视频预览处理脚本
+document.addEventListener('DOMContentLoaded', ()=>{
+  // 针对所有 .video-card 执行预览替换
+  document.querySelectorAll('.video-card, .videocard').forEach(card=>{
+    const videoData = card.__data__;       // 在 createVideoCard 里写入 card.__data__ = video;
+    if(!videoData || !videoData.previewUrl) return;
+
+    const img = card.querySelector('.video-thumbnail img, .coverwrapper img');
+    if(!img) return;
+
+    const p = videoData.previewUrl;
+    if(/\.(mp4|webm)$/i.test(p)){
+      const v=document.createElement('video');
+      v.src=p;v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;
+      v.style.width='100%';v.style.height='100%';v.style.objectFit='cover';
+      img.replaceWith(v);
+    }else{
+      img.src = p;
+    }
+  });
+});
+ 
   </script>
 </body>
 </html>

@@ -39,13 +39,14 @@ async function renderByCondition(req, res, title, matchCondition, activeTag) {
           _id: 1,
           id: '$_id',
           title: 1,
-          coverUrl: { $ifNull: ['$coverUrl', '$thumbnail'] },
           duration: 1,
           createdAt: 1,
           views: 1,
           likes: 1,
           danmakuCount: 1,
           isPremiumOnly: 1,
+          bunnyId: 1,
+          guid: 1,
           up: {
             uid: '$uploaderInfo.uid',
             name: {
@@ -61,12 +62,16 @@ async function renderByCondition(req, res, title, matchCondition, activeTag) {
       { $limit: 20 }
     ]);
 
-    // 数据后处理：封面URL 修复 & 补全UP主信息
+    // 数据后处理：添加 previewUrl & 补全UP主信息
     const processedVideos = videos.map(video => {
-      if (!video.coverUrl || video.coverUrl.trim() === '') {
-        video.coverUrl = '/api/placeholder/video-thumbnail';
-      } else if (!video.coverUrl.startsWith('http') && !video.coverUrl.startsWith('/')) {
-        video.coverUrl = '/' + video.coverUrl.replace(/^\/+/, '');
+      // 删除旧的封面字段
+      delete video.coverUrl;
+      delete video.thumbnail;
+      
+      // 添加 previewUrl 字段
+      if (video.bunnyId || video.guid) {
+        const videoGuid = video.bunnyId || video.guid;
+        video.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
       }
 
       if (!video.up.uid) {
@@ -74,6 +79,11 @@ async function renderByCondition(req, res, title, matchCondition, activeTag) {
       }
       return video;
     });
+
+    // 调试断言：确保输出无旧字段
+    if (processedVideos.some(x => x.coverUrl || x.thumbnail)) {
+      console.warn('❌ tagController still contains cover/thumbnail');
+    }
 
     res.render('index', {
       title,

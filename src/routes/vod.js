@@ -48,21 +48,30 @@ router.get('/videos', async (req, res) => {
 
     const dbVideos = await Media.find(dbQuery).sort({ createdAt: -1 });
 
-    const dbVideoList = dbVideos.map(video => ({
-      _id      : video._id,          // 添加MongoDB ID
-      id       : video._id,          // 兼容前端使用 id 字段
-      filename : video.cloudFileName || video.filename,
-      name     : video.title,
-      url      : video.url.startsWith('http') ? video.url : `/uploads/${video.filename}`,
-      playUrl  : video.url.startsWith('http') ? video.url : `/vod/video/${video.filename}`,
-      bunnyId  : video.bunnyId || video.cloudFileName, // Bunny Stream ID
-      embedUrl : video.url.startsWith('http') ? video.url : undefined,
-      thumbnail: video.thumbnail || '/api/placeholder/video-thumbnail',
-      views    : video.views || 0,
-      size     : video.size,
-      source   : video.cloudStatus === 'uploaded' ? 'cloud' : 'upload',
-      mimetype : video.mimetype
-    }));
+    const dbVideoList = dbVideos.map(video => {
+      const obj = {
+        _id      : video._id,          // 添加MongoDB ID
+        id       : video._id,          // 兼容前端使用 id 字段
+        filename : video.cloudFileName || video.filename,
+        name     : video.title,
+        url      : video.url.startsWith('http') ? video.url : `/uploads/${video.filename}`,
+        playUrl  : video.url.startsWith('http') ? video.url : `/vod/video/${video.filename}`,
+        bunnyId  : video.bunnyId || video.cloudFileName, // Bunny Stream ID
+        embedUrl : video.url.startsWith('http') ? video.url : undefined,
+        views    : video.views || 0,
+        size     : video.size,
+        source   : video.cloudStatus === 'uploaded' ? 'cloud' : 'upload',
+        mimetype : video.mimetype
+      };
+      
+      // 添加 previewUrl 字段，基于 bunnyId 或 guid
+      if (video.bunnyId || video.guid) {
+        const videoGuid = video.bunnyId || video.guid;
+        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+      }
+      
+      return obj;
+    });
 
     // 3. 合并并去重（按 MongoDB _id 或 filename 去重）
     const allVideosMap = new Map();
@@ -75,6 +84,11 @@ router.get('/videos', async (req, res) => {
     });
 
     const allVideos = Array.from(allVideosMap.values());
+    
+    // 调试断言：确保输出无旧字段
+    if (allVideos.some(x => x.coverUrl || x.thumbnail)) {
+      console.warn('❌ vod API still contains cover/thumbnail');
+    }
     
     console.log(`📹 VOD API: 返回 ${allVideos.length} 个视频 (本地: ${localFiles.length}, 数据库: ${dbVideoList.length})`);
     

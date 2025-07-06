@@ -39,8 +39,13 @@
 <div class="video-card">
   <!-- 视频缩略图区域 - 点击播放视频 -->
   <div class="video-thumbnail" onclick="location.href='/vod/<%= video._id %>'">
-    <img src="<%= video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail' %>" 
-         alt="<%= video.title %>" loading="lazy">
+    <picture>
+      <% if (video.previewUrl) { %>
+        <source srcset="<%= video.previewUrl %>" type="image/webp">
+      <% } %>
+      <img src="<%= video.previewUrl || '/api/placeholder/video-thumbnail' %>" 
+           alt="<%= video.title %>" loading="lazy">
+    </picture>
     <div class="video-duration"><%= formatDuration(video.duration) %></div>
     <% if (video.isPremiumOnly) { %>
       <div class="premium-badge">付费</div>
