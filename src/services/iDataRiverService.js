@@ -1,105 +1,63 @@
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
-// 统一加载环境变量
-require('../config/envloader');
-
-// 读取环境变量，兼容两种命名
-const SECRET = process.env.IDR_SECRET || process.env.IDATARIVER_SECRET;
-const HOST   = process.env.IDATARIVER_HOST || 'https://open.idatariver.com';
-
-if (!SECRET) {
-  console.warn('[iDataRiver] 缺少 IDR_SECRET/IDATARIVER_SECRET，支付功能将不可用');
-}
+// services/idatariverservice.js
+require('dotenv').config();                   // 读取 .env
+const axios  = require('axios');
 
 const http = axios.create({
-  baseURL: HOST,
+  baseURL: `${process.env.IDATARIVER_HOST}/mapi`,
   timeout: 8000,
   headers: {
-    Authorization: `Bearer ${SECRET}`,
-    'Content-Type': 'application/json',
-    'X-Idr-Locale': 'zh-cn'
+    Authorization: `Bearer ${process.env.IDR_SECRET}`,
+    'Content-Type': 'application/json'
   }
 });
 
-async function addOrder(amountFen, desc = '账户余额充值', currency = 'CNY') {
-  let data;
-  try {
-    ({ data } = await http.post('/mapi/order/add', {
-      amount: amountFen,
-      currency,
-      desc
-    }));
-  } catch (err) {
-    console.error('[iDataRiver] addOrder axios error', err.response?.status, err.response?.data || err.message);
-    throw err;
-  }
-  console.log('[iDataRiver] addOrder resp:', JSON.stringify(data, null, 2));
-  if (data.code !== 0 && data.code !== undefined) throw new Error(`addOrderFail:${data.msg}`);
-  return (data.result && (data.result.id || data.result.orderId)) || data.result || data.data;
+// ↓ 下单（已验证成功）
+async function addOrder(amountFen, contactInfo) {
+  const body = {
+    projectId : process.env.IDR_PROJECT_ID,
+    skuId     : process.env.IDR_SKU_ID,
+    orderInfo : {
+      quantity    : 1,
+      contactInfo,
+      coupon      : '',
+      affCode     : ''
+    },
+    amount   : amountFen,      // 单位：分
+    currency : 'CNY',
+    desc     : '账户余额充值'
+  };
+  const { data } = await http.post('/order/add', body);
+  if (data.code !== 0) throw new Error(data.msg);
+  return data.result.orderId;
 }
 
-async function payOrder(orderId, method = 'alipay_qr') {
-  const { data } = await http.post('/mapi/order/pay', {
-    id: orderId,
+// ↓ 支付，返回收银台 URL
+async function payOrder(orderId, method='alipay') {
+  const body = {
+    id          : orderId,
     method,
-    callbackUrl: 'https://fulijix.com/api/idatariver/webhook',
-    redirectUrl: 'https://fulijix.com/user/paysuccess'
-  });
-  // 打印完整返回体，方便确认收银台地址字段
-  console.log('PAY-RESP-RAW', JSON.stringify(data, null, 2));
-  
-  if (data.code !== 0) throw new Error(`payOrderFail:${data.msg}`);
-  return data.result.payUrl || data.result.pay_url || data.result.cashierUrl || data.result.cashier_url || data.result.url;
+    callbackUrl : process.env.PAY_CALLBACK,
+    redirectUrl : process.env.PAY_REDIRECT || 'https://fulijix.com/user/pay-result'
+  };
+  const { data } = await http.post('/order/pay', body);
+  if (data.code !== 0) throw new Error(data.msg);
+  return data.result.payUrl;
 }
 
-async function createRecharge(amountFen, desc='账户余额充值') {
-  let data;
-  try {
-    // 优先尝试新版 merchant 接口
-    ({ data } = await http.post('/mapi/merchant/createOrder', {
-      amount: amountFen,
-      currency: 'CNY',
-      desc,
-      notify_url: 'https://fulijix.com/api/idatariver/webhook'
-    }));
-    console.log('[iDataRiver] merchant/createOrder resp:', JSON.stringify(data, null, 2));
-  } catch (err) {
-    // 若网络/404 等异常，尝试旧版 add + pay 流程
-    console.warn('[iDataRiver] merchant/createOrder failed, fallback to addOrder/payOrder', err.response?.status || err.message);
-    return fallbackRecharge(amountFen, desc);
-  }
-
-  if (data.code !== 0 && data.code !== undefined) {
-    console.warn('[iDataRiver] merchant/createOrder code!=0, fallback. resp=', JSON.stringify(data));
-    return fallbackRecharge(amountFen, desc);
-  }
-
-  // 兼容不同返回格式
-  const root = data.result || data.data || {};
-  const payUrl =
-    root.payUrl || root.pay_url || root.cashierUrl || root.cashier_url || root.url || root.qrcode || root.paymentUrl || root.payment_url || root.cashier ||
-    data.payUrl || data.pay_url || data.cashierUrl || data.cashier_url || data.url || data.qrcode || data.paymentUrl || data.payment_url || data.cashier;
-
-  if (!payUrl) {
-    console.warn('[iDataRiver] merchant/createOrder returned no payUrl, fallback');
-    return fallbackRecharge(amountFen, desc);
-  }
-
-  console.log('PAYRESPRAW', JSON.stringify(data, null, 2));
-  return payUrl;
-
-  // ===== 内部帮助函数 =====
-  async function fallbackRecharge(amountFenLocal, descLocal) {
-    try {
-      const orderId = await addOrder(amountFenLocal, descLocal);
-      const url = await payOrder(orderId);
-      return url;
-    } catch (e) {
-      console.error('[iDataRiver] fallbackRecharge error', e.message);
-      throw e;
-    }
-  }
+// 聚合：前端只需要这一函数
+async function createRecharge(amountFen, contactInfo) {
+  const orderId = await addOrder(amountFen, contactInfo);
+  const payUrl  = await payOrder(orderId, 'alipay'); // 可按需动态选择
+  return { payUrl, orderId };
 }
 
-module.exports = { addOrder, payOrder, createRecharge }; 
+// 查询订单状态（供前端轮询）
+async function getOrderInfo(orderId){
+  if(!orderId) throw new Error('orderId required');
+  const { data } = await http.get('/order/info', { params: { id: orderId } });
+  if(data.code !== 0) throw new Error(data.msg);
+  return data.result || { status: data.status };
+}
+
+module.exports = { createRecharge, getOrderInfo };
+

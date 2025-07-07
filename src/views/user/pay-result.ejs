@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>支付结果 - X福利姬</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js" defer></script>
+  <style>
+    body{background:#f4f5f7;font-family:'Microsoft YaHei',-apple-system,BlinkMacSystemFont,sans-serif;}
+    .center-box{background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.05);padding:40px;margin-top:60px;text-align:center;}
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">X福利姬</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="center-box">
+          <h4 class="mb-3"><i class="fas fa-spinner fa-spin me-2"></i>正在确认支付结果…</h4>
+          <p id="tip" class="text-muted">请勿关闭此页面，系统检测到支付完成后会自动跳转。</p>
+          <a href="/user/coin" class="btn btn-link mt-3">返回我的余额</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+      const orderId = sessionStorage.getItem('lastOrderId');
+      if(!orderId){
+        location.href = '/user/coin';
+        return;
+      }
+      const tip = document.getElementById('tip');
+
+      async function poll(){
+        try{
+          const info = await fetch('/api/idatariver/orderinfo?id=' + orderId).then(r=>r.json());
+          // 根据后台返回结构自行调整
+          if(info.status === 'PAID' || info.status === 'DONE' || info.code === 0 && info.result?.status==='PAID'){
+            alert('充值成功！');
+            location.href = '/user/coin';
+          }else if(info.status === 'FAILED'){
+            alert('支付失败，请重试');
+            location.href = '/user/coin';
+          }else{
+            setTimeout(poll, 3000);
+          }
+        }catch(e){
+          console.error(e);
+          tip.innerText = '网络异常，正在重试…';
+          setTimeout(poll, 3000);
+        }
+      }
+      poll();
+  })();
+  </script>
+</body>
+</html> 

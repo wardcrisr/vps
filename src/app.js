@@ -689,19 +689,24 @@ app.get('/favicon.ico', (req, res) => {
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use(express.static(path.join(__dirname, '../public')));
-
 // === iDataRiver 支付路由 ===
-const idataRiverRoutes = require('./routes/idataRiver');
-app.use('/api/idatariver', idataRiverRoutes);
+// ① 先让 Express 能解析 JSON / 表单
+app.use(express.json());                // application/json
+app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencoded
 
-// 404 处理
+
+const idatariverRoutes = require('./routes/idataRiver');  
+app.use('/api/idatariver', idatariverRoutes);
+
+// ③ 一切路由都匹配失败后，才落到 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    error: 'NotFound',
+    error  : 'NotFound',
     message: '请求的资源不存在'
   });
 });
+
 
 // 添加 EJS 模板辅助函数供服务器端渲染使用
 function formatDuration(seconds) {

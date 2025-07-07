@@ -36,4 +36,14 @@ router.get('/coin', optionalAuth, (req, res) => {
   });
 });
 
+// 支付结果页面
+router.get('/pay-result', optionalAuth, (req, res) => {
+  // 支付完成后第三方将跳回此页，使用前端脚本轮询订单状态
+  res.render('user/pay-result', {
+    title: '支付结果',
+    user: req.user,
+    current: 'pay-result'
+  });
+});
+
 module.exports = router; 

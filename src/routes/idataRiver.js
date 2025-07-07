@@ -1,77 +1,37 @@
-const express = require('express');
-require('dotenv').config();
+const router = require('express').Router();
+const { createRecharge, getOrderInfo } = require('../services/iDataRiverService');
 
-const router = express.Router();
-router.use(express.json());
-
-// 创建订单并返回 payUrl
-// POST /api/idatariver/createorder { quantity?: number, contact?: string }
-const { createRecharge } = require('../services/iDataRiverService');
-
+// 创建订单 + 获取 payUrl
 router.post('/createorder', async (req, res) => {
   try {
-    let { amount } = req.body || {};
-    amount = Number(amount);
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'invalid amount' });
-    }
-
-    const payUrl = await createRecharge(amount);
-    if (!payUrl) {
-      console.error('[iDataRiver] create-order resp invalid');
-      return res.status(502).json({ success: false, message: 'PAY_URL_EMPTY' });
-    }
-    return res.json({ success: true, payUrl });
-  } catch (err) {
-    console.error('[iDataRiver] createorder error:', err.response?.data || err.message);
-    return res.status(500).json({ success: false, message: 'IDR_INTERNAL' });
-  }
-});
-
-router.post('/create-order', async (req, res) => {
-  try {
-    let { amount } = req.body || {};
-    amount = Number(amount);
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'invalid amount' });
-    }
-
-    const payUrl = await createRecharge(amount);
-    if (!payUrl) {
-      console.error('[iDataRiver] create-order resp invalid');
-      return res.status(502).json({ success: false, message: 'PAY_URL_EMPTY' });
-    }
-    return res.json({ success: true, payUrl });
-  } catch (err) {
-    console.error('[iDataRiver] createorder error:', err.response?.data || err.message);
-    return res.status(500).json({ success: false, message: 'IDR_INTERNAL' });
-  }
-});
-
-// Webhook 回调
-// POST /api/idatariver/webhook
-router.post('/webhook', async (req, res) => {
-  const evt = req.body;
-  try {
-    if (evt.status === 'PAID') {
-      // 这里根据业务调整字段，假设 evt.extra.user_id 保存用户ID
-      const userId = evt.extra?.user_id || evt.user_id;
-      const amount = Number(evt.amount) || 0;
-      if (userId && amount > 0) {
-        const User = require('../models/User');
-        await User.findByIdAndUpdate(userId, { $inc: { coins: amount / 100 } }); // 充值金币=分/100
-      }
-    }
+    const { amount, contactInfo } = req.body;
+    const { payUrl, orderId } = await createRecharge(amount, contactInfo);
+    res.json({ code: 0, payUrl, orderId });
   } catch (e) {
-    console.error('iDataRiver webhook process error:', e);
-    // 仍返回 200 让平台不重试，视需要写入日志
+    res.status(500).json({ code: 500, msg: e.message });
   }
-  res.sendStatus(200);
 });
 
-router.get('/ping', (req,res)=>res.json({pong:true}));
+// 订单状态查询（前端轮询用，避免暴露 Bearer Token）
+router.get('/orderinfo', async (req, res) => {
+  try {
+    const orderId = req.query.id;
+    if(!orderId){
+      return res.status(400).json({ code: 400, msg: 'missing id' });
+    }
+    const info = await getOrderInfo(orderId);
+    res.json(info);
+  } catch (e) {
+    res.status(500).json({ code: 500, msg: e.message });
+  }
+});
 
-// 临时调试接口，回显 body
-router.post('/echo', (req,res)=>res.json({body:req.body}));
+// 支付回调 Webhook
+router.post('/webhook', async (req, res) => {
+  /* 验签（可选），再查 order/info 校验 DONE */
+  res.sendStatus(200);     // 必须 200，否则 iDataRiver 会重试
+});
 
-module.exports = router; 
+module.exports = router;
+
+ 
