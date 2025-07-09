@@ -47,6 +47,7 @@ router.post('/', upload.single('video'), async (req, res) => {
         cloudStatus: 'uploaded',
         cloudFileName: videoId,
         cloudFileId: videoId,
+        guid: videoId,
         cdnUrl: embedUrl,
         bunnyId: videoId,
         cloudUploadedAt: new Date()

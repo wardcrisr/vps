@@ -127,6 +127,11 @@ const MediaSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  // 兼容字段：Bunny Video GUID（与 bunnyId 相同）
+  guid: {
+    type: String,
+    required: false
+  },
   // 云存储状态
   cloudStatus: {
     type: String,
@@ -188,7 +193,5 @@ MediaSchema.methods.incrementView = function() {
   this.views += 1;
   return this.save();
 };
-
-MediaSchema.index({ bunnyId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Media', MediaSchema); 

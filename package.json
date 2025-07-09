@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
     "dev:frontend": "vite",
     "build:frontend": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,8 +24,6 @@
   "dependencies": {
     "@adminjs/express": "^6.1.1",
     "@adminjs/mongoose": "^4.1.0",
-    "@stripe/react-stripe-js": "^3.7.0",
-    "@stripe/stripe-js": "^7.4.0",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
@@ -47,13 +45,15 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
     "react-toastify": "^11.0.5",
-    "stripe": "^18.2.1"
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",
     "nodemon": "^3.1.10",
-    "vite": "^4.4.0"
+    "vite": "^4.4.0",
+    "supertest": "^6.3.4"
   }
 }

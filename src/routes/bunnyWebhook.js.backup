@@ -1,0 +1,65 @@
+const express = require('express');
+const router = express.Router();
+
+// Bunny Stream 客户端封装
+const bunny = require('../../bunny');
+
+// Mongoose 模型
+const Media = require('../models/Media');
+
+// POST  /api/bunny/webhook
+router.post('/webhook', async (req, res) => {
+  console.log('[bunnyWebhook][ENTRY] body:', req.body);
+  res.status(200).json({ success: true });
+
+  const { VideoGuid, Status } = req.body;
+  if (!VideoGuid) {
+    console.warn('[bunnyWebhook] Missing VideoGuid:', req.body);
+    return;
+  }
+  if (Status < 3) {
+    console.log(`[bunnyWebhook] Video ${VideoGuid} Status ${Status} – ignored`);
+    return;
+  }
+
+  try {
+    const videoInfo = await bunny.video.get(VideoGuid);
+    if (!videoInfo) {
+      console.error('[bunnyWebhook] get returned empty for:', VideoGuid);
+      return;
+    }
+    console.log('[bunnyWebhook][DEBUG] videoInfo:', videoInfo);
+
+    // 提取时长
+    const lengthInSeconds =
+      Number(videoInfo.length) ||
+      Number(videoInfo.duration) ||
+      Number(videoInfo.lengthInSeconds) ||
+      Number(videoInfo.meta?.duration) ||
+      0;
+    console.log(`[bunnyWebhook][DEBUG] Parsed duration: ${lengthInSeconds}s`);
+
+    // 更新数据库
+    const updatedMedia = await Media.findOneAndUpdate(
+      { $or: [ { bunnyId: VideoGuid }, { guid: VideoGuid }, { cloudFileName: VideoGuid } ] },
+      { duration: lengthInSeconds },
+      { new: true }
+    );
+    if (!updatedMedia) {
+      console.warn(`[bunnyWebhook] No Media found for bunnyId: ${VideoGuid}`);
+    } else {
+      console.log(`[bunnyWebhook] Duration updated: ${VideoGuid} → ${lengthInSeconds}s`);
+    }
+
+    // 推送通知
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('video-duration-updated', { videoId: VideoGuid, lengthInSeconds });
+    }
+  } catch (error) {
+    console.error('[bunnyWebhook][ERROR]', error);
+  }
+});
+
+
+module.exports = router;

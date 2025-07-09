@@ -1,0 +1,42 @@
+// bunny.js
+
+// 1. 加载 .env 文件中的环境变量（需提前安装 dotenv）
+//    dotenv 会将 .env 文件里的键值对注入到 process.env 中:contentReference[oaicite:4]{index=4}
+require('dotenv').config({
+  path: require('path').resolve(__dirname, '../.env'),
+});
+
+const axios = require('axios');                           // axios 用于发起 HTTP 请求:contentReference[oaicite:5]{index=5}
+const { BunnyCdnStream } = require('bunnycdn-stream');     // 导入 BunnyCdnStream 类:contentReference[oaicite:6]{index=6}
+
+// 2. 注册全局请求拦截器，捕获并打印每次请求的 URL
+//    这会拦截所有通过 axios 发出的请求，包括 bunnycdn-stream 内部请求:contentReference[oaicite:7]{index=7}
+axios.interceptors.request.use(
+  (config) => {
+    console.log('[SDK 请求 URL]', config.url);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 3. 创建 BunnyCdnStream 实例，传入 API Key 和 Video Library ID
+//    确保 .env 中定义了 BUNNY_API_KEY 和 BUNNY_VIDEO_LIBRARY:contentReference[oaicite:8]{index=8}
+const bunny = new BunnyCdnStream({
+  apiKey: process.env.BUNNY_API_KEY,
+  videoLibrary: Number(process.env.BUNNY_VIDEO_LIBRARY),
+});
+
+// 4. 导出实例，供全局使用
+module.exports = bunny;
+
+// 5. 打印调试信息，验证 key、库 ID 及请求头是否正确
+console.log('[DEBUG]', {
+  apiKey: bunny.options.apiKey,                           // 从实例 options 中读取 apiKey:contentReference[oaicite:9]{index=9}
+  videoLibrary: bunny.options.videoLibrary,               // 从实例 options 中读取 videoLibrary ID:contentReference[oaicite:10]{index=10}
+  header: bunny.axiosOptions.headers.AccessKey            // axiosOptions.headers 中的 AccessKey 即为 API Key:contentReference[oaicite:11]{index=11}
+});
+
+
+
+
+

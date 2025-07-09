@@ -61,7 +61,8 @@ router.get('/videos', async (req, res) => {
         views    : video.views || 0,
         size     : video.size,
         source   : video.cloudStatus === 'uploaded' ? 'cloud' : 'upload',
-        mimetype : video.mimetype
+        mimetype : video.mimetype,
+        duration : video.duration || 0  // 添加时长字段
       };
       
       // 添加 previewUrl 字段，基于 bunnyId 或 guid

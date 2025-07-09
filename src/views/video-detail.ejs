@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= video.title %> - <%= title %></title>
+    <link rel="stylesheet" href="https://unpkg.com/video.js/dist/video-js.css">
+    <link rel="stylesheet" href="https://unpkg.com/@videojs/themes@1/dist/city/index.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -27,11 +29,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- ★ HTML5 播放器 + HLS.js ★ -->
+        <!-- ★ Video.js 播放器 ★ -->
         <div style="position: relative; padding-top: 56.25%;" id="playerContainer">
-          <video id="videoPlayer" controls style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000;"></video>
-          <!-- 遮罩层 -->
-          <div id="payOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);color:#fff;align-items:center;justify-content:center;flex-direction:column;">
+          <video id="videoPlayer" class="video-js vjs-theme-city" playsinline preload="auto" controls controlsList="nodownload" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000;" oncontextmenu="return false"></video>
+         <!-- 遮罩层 -->
+         <div id="payOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);color:#fff;align-items:center;justify-content:center;flex-direction:column;">
             <p style="font-size:20px;margin-bottom:20px;">试看已结束，支付后继续观看</p>
             <button id="buyBtn" style="padding:10px 20px;font-size:16px;cursor:pointer;background:#ff5722;border:none;color:#fff;border-radius:4px;">立即购买</button>
           </div>
@@ -82,7 +84,11 @@
             <a href="/" style="color: #1890ff; text-decoration: none;">← 返回首页</a>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.0/dist/hls.min.js"></script>
+    <!-- Video.js & 插件 -->
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <!-- video.js 自带 VHS，避免重复插件 -->
+    <script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.min.js"></script>
+    <script src="https://unpkg.com/videojs-sprite-thumbnails@latest/dist/videojs-sprite-thumbnails.min.js"></script>
     <script>
       const VIDEO_ID = '<%= video.id %>';
       const PRICE  = <%= (Number.isFinite(video.priceCoins) ? video.priceCoins : 0) %>;
@@ -93,7 +99,16 @@
       const IS_LOGIN = <%= user ? 'true' : 'false' %>;
       let hasPurchase = false; // 后端可渲染已购状态
 
-      const player   = document.getElementById('videoPlayer');
+      const playerEl   = document.getElementById('videoPlayer');
+      const vjsPlayer  = videojs(playerEl, {
+        fluid: true,
+        html5:{ vhs:{ overrideNative:true }},
+        controlBar:{ pictureInPictureToggle:false, downloadMenuButton:false }
+      });
+
+      // 缩略图示例
+      vjsPlayer.spriteThumbnails({ url:'/thumbs/sprite.jpg', width:160, height:90, interval:1 });
+
       const overlay  = document.getElementById('payOverlay');
       const buyBtn   = document.getElementById('buyBtn');
 
@@ -110,14 +125,13 @@
           previewIframe.remove();
           previewIframe = null;
         }else{
-          // 暂停本地 video
-          player.pause();
+          vjsPlayer.pause();
         }
       }
 
-      // 监听试看限制（HTML5播放器）
-      player.addEventListener('timeupdate', ()=>{
-        if(IS_PAID_VIDEO && !hasPurchase && player.currentTime >= PREVIEW_SECONDS){
+      // 监听试看限制（Video.js）
+      vjsPlayer.on('timeupdate', ()=>{
+        if(IS_PAID_VIDEO && !hasPurchase && vjsPlayer.currentTime() >= PREVIEW_SECONDS){
           showPayOverlay();
         }
       });
@@ -134,7 +148,7 @@
       }
 
       // 当 HTML5 视频真正开始播放后再启动计时，避免用户未点击播放计时先结束
-      player.addEventListener('play', ()=>{
+      vjsPlayer.on('play', ()=>{
         if(!previewIsIframe){
           startPreviewCountdown();
         }
@@ -173,7 +187,7 @@
           iframe.style.border = 'none';
 
           // 隐藏原生 video 元素，避免同时播放
-          player.style.display = 'none';
+          playerEl.style.display = 'none';
 
           // 先插入 iframe，再把 overlay 置于最上层
           container.appendChild(iframe);
@@ -190,12 +204,13 @@
         }
 
         const isHls = url.includes('.m3u8');
-        if(isHls && Hls.isSupported()){
-          const hls = new Hls();
-          hls.loadSource(url);
-          hls.attachMedia(player);
+        const isDash = url.endsWith('.mpd');
+        if(isDash){
+          vjsPlayer.src({ src:url, type:'application/dash+xml' });
+        }else if(isHls){
+          vjsPlayer.src({ src:url, type:'application/x-mpegURL' });
         }else{
-          player.src = url;
+          vjsPlayer.src({ src:url, type:'video/mp4' });
         }
       }
 
@@ -229,12 +244,12 @@
 
         loadSource(url);
         // 触发浏览器开始加载元数据
-        player.load();
-        // 免费视频尝试静音自动播放，减少用户点击步骤
-        if(!IS_PAID_VIDEO){
-          player.muted = true;
-          player.play().catch(()=>{});
-        }
+        vjsPlayer.ready(()=>{
+          if(!IS_PAID_VIDEO){
+            vjsPlayer.muted(true);
+            vjsPlayer.play().catch(()=>{});
+          }
+        });
       }
 
       buyBtn.addEventListener('click', async ()=>{
@@ -255,7 +270,7 @@
             // 加载完整版（带 token 的 iframe）
             const container = document.getElementById('playerContainer');
             container.innerHTML = '';
-            player.style.display = 'none';
+            playerEl.style.display = 'none';
             previewIsIframe = false;
             loadSource(iframeUrl);
           }else{

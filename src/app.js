@@ -4,6 +4,7 @@
  */
 
 // 先加载默认 .env，再加载 production 覆盖（如有）
+
 require('dotenv').config();
 require('dotenv').config({ path: './src/config/production.env' });
 
@@ -15,18 +16,7 @@ const expressLayouts = require('express-ejs-layouts');
 const mongoose       = require('mongoose');
 const multer         = require('multer');
 const fs             = require('fs');
-
-// Stripe 初始化：在未设置密钥时给出警告，避免应用崩溃
-let stripe;
-if (process.env.STRIPE_SECRET_KEY) {
-  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-} else {
-  console.warn('⚠️  未检测到 STRIPE_SECRET_KEY，已禁用与 Stripe 相关的支付功能');
-  // 用一个空对象占位，防止后续代码直接调用时报错
-  stripe = {
-    disabled: true,
-  };
-}
+const { Types: MongooseTypes } = require('mongoose');
 
 // 引入模型
 const Post           = require('./models/Post');
@@ -92,10 +82,6 @@ app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ extended: true, limit: '1gb' }));
 
 // ============================================================
-// Stripe PaymentIntent - 调试临时路由
-// TODO: 替换为真正的 Stripe 实现
-
-// ============================================================
 // Cookie 解析中间件
 app.use(cookieParser());
 
@@ -111,6 +97,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// 全局 :id 参数验证，避免无效 ObjectId 导致服务器错误
+app.param('id', (req, res, next, id) => {
+  if (!MongooseTypes.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, error: 'Invalid ID format' });
+  }
+  next();
+});
+
 // 视图引擎 & 布局 & 日志
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -120,10 +114,7 @@ app.use(morgan('dev'));
 app.locals.title = 'X福利姬';
 
 // 连接 MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/contentdb', {
-  useNewUrlParser:    true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/contentdb')
   .then(() => console.log('✅ MongoDB 已连接'))
   .catch(err => console.error('❌ MongoDB 连接失败:', err));
 
@@ -145,12 +136,6 @@ app.use('/api/auth', authRoutes);
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
-// B2 视频管理路由已移除
-
-// 直传上传路由
-const directUploadRoutes = require('./routes/directUpload');
-app.use('/api/direct-upload', directUploadRoutes);
-
 // Bunny Stream 签名直传路由 (前端直传使用)
 const bunnySignRoutes = require('./routes/bunnySign');
 app.use('/api/bunny-sign', bunnySignRoutes);
@@ -159,12 +144,9 @@ app.use('/api/bunny-sign', bunnySignRoutes);
 const bunnyUpdateRoutes = require('./routes/bunnyUpdate');
 app.use('/api/bunny-update', bunnyUpdateRoutes);
 
-// 金币充值 & 付费点播
-const paymentRoutes   = require('./routes/payment');
-app.use('/api/payment', paymentRoutes);
-
-const videoPaymentRoutes = require('./routes/videoPayment');
-app.use('/api/video', videoPaymentRoutes);
+// 新增：Bunny Stream Webhook 回调
+const bunnyWebhookRoutes = require('./routes/bunnyWebhook');
+app.use('/api/bunny', bunnyWebhookRoutes);
 
 // 金币解锁观看路由
 const unlockRoutes = require('./routes/unlock');
@@ -212,6 +194,14 @@ app.get('/api/health', (req, res) => {
     status: 'ok', 
     message: 'X福利姬服务器运行正常',
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    uptime: process.uptime(),
+    timestamp: Date.now(),
   });
 });
 
@@ -656,14 +646,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// 直传演示页面路由
-app.get('/direct-upload-demo', (req, res) => {
-  res.render('direct-upload-demo', {
-    title: 'X福利姬',
-    user: req.user || null
-  });
-});
-
 // 静态文件服务（必须在404处理之前）
 // 为JavaScript文件添加no-cache头部
 app.use('/js', (req, res, next) => {
@@ -757,49 +739,20 @@ app.use((req, res, next) => {
 // 禁用etag
 app.disable('etag');
 
-// 启动服务器
-/* const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`📁 Upload directory: ${uploadDir}`);
-  console.log(`🔗 直传演示 - http://localhost:${PORT}/direct-upload-demo`);
-  console.log(`🔧 AdminJS at http://localhost:${PORT}${adminJs.options.rootPath}`);
- });
-*/
+
  module.exports = app;
 
 // …前面已有 express.json()、路由等配置…
 
-// 仅当直接执行 `node src/app.js` 时才启动监听
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  // 显式绑定到所有 IPv4 和 IPv6 接口（0.0.0.0 可兼容大多数 Linux 双栈环境）
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 服务已启动，监听在 http://0.0.0.0:${PORT}`);
   });
 }
-
 // 导出 app 实例，供 Supertest 或其它模块引用
 module.exports = app;
-
-app.post('/api/createpaymentintent', async (req, res) => {
-  console.log('▶ Received /api/createpaymentintent, body =', req.body);
-  // 如果未配置Stripe密钥, 返回假数据避免测试404
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return res.json({ clientSecret: 'test_dummy_secret' });
-  }
-  try {
-    const { amount = 1000, currency = 'usd' } = req.body;
-    const pi = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      automatic_payment_methods: { enabled: true },
-    });
-    return res.json({ clientSecret: pi.client_secret });
-  } catch (err) {
-    console.error('createPaymentIntent error:', err);
-    return res.status(500).json({ error: err.message });
-  }
-});
 
 const bunnyEmbedRoutes = require('./routes/bunnyEmbed');
 app.use('/api/bunny-embed', bunnyEmbedRoutes);

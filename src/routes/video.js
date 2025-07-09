@@ -12,6 +12,15 @@ router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const videoId = req.params.id;
     
+    // 校验 ObjectId 格式
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+      return res.status(400).render('error', {
+        title: '无效的视频ID',
+        message: '视频ID格式错误',
+        user: req.user || null
+      });
+    }
+    
     // 查询视频信息并联表UP主信息
     const video = await Media.aggregate([
       {

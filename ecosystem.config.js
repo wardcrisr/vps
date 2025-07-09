@@ -2,9 +2,13 @@ module.exports = {
   apps: [{
     name: 'content-distribution',
     script: 'src/app.js',
-    cwd: '/root/content-distribution',
+    // 简单开启时间戳
+    time             : true,
+    // 或自定义格式
+    log_date_format  : "YYYY-MM-DD HH:mm:ss Z",
+    cwd: '/root/content-distribution',  // 确保指向你的项目根目录
 
-    /* 建议在生产跑 cluster 提升并发；如只需单进程可继续用 fork */
+    // 集群模式，按 CPU 核心启动多个实例，提升并发
     instances: 'max',
     exec_mode: 'cluster',
 
