@@ -511,10 +511,7 @@ app.post('/comments', authenticateToken, async (req, res) => {
   res.json({ message: '评论成功', comment });
 });
 
-// B2视频管理页面 - 管理员专用React应用
-app.get('/admin/b2-videos', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+// B2视频管理页面路由已移除
 
 // VIP升级页面
 app.get('/upgrade', (req, res) => {

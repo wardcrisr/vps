@@ -62,13 +62,17 @@ router.post('/webhook', async (req, res) => {
     }
 
     // 推送通知
-    const io = req.app.get('io');
-    if (io) {
-      io.emit('video-duration-updated', { 
-        videoId: VideoGuid, 
-        lengthInSeconds,
-        title: updatedMedia?.title 
-      });
+    try {
+      const io = req.app && req.app.get('io');
+      if (io) {
+        io.emit('video-duration-updated', { 
+          videoId: VideoGuid, 
+          lengthInSeconds,
+          title: updatedMedia?.title 
+        });
+      }
+    } catch (ioError) {
+      console.warn('[bunnyWebhook] Socket.io notification failed:', ioError.message);
     }
 
   } catch (error) {

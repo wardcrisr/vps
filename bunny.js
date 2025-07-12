@@ -44,6 +44,26 @@ class BunnyStreamClient {
       throw error;
     }
   }
+
+  // 创建视频
+  async createVideo(options = {}) {
+    try {
+      const { title = 'untitled' } = options;
+      const response = await axios.post(`${this.baseURL}/library/${this.videoLibrary}/videos`, 
+        { title },
+        {
+          headers: {
+            'AccessKey': this.apiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('[BunnyStreamClient] createVideo error:', error.response?.data || error.message);
+      throw error;
+    }
+  }
 }
 
 // 创建实例
@@ -57,7 +77,8 @@ const bunny = {
   video: {
     get: (videoGuid) => bunnyClient.getVideo(videoGuid),
     list: () => bunnyClient.listVideos()
-  }
+  },
+  createVideo: (options) => bunnyClient.createVideo(options)
 };
 
 module.exports = bunny;
@@ -67,7 +88,8 @@ console.log('[DEBUG] Bunny Stream Client initialized:', {
   apiKey: process.env.BUNNY_API_KEY,
   videoLibrary: process.env.BUNNY_VIDEO_LIBRARY,
   hasVideoGet: typeof bunny.video.get === 'function',
-  hasVideoList: typeof bunny.video.list === 'function'
+  hasVideoList: typeof bunny.video.list === 'function',
+  hasCreateVideo: typeof bunny.createVideo === 'function'
 });
 
 
