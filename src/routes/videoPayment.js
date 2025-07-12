@@ -72,10 +72,56 @@ router.get('/:id/play', authenticateToken, async (req,res)=>{
   try{
     const purchased = await Purchase.findOne({ userId:req.user._id, videoId:req.params.id });
     if(!purchased) return err(res,1,'not purchased',403);
+    
     const video = await Media.findById(req.params.id);
     if(!video) return err(res,1,'video not found',404);
-    return ok(res,{ url: video.streamUrl });
-  }catch(e){ console.error(e); return err(res,1,'server error',500);} 
+    
+    // 生成视频播放地址，按优先级处理
+    let playUrl;
+    
+    // 1. 优先使用HLS流地址
+    if (video.streamUrl) {
+      playUrl = video.streamUrl;
+    } 
+    // 2. 使用Bunny Stream iframe
+    else if (video.bunnyId) {
+      const libId = process.env.BUNNY_VIDEO_LIBRARY || '461001';
+      playUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}`;
+      
+      // 添加签名认证
+      if (process.env.BUNNY_SECRET) {
+        const expires = Math.floor(Date.now() / 1000) + 3600; // 1小时有效期
+        const raw = `${process.env.BUNNY_SECRET}${video.bunnyId}${expires}`;
+        const token = crypto.createHash('sha256').update(raw).digest('hex');
+        playUrl += `?token=${token}&expires=${expires}`;
+      }
+    }
+    // 3. 使用CDN地址
+    else if (video.cdnUrl) {
+      playUrl = video.cdnUrl;
+    }
+    // 4. 使用本地文件
+    else if (video.cloudFileName || video.filename) {
+      const fileKey = video.cloudFileName || video.filename;
+      playUrl = `/vod/video/${encodeURIComponent(fileKey)}`;
+    }
+    
+    if (!playUrl) {
+      console.error(`视频播放地址生成失败: ${req.params.id}`, {
+        streamUrl: video.streamUrl,
+        bunnyId: video.bunnyId,
+        cdnUrl: video.cdnUrl,
+        filename: video.filename,
+        cloudFileName: video.cloudFileName
+      });
+      return err(res, 1, 'video playback url unavailable', 500);
+    }
+    
+    return ok(res, { url: playUrl });
+  }catch(e){ 
+    console.error('视频播放错误:', e); 
+    return err(res,1,'server error',500);
+  } 
 });
 
 module.exports = router; 

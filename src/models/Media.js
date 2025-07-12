@@ -132,6 +132,11 @@ const MediaSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  // HLS 视频流地址
+  streamUrl: {
+    type: String,
+    required: false  // HLS播放地址，通常来自Bunny Stream
+  },
   // 云存储状态
   cloudStatus: {
     type: String,

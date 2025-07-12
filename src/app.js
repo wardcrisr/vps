@@ -91,6 +91,12 @@ app.use('/uploads', express.static(uploadDir));
 // 静态文件服务（CSS、JS等）
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 静态文件服务（根目录）
+app.use('/static', express.static(path.join(__dirname, '../..')));
+
+// 专门处理logo文件
+app.use('/assets', express.static(path.join(__dirname, 'public')));
+
 // 全局将 req.user 注入到模板变量 user 中
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
@@ -171,6 +177,10 @@ app.use('/video', videoRoutes);
 const videosRoutes = require('./routes/videos');
 app.use('/api/videos', videosRoutes);
 
+// 视频付费相关路由（预览、购买、播放）
+const videoPaymentRoutes = require('./routes/videoPayment');
+app.use('/api/video', videoPaymentRoutes);
+
 // 新增：用户API路由（实时资料）
 const userApiRoutes = require('./routes/userApi');
 app.use('/api/user', userApiRoutes);
@@ -194,6 +204,44 @@ app.get('/api/health', (req, res) => {
     status: 'ok', 
     message: 'X福利姬服务器运行正常',
     timestamp: new Date().toISOString()
+  });
+});
+
+// 测试logo文件是否存在
+app.get('/api/test/logo', (req, res) => {
+  const logoPath = path.join(__dirname, 'public', 'logo-black.jpg');
+  const fs = require('fs');
+  
+  fs.access(logoPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      res.json({
+        success: false,
+        message: 'Logo file not found',
+        path: logoPath,
+        error: err.message
+      });
+    } else {
+      fs.stat(logoPath, (statErr, stats) => {
+        res.json({
+          success: true,
+          message: 'Logo file exists',
+          path: logoPath,
+          size: stats ? stats.size : 'unknown',
+          assets_url: '/assets/logo-black.jpg'
+        });
+      });
+    }
+  });
+});
+
+// 直接提供logo文件
+app.get('/logo-black.jpg', (req, res) => {
+  const logoPath = path.join(__dirname, 'public', 'logo-black.jpg');
+  res.sendFile(logoPath, (err) => {
+    if (err) {
+      console.error('Error sending logo file:', err);
+      res.status(404).send('Logo not found');
+    }
   });
 });
 

@@ -4,93 +4,234 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>X福利姬 - 视频分享平台</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.bunny.net/player-js/latest/player.min.js"></script>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      background: #f4f5f7;
+      background: #f9f9f9;
       min-height: 100vh;
-      font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f0f0f;
     }
     
-    .navbar {
-      background: #ffffff !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      border-bottom: 1px solid #e3e5e7;
-      padding: 12px 0;
+    /* YouTube风格导航栏 */
+    .youtube-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #fff;
+      z-index: 2100;
+      border-bottom: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
     }
     
-    .navbar-brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #00aeec !important;
+    .header-start {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 120px;
+      margin-left: 12px;
     }
     
-    .search-box {
-      width: 480px;
+
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #030303;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .logo-icon {
+      height: 20px;
+      width: auto;
+      margin-right: 4px;
+    }
+    
+    .header-center {
+      flex: 1;
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+    }
+    
+    .search-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      max-width: 540px;
+    }
+    
+    .search-form {
+      flex: 1;
+      display: flex;
+      height: 40px;
     }
     
     .search-input {
-      border-radius: 8px;
-      padding: 8px 15px;
-      border: 1px solid #e3e5e7;
-      font-size: 0.9rem;
-      background: #f9f9f9;
+      flex: 1;
+      border: 1px solid #ccc;
+      border-right: none;
+      padding: 0 16px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      background: #fff;
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
     }
     
     .search-input:focus {
-      background: #ffffff;
-      border-color: #00aeec;
-      box-shadow: 0 0 0 0.2rem rgba(0, 174, 236, 0.25);
+      border-color: #1c62b9;
+      box-shadow: inset 0 1px 2px rgba(27, 97, 183, 0.3);
     }
     
-    .search-btn {
-      background: #00aeec;
-      color: white;
-      border: none;
-      border-radius: 6px;
+    .search-button {
+      width: 64px;
+      height: 40px;
+      border: 1px solid #ccc;
+      border-left: none;
+      background: #f8f8f8;
+      cursor: pointer;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.1s ease;
+    }
+    
+    .search-button:hover {
+      background: #f0f0f0;
+    }
+    
+    .search-button i {
+      color: #030303;
+      font-size: 16px;
+    }
+    
+
+    
+    .header-end {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 225px;
+      justify-content: flex-end;
+    }
+    
+    .header-button {
       padding: 8px 16px;
-      margin-left: 8px;
+      border: 1px solid #065fd4;
+      background: transparent;
+      color: #065fd4;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.1s ease;
+      white-space: nowrap;
     }
     
-    .main-container {
-      padding-top: 80px;
-      max-width: 1400px;
-      margin: 0 auto;
+    .header-button:hover {
+      background: #e3f2fd;
+      text-decoration: none;
+      color: #065fd4;
     }
     
-    .category-nav {
-      background: white;
-      border-radius: 8px;
-      padding: 16px;
+    .user-menu {
+      position: relative;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #065fd4;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    /* 主内容区域 */
+    .main-content {
+      margin-top: 56px;
+      padding: 24px 24px 0;
+      max-width: 1284px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* 分类标签 */
+    .category-chips {
+      display: flex;
+      gap: 12px;
       margin-bottom: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      overflow-x: auto;
+      padding-bottom: 4px;
     }
     
-    .category-nav .nav-link {
-      color: #61666d;
-      font-size: 0.9rem;
-      padding: 8px 16px;
-      border-radius: 6px;
-      margin-right: 8px;
+    .category-chips::-webkit-scrollbar {
+      height: 0;
+    }
+    
+    .category-chip {
+      background: #f2f2f2;
       border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f0f0f;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.1s ease;
+      text-decoration: none;
     }
     
-    .category-nav .nav-link.active {
-      background: #00aeec;
-      color: white;
+    .category-chip:hover {
+      background: #e5e5e5;
+      text-decoration: none;
+      color: #0f0f0f;
     }
     
+    .category-chip.active {
+      background: #0f0f0f;
+      color: #fff;
+    }
+    
+    .category-chip.active:hover {
+      background: #272727;
+      color: #fff;
+    }
+    
+    /* 视频网格 - 保持原有布局 */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 20px;
-      padding: 0 16px;
       margin-bottom: 40px;
     }
     
-    /* B站风格网格布局优化 */
     @media (min-width: 1200px) {
       .video-grid {
         grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -102,7 +243,22 @@
       .video-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 16px;
+      }
+      
+      .main-content {
+        padding: 24px 16px 0;
+      }
+      
+      .youtube-header {
         padding: 0 12px;
+      }
+      
+      .header-center {
+        margin: 0 12px;
+      }
+      
+      .search-input {
+        font-size: 16px; /* 防止iOS缩放 */
       }
     }
     
@@ -110,10 +266,14 @@
       .video-grid {
         grid-template-columns: 1fr;
         gap: 12px;
-        padding: 0 8px;
+      }
+      
+      .main-content {
+        padding: 24px 12px 0;
       }
     }
     
+    /* 视频卡片样式保持不变 */
     .video-card {
       background: transparent;
       border: none;
@@ -226,115 +386,68 @@
       height: auto;
       border-radius: 8px;
     }
-    
-    /* 响应式设计 */
-    @media (max-width: 768px) {
-      .search-box {
-        width: 100%;
-        margin-bottom: 12px;
-      }
-      
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
-        padding: 0 12px;
-      }
-    }
-    
-    @media (max-width: 576px) {
-      .video-grid {
-        grid-template-columns: 1fr;
-        padding: 0 8px;
-      }
-    }
   </style>
 </head>
 <body>
-  <!-- 顶部导航栏 -->
-  <nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container-fluid px-4">
-      <a class="navbar-brand" href="/">
-        <i class="fas fa-play-circle me-2"></i>X福利姬
+  <!-- YouTube风格顶部导航栏 -->
+  <header class="youtube-header">
+    <div class="header-start">
+      <a href="/" class="logo">
+        <img
+          src="https://fulijix.b-cdn.net/1.png"
+          alt="X"
+          class="logo-icon"
+          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMSA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDMgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPgo='; this.onerror=null;"
+        >
+        福利姬
       </a>
-      
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <div class="mx-auto">
-          <div class="search-box">
-            <div class="d-flex">
-              <input type="text" class="form-control search-input" placeholder="" id="searchInput">
-              <button class="search-btn" id="searchBtn">
-                <i class="fas fa-search"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <ul class="navbar-nav">
-          <% if (typeof user === 'undefined' || !user) { %>
-            <li class="nav-item"><a class="nav-link" href="/api/auth/login">登录</a></li>
-            <li class="nav-item"><a class="nav-link" href="/api/auth/register">注册</a></li>
-          <% } else { %>
-            <% if (user.role === 'admin') { %>
-              <li class="nav-item">
-                <a class="nav-link text-primary" href="/api/admin/dashboard">
-                  <i class="fas fa-cog"></i> 管理后台
-                </a>
-              </li>
-            <% } %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                <i class="fas fa-user-circle"></i> <%= user.username %>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/user">个人中心</a></li>
-                <li><a class="dropdown-item" href="/settings">设置</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/api/auth/logout">退出登录</a></li>
-              </ul>
-            </li>
-          <% } %>
-        </ul>
+    </div>
+    
+    <div class="header-center">
+      <div class="search-container">
+        <form class="search-form" onsubmit="handleSearch(event)">
+          <input type="text" class="search-input" placeholder="搜索" id="searchInput">
+          <button type="submit" class="search-button">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
       </div>
     </div>
-  </nav>
+    
+    <div class="header-end">
+      <% if (typeof user === 'undefined' || !user) { %>
+        <a href="/api/auth/login" class="header-button">
+          <i class="fas fa-sign-in-alt me-1"></i>登录
+        </a>
+      <% } else { %>
+        <% if (user.role === 'admin') { %>
+          <a href="/api/admin/dashboard" class="header-button">
+            <i class="fas fa-cog me-1"></i>管理后台
+          </a>
+        <% } %>
+        <div class="user-menu">
+          <div class="user-avatar" title="<%= user.username %>">
+            <%= user.username.charAt(0).toUpperCase() %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </header>
 
   <!-- 主要内容区域 -->
-  <div class="main-container">
-    <!-- 分类导航 -->
-    <div class="category-nav">
-      <ul class="nav nav-pills">
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'free') ? 'active' : '' %>" href="/free">免费视频</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'paid') ? 'active' : '' %>" href="/paid">付费视频</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof activeTag !== 'undefined' && activeTag === 'vip') ? 'active' : '' %>" href="/vip">会员视频</a>
-        </li>
-      </ul>
+  <main class="main-content">
+    <!-- 分类标签 -->
+    <div class="category-chips">
+      <a href="/" class="category-chip <%= (typeof activeTag === 'undefined' || activeTag === 'all') ? 'active' : '' %>">全部</a>
+      <a href="/free" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'free') ? 'active' : '' %>">免费视频</a>
+      <a href="/paid" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'paid') ? 'active' : '' %>">付费视频</a>
+      <a href="/vip" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'vip') ? 'active' : '' %>">会员视频</a>
     </div>
 
     <!-- 视频网格 -->
     <div id="videoContainer">
       <div class="video-grid" id="videoGrid">
-        <!-- B站风格视频卡片 -->
-        <% if (videos && videos.length > 0) { %>
-          <% videos.forEach(function(video) { %>
-            <%- include('partials/videoCard', { video: video }) %>
-          <% }); %>
-        <% } else { %>
-          <!-- 空状态 -->
-          <div class="empty-state" style="grid-column: 1 / -1;">
-            <i class="fas fa-video-slash"></i>
-            <h5>暂无视频</h5>
-            <p>目前还没有上传任何视频</p>
-          </div>
-        <% } %>
+        <!-- 视频卡片通过JavaScript动态加载 -->
       </div>
     </div>
 
@@ -351,7 +464,7 @@
         <i class="fas fa-arrow-down me-2"></i>加载更多
       </button>
     </div>
-  </div>
+  </main>
 
   <!-- 视频播放模态框 -->
   <div class="modal fade video-modal" id="videoModal" tabindex="-1">
@@ -402,84 +515,119 @@
       const modalVideoViews = document.getElementById('modalVideoViews');
       const modalVideoDate = document.getElementById('modalVideoDate');
 
-      // 清理旧播放器
-      if (modalPlayer && typeof modalPlayer.destroy === 'function') {
-        modalPlayer.destroy();
-        modalPlayer = null;
-      }
+      modalTitle.textContent = video.title || '视频播放';
+      modalVideoTitle.textContent = video.title || '未知视频';
+      modalVideoViews.textContent = video.views || 0;
+      modalVideoDate.textContent = formatRelativeTime(video.createdAt);
 
-      document.querySelector(containerId).innerHTML = '';
-
-      let embedUrl = '';
       try {
-        const bunnyId = video.bunnyId || video.videoId || video.id;
-        const res = await fetch(`/api/bunny-embed/${bunnyId}`);
-        const data = await res.json();
-        if (data.success && data.embedUrl) {
-          embedUrl = data.embedUrl;
-        } else if (video.embedUrl) {
-          embedUrl = video.embedUrl;
-        }
-      } catch (err) {
-        console.error('获取 Bunny Embed URL 失败:', err);
-        embedUrl = video.embedUrl || '';
-      }
-
-      if (!embedUrl) {
-        alert('无法播放该视频');
-        return;
-      }
-
-      modalPlayer = new BunnyPlayer.Player(containerId, {
-        url: embedUrl,
-        previewTime: 30,
-        allowFullscreen: true,
-        playsinline: true,
-        disableIosPlayer: true,
-        controls: { download: false },
-        useNativeHlsOnSafari: false
-      }).on('ready', function(p){
-        const v = p.getContainer().querySelector('video');
-        if(v){
-          v.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');
-          v.setAttribute('oncontextmenu','return false');
-        }
-      });
-
-      // 模态框关闭时销毁播放器，释放资源
-      modalEl.addEventListener('hidden.bs.modal', () => {
-        if (modalPlayer && typeof modalPlayer.destroy === 'function') {
+        console.log('准备播放视频:', video);
+        
+        if (modalPlayer) {
           modalPlayer.destroy();
           modalPlayer = null;
         }
-      }, { once: true });
 
-      modalTitle.textContent = video.name || video.title;
-      modalVideoTitle.textContent = video.name || video.title;
-      modalVideoViews.textContent = formatNumber(video.views || 0);
-      modalVideoDate.textContent = formatDate(video.uploadDate || video.createdAt || new Date());
+        const container = document.querySelector(containerId);
+        container.innerHTML = '';
 
-      modal.show();
+        // 获取播放URL
+        let playUrl = null;
+        
+        if (video.streamUrl) {
+          playUrl = video.streamUrl;
+        } else if (video.bunnyId) {
+          const libId = '461001'; 
+          playUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}`;
+        } else if (video.cdnUrl) {
+          playUrl = video.cdnUrl;
+        } else if (video.url) {
+          playUrl = video.url;
+        }
 
-      // 观看次数
-      incrementViews(video.filename || video.id);
+        if (!playUrl) {
+          throw new Error('无法获取视频播放地址');
+        }
+
+        console.log('使用播放地址:', playUrl);
+
+        if (playUrl.includes('iframe.mediadelivery.net')) {
+          // Bunny iframe 播放器
+          const iframe = document.createElement('iframe');
+          iframe.src = playUrl;
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.frameBorder = '0';
+          iframe.allowFullscreen = true;
+          
+          container.appendChild(iframe);
+        } else if (playUrl.includes('.m3u8')) {
+          // HLS 流媒体播放
+          const video = document.createElement('video');
+          video.controls = true;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.position = 'absolute';
+          video.style.top = '0';
+          video.style.left = '0';
+          
+          if (Hls.isSupported()) {
+            if (hlsInstance) {
+              hlsInstance.destroy();
+            }
+            hlsInstance = new Hls();
+            hlsInstance.loadSource(playUrl);
+            hlsInstance.attachMedia(video);
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+              video.play();
+            });
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = playUrl;
+            video.addEventListener('loadedmetadata', function() {
+              video.play();
+            });
+          }
+          
+          container.appendChild(video);
+        } else {
+          // 普通视频文件
+          const video = document.createElement('video');
+          video.src = playUrl;
+          video.controls = true;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.position = 'absolute';
+          video.style.top = '0';
+          video.style.left = '0';
+          video.autoplay = true;
+          
+          container.appendChild(video);
+        }
+
+        modal.show();
+      } catch (error) {
+        console.error('视频播放错误:', error);
+        alert('视频播放失败: ' + error.message);
+      }
     }
 
-    // 增加观看次数
-    async function incrementViews(filename) {
-      try {
-        await fetch(`/api/videos/${filename}/view`, { method: 'POST' });
-      } catch (error) {
-        console.error('增加观看次数失败:', error);
+    // 搜索功能
+    function handleSearch(event) {
+      event.preventDefault();
+      const query = document.getElementById('searchInput').value.trim();
+      if (query) {
+        // 实现搜索逻辑
+        window.location.href = `/search?q=${encodeURIComponent(query)}`;
       }
     }
 
     // 页面加载完成后初始化
     document.addEventListener('DOMContentLoaded', function() {
-      // 根据后端变量决定是否自动加载视频
-      <% if (!disableDynamicLoad) { %>
-        loadVideos();
-      <% } %>
+      // 初始化页面
+      loadVideos();
       initializeEventListeners();
     });
 
@@ -488,17 +636,15 @@
       // 搜索功能
       document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-          performSearch();
+          handleSearch(e);
         }
       });
 
-      document.getElementById('searchBtn').addEventListener('click', performSearch);
-
       // 分类切换
-      document.querySelectorAll('[data-category]').forEach(link => {
+      document.querySelectorAll('.category-chip').forEach(link => {
         link.addEventListener('click', function(e) {
           e.preventDefault();
-          switchCategory(this.dataset.category, this);
+          switchCategory(this.href.split('/').pop() || 'all', this);
         });
       });
 
@@ -601,7 +747,6 @@
       const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
 
       card.innerHTML = `
-      
         <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
           <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
           <div class="video-duration">${duration}</div>
@@ -626,19 +771,9 @@
       return card;
     }
 
-    // 搜索功能
-    function performSearch() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (query) {
-        // 实现搜索逻辑
-        currentCategory = 'search';
-        loadVideos(true);
-      }
-    }
-
     // 切换分类
     function switchCategory(category, element) {
-      document.querySelectorAll('[data-category]').forEach(link => link.classList.remove('active'));
+      document.querySelectorAll('.category-chip').forEach(link => link.classList.remove('active'));
       element.classList.add('active');
       
       currentCategory = category;
@@ -714,28 +849,45 @@
       return `${Math.floor(days / 30)}月前`;
     }
 
-// 引入视频预览处理脚本
-document.addEventListener('DOMContentLoaded', ()=>{
-  // 针对所有 .video-card 执行预览替换
-  document.querySelectorAll('.video-card, .videocard').forEach(card=>{
-    const videoData = card.__data__;       // 在 createVideoCard 里写入 card.__data__ = video;
-    if(!videoData || !videoData.previewUrl) return;
-
-    const img = card.querySelector('.video-thumbnail img, .coverwrapper img');
-    if(!img) return;
-
-    const p = videoData.previewUrl;
-    if(/\.(mp4|webm)$/i.test(p)){
-      const v=document.createElement('video');
-      v.src=p;v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;
-      v.style.width='100%';v.style.height='100%';v.style.objectFit='cover';
-      img.replaceWith(v);
-    }else{
-      img.src = p;
+    function formatRelativeTime(date) {
+      if (!date) return '';
+      const now = new Date();
+      const target = new Date(date);
+      const diffSec = Math.floor((now - target) / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHr = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHr / 24);
+      const diffMon = Math.floor(diffDay / 30);
+      const diffYr = Math.floor(diffDay / 365);
+      if (diffSec < 60) return '刚刚';
+      if (diffMin < 60) return `${diffMin}分钟前`;
+      if (diffHr < 24) return `${diffHr}小时前`;
+      if (diffDay < 30) return `${diffDay}天前`;
+      if (diffMon < 12) return `${diffMon}个月前`;
+      return `${diffYr}年前`;
     }
-  });
-});
- 
+
+    // 引入视频预览处理脚本
+    document.addEventListener('DOMContentLoaded', () => {
+      // 针对所有 .video-card 执行预览替换
+      document.querySelectorAll('.video-card, .videocard').forEach(card => {
+        const videoData = card.__data__;       // 在 createVideoCard 里写入 card.__data__ = video;
+        if(!videoData || !videoData.previewUrl) return;
+
+        const img = card.querySelector('.video-thumbnail img, .coverwrapper img');
+        if(!img) return;
+
+        const p = videoData.previewUrl;
+        if(/\.(mp4|webm)$/i.test(p)){
+          const v = document.createElement('video');
+          v.src = p; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+          v.style.width = '100%'; v.style.height = '100%'; v.style.objectFit = 'cover';
+          img.replaceWith(v);
+        } else {
+          img.src = p;
+        }
+      });
+    });
   </script>
 </body>
 </html>

@@ -3,201 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户登录 - X福利姬</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>登录 - X福利姬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: #ffffff;
-            min-height: 100vh;
-            font-family: 'Microsoft YaHei', sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .auth-container {
+        body {
+            font-family: 'Google Sans', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fff;
+            color: #202124;
+            line-height: 1.4;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .auth-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            max-width: 400px;
+        .container {
+            max-width: 450px;
             width: 100%;
+            padding: 20px;
         }
         
-        .auth-header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 30px;
+        .auth-card {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 48px 40px 36px;
+            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .title-container {
             text-align: center;
+            margin-bottom: 32px;
         }
         
-        .auth-header h2 {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
+        .title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: #202124;
         }
         
-        .auth-body {
-            padding: 40px 30px;
+        .subtitle {
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 24px;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        
+        .input-wrapper {
+            position: relative;
         }
         
         .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 15px 20px;
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
             font-size: 16px;
-            transition: all 0.3s ease;
+            outline: none;
+            transition: border-color 0.2s ease;
+            background: transparent;
         }
         
         .form-control:focus {
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+            border-color: #1a73e8;
+            border-width: 2px;
+            padding: 12px 15px;
         }
         
-        .input-group-text {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-right: none;
-            border-radius: 10px 0 0 10px;
-            padding: 15px;
+        .form-control.error {
+            border-color: #d93025;
         }
         
-        .input-group .form-control {
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-        }
-        
-        .btn-login {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            border: none;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
+        .form-label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f6368;
             font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s ease;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            background: white;
+            padding: 0 4px;
         }
         
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+        .form-control:focus + .form-label,
+        .form-control:not(:placeholder-shown) + .form-label {
+            top: 0;
+            font-size: 12px;
+            color: #1a73e8;
         }
         
-        .auth-links {
-            text-align: center;
-            margin-top: 20px;
+        .form-control.error + .form-label {
+            color: #d93025;
         }
         
-        .auth-links a {
-            color: #666;
+        .help-text {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+        
+        .error-text {
+            font-size: 12px;
+            color: #d93025;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .btn-next {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            float: right;
+            transition: background-color 0.2s ease;
+            min-width: 80px;
+        }
+        
+        .btn-next:hover:not(:disabled) {
+            background-color: #1557b0;
+        }
+        
+        .btn-next:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .footer {
+            margin-top: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-left {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            color: #1a73e8;
             text-decoration: none;
-            margin: 0 10px;
-            transition: color 0.3s ease;
+            font-size: 14px;
         }
         
-        .auth-links a:hover {
-            color: #4CAF50;
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        
+        .language-selector {
+            color: #5f6368;
+            font-size: 14px;
+            cursor: pointer;
         }
         
         .alert {
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            display: none;
         }
         
-        .brand-logo {
-            text-align: center;
-            margin-bottom: 30px;
+        .alert-success {
+            background-color: #e8f5e8;
+            color: #137333;
+            border: 1px solid #c4e7c4;
         }
         
-        .brand-logo h1 {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 0;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        .alert-danger {
+            background-color: #fce8e6;
+            color: #d93025;
+            border: 1px solid #f4c2c2;
+        }
+        
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px 20px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid auth-container">
+    <div class="container">
         <div class="auth-card">
-            <div class="auth-header">
-                <div class="brand-logo">
-                    <h1>X福利姬</h1>
-                </div>
-                <h2>用户登录</h2>
-                <p class="mb-0">登录到您的账户</p>
+            <div class="title-container">
+                <h1 class="title">登录</h1>
+                <p class="subtitle">使用您的X福利姬账户</p>
             </div>
             
-            <div class="auth-body">
-                <div id="alertContainer"></div>
+            <div id="alertContainer"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               placeholder=" "
+                               required>
+                        <label class="form-label" for="email">邮箱地址</label>
+                    </div>
+                    <div class="help-text">您需要确认此邮箱地址属于您</div>
+                </div>
                 
-                <form id="loginForm">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" 
-                                   class="form-control" 
-                                   id="email" 
-                                   name="email" 
-                                   placeholder="请输入邮箱地址" 
-                                   required>
-                        </div>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               placeholder=" "
+                               required>
+                        <label class="form-label" for="password">密码</label>
                     </div>
-                    
-                    <div class="form-group">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="请输入密码" 
-                                   required>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-login">
-                        <i class="fas fa-sign-in-alt me-2"></i>
-                        登录
+                </div>
+                
+                <div class="clearfix">
+                    <button type="submit" class="btn-next">
+                        <span id="buttonText">下一步</span>
                     </button>
-                </form>
-                
-                <div class="auth-links">
-                    <a href="/api/auth/register">还没有账户？立即注册</a>
-                    <br>
-                    <a href="/">返回首页</a>
+                </div>
+            </form>
+            
+            <div class="footer">
+                <div class="footer-left">
+                    <a href="/api/auth/register" class="footer-link">创建账户</a>
+                    <a href="/" class="footer-link">返回首页</a>
+                </div>
+                <div class="language-selector">
+                    中文 (简体)
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const alertContainer = document.getElementById('alertContainer');
             const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
+            const buttonText = document.getElementById('buttonText');
+            const originalText = buttonText.textContent;
             
             // 显示加载状态
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>登录中...';
+            buttonText.textContent = '登录中...';
             submitBtn.disabled = true;
             
             try {
@@ -219,14 +296,7 @@
                     localStorage.setItem('authToken', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
                     
-                    // 显示成功消息
-                    alertContainer.innerHTML = `
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            ${result.message}，正在跳转...
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    `;
+                    showAlert(result.message + '，正在跳转...', 'success');
                     
                     // 根据用户角色决定跳转地址
                     let redirectUrl = '/';
@@ -244,19 +314,30 @@
                     throw new Error(result.message || '登录失败');
                 }
             } catch (error) {
-                alertContainer.innerHTML = `
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        ${error.message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `;
+                showAlert(error.message, 'danger');
             } finally {
                 // 恢复按钮状态
-                submitBtn.innerHTML = originalText;
+                buttonText.textContent = originalText;
                 submitBtn.disabled = false;
             }
         });
+        
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}" style="display: block;">
+                    ${message}
+                </div>
+            `;
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                const alert = alertContainer.querySelector('.alert');
+                if (alert) {
+                    alert.style.display = 'none';
+                }
+            }, 3000);
+        }
     </script>
 </body>
 </html> 
