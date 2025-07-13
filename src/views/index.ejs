@@ -6,6 +6,7 @@
   <title>X福利姬 - 视频分享平台</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.bunny.net/player-js/latest/player.min.js"></script>
   <style>
     * {
@@ -73,11 +74,12 @@
       flex: 1;
       display: flex;
       align-items: center;
-      max-width: 540px;
+      min-width: 0;
     }
     
     .search-form {
       flex: 1;
+      min-width: 0;
       display: flex;
       height: 40px;
     }
@@ -101,6 +103,7 @@
     }
     
     .search-button {
+      flex-shrink: 0; 
       width: 64px;
       height: 40px;
       border: 1px solid #ccc;
@@ -170,6 +173,60 @@
       cursor: pointer;
       font-size: 14px;
       font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+    
+    .user-avatar:hover {
+      background: #0052cc;
+    }
+    
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 200px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+    
+    .user-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .user-dropdown-item {
+      display: block;
+      padding: 12px 16px;
+      color: #0f0f0f;
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.1s ease;
+    }
+    
+    .user-dropdown-item:last-child {
+      border-bottom: none;
+    }
+    
+    .user-dropdown-item:hover {
+      background: #f8f9fa;
+      color: #0f0f0f;
+      text-decoration: none;
+    }
+    
+    .user-dropdown-item i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
     }
     
     /* 主内容区域 */
@@ -179,6 +236,64 @@
       max-width: 1284px;
       margin-left: auto;
       margin-right: auto;
+    }
+    
+    /* 主内容区域中的搜索框 */
+    .main-search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    
+    .main-search-form {
+      display: flex;
+      max-width: 600px;
+      width: 100%;
+      height: 48px;
+    }
+    
+    .main-search-input {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-right: none;
+      padding: 0 20px;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      background: #fff;
+      border-top-left-radius: 24px;
+      border-bottom-left-radius: 24px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .main-search-input:focus {
+      border-color: #1c62b9;
+      box-shadow: inset 0 1px 2px rgba(27, 97, 183, 0.3);
+    }
+    
+    .main-search-button {
+      flex-shrink: 0;
+      width: 80px;
+      height: 48px;
+      border: 1px solid #ccc;
+      border-left: none;
+      background: #f8f8f8;
+      cursor: pointer;
+      border-top-right-radius: 24px;
+      border-bottom-right-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
+    }
+    
+    .main-search-button:hover {
+      background: #e8e8e8;
+    }
+    
+    .main-search-button i {
+      color: #030303;
+      font-size: 18px;
     }
     
     /* 分类标签 */
@@ -251,14 +366,35 @@
       
       .youtube-header {
         padding: 0 12px;
+        justify-content: space-between;
+      }
+      /* 移动端：压缩右端区域，防止头像被截断 */
+      .header-end {
+        min-width: auto;
+        gap: 6px;
+      }
+      .user-avatar {
+        width: 28px;
+        height: 28px;
       }
       
-      .header-center {
-        margin: 0 12px;
+      .main-search-form {
+        max-width: 100%;
+        height: 44px;
       }
       
-      .search-input {
+      .main-search-input {
         font-size: 16px; /* 防止iOS缩放 */
+        padding: 0 16px;
+      }
+      
+      .main-search-button {
+        width: 70px;
+        height: 44px;
+      }
+      
+      .main-search-container {
+        margin-bottom: 20px;
       }
     }
     
@@ -270,6 +406,24 @@
       
       .main-content {
         padding: 24px 12px 0;
+      }
+      
+      .main-search-form {
+        height: 40px;
+      }
+      
+      .main-search-input {
+        padding: 0 12px;
+        font-size: 16px;
+      }
+      
+      .main-search-button {
+        width: 60px;
+        height: 40px;
+      }
+      
+      .main-search-container {
+        margin-bottom: 16px;
       }
     }
     
@@ -290,22 +444,37 @@
     .video-thumbnail {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #f0f0f0;
+      /* 动态宽高比支持：优先使用CSS变量，回退到16/9 */
+      aspect-ratio: var(--video-aspect-ratio, 16/9);
+      background: transparent;
       overflow: hidden;
       border-radius: 12px;
+      /* 确保没有旧的padding规则冲突 */
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
     }
+    
+    /* 视频缩略图宽高比预设类 */
+    .video-thumbnail.aspect-16-9 { aspect-ratio: 16/9; }
+    .video-thumbnail.aspect-4-3 { aspect-ratio: 4/3; }
+    .video-thumbnail.aspect-1-1 { aspect-ratio: 1/1; }
+    .video-thumbnail.aspect-9-16 { aspect-ratio: 9/16; }
+    .video-thumbnail.aspect-21-9 { aspect-ratio: 21/9; }
     
     .video-thumbnail img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: transparent !important;
+      background: transparent !important;
     }
     
     .video-thumbnail video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: transparent !important;
+      background: transparent !important;
     }
     
     .video-duration {
@@ -372,19 +541,81 @@
       color: #d1d5db;
     }
     
-    /* 视频播放器模态框 */
+        /* 视频播放器模态框 */
     .video-modal .modal-dialog {
       max-width: 1000px;
     }
-    
+
     .video-modal .modal-body {
       padding: 0;
     }
-    
+
     .video-modal video {
       width: 100%;
       height: auto;
       border-radius: 8px;
+    }
+    
+    /* 
+    视频包装器 - 使用现代CSS aspect-ratio
+    
+    使用方法：
+    1. 默认16:9宽高比：<div class="video-wrapper">
+    2. 预设宽高比：<div class="video-wrapper aspect-4-3">
+    3. 动态宽高比（JavaScript）：setVideoAspectRatio(element, '21/9')
+    4. CSS变量：<div class="video-wrapper" style="--video-aspect-ratio: 4/3">
+    */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      /* 动态宽高比支持：优先使用CSS变量，回退到16/9 */
+      aspect-ratio: var(--video-aspect-ratio, 16/9);
+      background: transparent !important;
+      /* 移除所有旧的padding-top规则 */
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    
+    /* 特定宽高比预设类 */
+    .video-wrapper.aspect-16-9 { aspect-ratio: 16/9; }
+    .video-wrapper.aspect-4-3 { aspect-ratio: 4/3; }
+    .video-wrapper.aspect-1-1 { aspect-ratio: 1/1; }
+    .video-wrapper.aspect-9-16 { aspect-ratio: 9/16; }
+    .video-wrapper.aspect-21-9 { aspect-ratio: 21/9; }
+    
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background-color: transparent !important;
+      background: transparent !important;
+      object-fit: contain;
+    }
+    
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background-color: transparent !important;
+      background: transparent !important;
+    }
+    
+    /* 全局视频元素样式 - 强制透明背景 */
+    video {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+    
+    iframe {
+      background: transparent !important;
+      background-color: transparent !important;
     }
   </style>
 </head>
@@ -403,16 +634,7 @@
       </a>
     </div>
     
-    <div class="header-center">
-      <div class="search-container">
-        <form class="search-form" onsubmit="handleSearch(event)">
-          <input type="text" class="search-input" placeholder="搜索" id="searchInput">
-          <button type="submit" class="search-button">
-            <i class="fas fa-search"></i>
-          </button>
-        </form>
-      </div>
-    </div>
+
     
     <div class="header-end">
       <% if (typeof user === 'undefined' || !user) { %>
@@ -426,8 +648,15 @@
           </a>
         <% } %>
         <div class="user-menu">
-          <div class="user-avatar" title="<%= user.username %>">
+          <div class="user-avatar" title="<%= user.username %>" id="userAvatar">
             <%= user.username.charAt(0).toUpperCase() %>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="/user" class="user-dropdown-item">
+              <i class="fas fa-user"></i>个人中心
+            <a href="/api/auth/logout" class="user-dropdown-item">
+              <i class="fas fa-sign-out-alt"></i>退出登录
+            </a>
           </div>
         </div>
       <% } %>
@@ -436,6 +665,16 @@
 
   <!-- 主要内容区域 -->
   <main class="main-content">
+    <!-- 主内容区域中的搜索框 -->
+    <div class="main-search-container">
+      <form class="main-search-form" onsubmit="handleSearch(event)">
+        <input type="text" class="main-search-input" placeholder="搜索视频" id="searchInput">
+        <button type="submit" class="main-search-button">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+
     <!-- 分类标签 -->
     <div class="category-chips">
       <a href="/" class="category-chip <%= (typeof activeTag === 'undefined' || activeTag === 'all') ? 'active' : '' %>">全部</a>
@@ -476,13 +715,21 @@
         </div>
         <div class="modal-body">
           <!-- ★ Bunny Player 视频嵌入 ★ -->
-          <div id="modalVideoContainer" style="position: relative; padding-top: 56.25%;"></div>
+          <!-- 
+          使用示例：
+          默认16:9: <div class="video-wrapper">
+          4:3宽高比: <div class="video-wrapper aspect-4-3">
+          竖屏9:16: <div class="video-wrapper aspect-9-16">
+          电影21:9: <div class="video-wrapper aspect-21-9">
+          自定义: <div class="video-wrapper" style="--video-aspect-ratio: 2.35/1">
+          -->
+          <div id="modalVideoContainer" class="video-wrapper"></div>
           <!-- ★ 视频嵌入结束 ★ -->
           <div class="mt-3">
             <h6 id="modalVideoTitle"></h6>
-            <div class="d-flex align-items-center gap-3 text-muted">
-              <span><i class="fas fa-eye me-1"></i><span id="modalVideoViews">0</span> 次观看</span>
-              <span><i class="fas fa-clock me-1"></i><span id="modalVideoDate">刚刚</span></span>
+            <div class="videostats d-flex align-items-center gap-3 text-muted">
+              <span class="viewcount visible"><i class="fas fa-eye me-1"></i><span id="modalVideoViews">0</span> 次观看</span>
+              <span class="video-date visible"><i class="fas fa-clock me-1"></i><span id="modalVideoDate">刚刚</span></span>
             </div>
           </div>
         </div>
@@ -573,6 +820,8 @@
           video.style.position = 'absolute';
           video.style.top = '0';
           video.style.left = '0';
+          video.style.background = 'transparent';
+          video.style.backgroundColor = 'transparent';
           
           if (Hls.isSupported()) {
             if (hlsInstance) {
@@ -602,6 +851,8 @@
           video.style.position = 'absolute';
           video.style.top = '0';
           video.style.left = '0';
+          video.style.background = 'transparent';
+          video.style.backgroundColor = 'transparent';
           video.autoplay = true;
           
           container.appendChild(video);
@@ -612,6 +863,48 @@
         console.error('视频播放错误:', error);
         alert('视频播放失败: ' + error.message);
       }
+    }
+
+    // 动态设置视频容器宽高比
+    function setVideoAspectRatio(element, ratio) {
+      if (!element) return;
+      
+      // 支持多种格式：
+      // setVideoAspectRatio(el, '16/9')
+      // setVideoAspectRatio(el, 1.777)
+      // setVideoAspectRatio(el, { width: 16, height: 9 })
+      
+      let aspectRatio;
+      if (typeof ratio === 'string') {
+        aspectRatio = ratio;
+      } else if (typeof ratio === 'number') {
+        aspectRatio = ratio.toString();
+      } else if (typeof ratio === 'object' && ratio.width && ratio.height) {
+        aspectRatio = `${ratio.width}/${ratio.height}`;
+      } else {
+        aspectRatio = '16/9'; // 默认值
+      }
+      
+      element.style.setProperty('--video-aspect-ratio', aspectRatio);
+    }
+    
+    // 批量设置视频宽高比
+    function setAllVideoAspectRatio(ratio) {
+      document.querySelectorAll('.video-wrapper, .video-thumbnail').forEach(el => {
+        setVideoAspectRatio(el, ratio);
+      });
+    }
+    
+    // 根据视频数据自动设置宽高比（将来可扩展）
+    function autoSetAspectRatio(videoElement, videoData) {
+      if (!videoElement || !videoData) return;
+      
+      // 如果视频数据包含宽高信息，计算宽高比
+      if (videoData.width && videoData.height) {
+        const ratio = videoData.width / videoData.height;
+        setVideoAspectRatio(videoElement, ratio);
+      }
+      // 否则使用默认的16:9
     }
 
     // 搜索功能
@@ -634,11 +927,14 @@
     // 初始化事件监听器
     function initializeEventListeners() {
       // 搜索功能
-      document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          handleSearch(e);
-        }
-      });
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            handleSearch(e);
+          }
+        });
+      }
 
       // 分类切换
       document.querySelectorAll('.category-chip').forEach(link => {
@@ -652,6 +948,30 @@
       const loadMoreBtn = document.getElementById('loadMoreBtn');
       if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', loadMoreVideos);
+      }
+
+      // 用户头像下拉菜单
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      
+      if (userAvatar && userDropdown) {
+        // 点击头像切换下拉菜单
+        userAvatar.addEventListener('click', function(e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('show');
+        });
+
+        // 点击页面其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+          if (!userAvatar.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('show');
+          }
+        });
+
+        // 点击下拉菜单项时关闭菜单
+        userDropdown.addEventListener('click', function() {
+          userDropdown.classList.remove('show');
+        });
       }
     }
 
@@ -758,12 +1078,12 @@
           </div>
           <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+              <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
             </div>
           </div>
           <div class="video-stats">
-            <span><i class="fas fa-eye"></i>${views}</span>
-            <span><i class="fas fa-clock"></i>${uploadDate}</span>
+            <span class="viewcount visible"><i class="fas fa-eye"></i>${views}</span>
+            <span class="video-date visible"><i class="fas fa-clock"></i>${uploadDate}</span>
           </div>
         </div>
       `;
@@ -838,15 +1158,12 @@
     }
 
     function formatDate(date) {
-      const now = new Date();
-      const diff = now - new Date(date);
-      const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-      
-      if (days === 0) return '今天';
-      if (days === 1) return '昨天';
-      if (days < 7) return `${days}天前`;
-      if (days < 30) return `${Math.floor(days / 7)}周前`;
-      return `${Math.floor(days / 30)}月前`;
+      if (!date) return '';
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = (d.getMonth() + 1).toString().padStart(2, '0');
+      const day = d.getDate().toString().padStart(2, '0');
+      return `${year}/${month}/${day}`;
     }
 
     function formatRelativeTime(date) {
@@ -881,7 +1198,8 @@
         if(/\.(mp4|webm)$/i.test(p)){
           const v = document.createElement('video');
           v.src = p; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
-          v.style.width = '100%'; v.style.height = '100%'; v.style.objectFit = 'cover';
+          v.style.width = '100%'; v.style.height = '100%'; v.style.objectFit = 'contain';
+          v.style.background = 'transparent'; v.style.backgroundColor = 'transparent';
           img.replaceWith(v);
         } else {
           img.src = p;

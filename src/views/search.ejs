@@ -7,6 +7,7 @@
   <title>搜索结果 - X福利姬</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.bunny.net/player-js/latest/player.min.js"></script>
   <style>
     * {
@@ -263,22 +264,37 @@
     .video-thumbnail {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #f0f0f0;
+      /* 动态宽高比支持：优先使用CSS变量，回退到16/9 */
+      aspect-ratio: var(--video-aspect-ratio, 16/9);
+      background: transparent;
       overflow: hidden;
       border-radius: 12px;
+      /* 确保没有旧的padding规则冲突 */
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
     }
+    
+    /* 视频缩略图宽高比预设类 */
+    .video-thumbnail.aspect-16-9 { aspect-ratio: 16/9; }
+    .video-thumbnail.aspect-4-3 { aspect-ratio: 4/3; }
+    .video-thumbnail.aspect-1-1 { aspect-ratio: 1/1; }
+    .video-thumbnail.aspect-9-16 { aspect-ratio: 9/16; }
+    .video-thumbnail.aspect-21-9 { aspect-ratio: 21/9; }
     
     .video-thumbnail img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: transparent !important;
+      background: transparent !important;
     }
     
     .video-thumbnail video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: transparent !important;
+      background: transparent !important;
     }
     
     .video-duration {
@@ -350,19 +366,62 @@
       color: #d1d5db;
     }
     
-    /* 视频播放器模态框 */
+        /* 视频播放器模态框 */
     .video-modal .modal-dialog {
       max-width: 1000px;
     }
-    
+
     .video-modal .modal-body {
       padding: 0;
     }
-    
+
     .video-modal video {
       width: 100%;
       height: auto;
       border-radius: 8px;
+    }
+    
+    /* 视频包装器 - 设置透明背景 */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 16/9;
+      background: transparent !important;
+    }
+    
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background-color: transparent !important;
+      background: transparent !important;
+      object-fit: contain;
+    }
+    
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background-color: transparent !important;
+      background: transparent !important;
+    }
+    
+    /* 全局视频元素样式 - 强制透明背景 */
+    video {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+    
+    iframe {
+      background: transparent !important;
+      background-color: transparent !important;
     }
   </style>
 </head>
@@ -371,11 +430,16 @@
   <header class="youtube-header">
     <div class="header-start">
       <a href="/" class="logo">
-        <img src="/assets/logo-black.jpg" alt="X" class="logo-icon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMSA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDMgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPgo='; this.onerror=null;">
+        <img
+          src="https://fulijix.b-cdn.net/1.png"
+          alt="X"
+          class="logo-icon"
+          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMSA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDMgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPgo='; this.onerror=null;"
+        >
         福利姬
       </a>
     </div>
-    
+  
     <div class="header-center">
       <div class="search-container">
         <form class="search-form" action="/search" method="GET">
@@ -408,7 +472,7 @@
         <% results.forEach(video => { %>
           <div class="video-card" onclick="location.href='/video/<%= video._id || video.id %>'">
             <div class="video-thumbnail">
-              <img src="<%= video.previewUrl || '/api/placeholder/video-thumbnail' %>" alt="<%= video.title || video.name %>" onerror="this.src='/api/placeholder/video-thumbnail'">
+              <img src="<%= video.previewUrl || '/api/placeholder/video-thumbnail' %>" data-preview="<%= video.previewVideo || '' %>" alt="<%= video.title || video.name %>" onerror="this.src='/api/placeholder/video-thumbnail'">
               <div class="video-duration"><%= formatDuration(video.duration || 0) %></div>
               <% if (video.isPremiumOnly) { %>
                 <div class="premium-badge">付费</div>
@@ -423,11 +487,11 @@
                   const uploader = video.uploader || video.uploaderInfo || video.up || {};
                   const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
                 %>
-                <div style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 <%= uploaderName %></div>
+                <div class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 <%= uploaderName %></div>
               </div>
                              <div class="video-stats">
-                 <span><i class="fas fa-eye"></i><%= formatNumber(video.views || 0) %></span>
-                 <span><i class="fas fa-clock"></i><%= formatRelativeTime(video.createdAt || video.uploadDate || new Date()) %></span>
+                 <span class="viewcount visible"><i class="fas fa-eye"></i><%= formatNumber(video.views || 0) %></span>
+                 <span class="video-date visible"><i class="fas fa-clock"></i><%= formatDate(video.uploadDate || video.createdAt || new Date()) %></span>
                </div>
             </div>
           </div>
@@ -446,44 +510,47 @@
   <script>
     // 视频预览动画功能
     document.addEventListener('DOMContentLoaded', () => {
-      // 针对所有视频卡片执行预览替换
+      // 自动加载并播放预览动画，无需鼠标悬停
       document.querySelectorAll('.video-card').forEach(card => {
         const img = card.querySelector('.video-thumbnail img');
         if (!img) return;
 
-        const videoSrc = img.src;
-        
-        // 检查是否为视频格式的预览
+        const videoSrc = img.dataset.preview || '';
+
         if (videoSrc && /\.(mp4|webm)$/i.test(videoSrc)) {
-          let video = null;
-          
-          // 鼠标悬停时播放预览
-          card.addEventListener('mouseenter', () => {
-            if (!video) {
-              video = document.createElement('video');
-              video.src = videoSrc;
-              video.muted = true;
-              video.loop = true;
-              video.autoplay = true;
-              video.playsInline = true;
-              video.style.width = '100%';
-              video.style.height = '100%';
-              video.style.objectFit = 'cover';
-            }
-            
-            if (img.parentNode && img.parentNode.contains(img)) {
-              img.style.display = 'none';
-              img.parentNode.appendChild(video);
-            }
-          });
-          
-          // 鼠标离开时恢复封面
-          card.addEventListener('mouseleave', () => {
-            if (video && video.parentNode) {
-              video.parentNode.removeChild(video);
-              img.style.display = 'block';
-            }
-          });
+          const video = document.createElement('video');
+          video.src = videoSrc;
+          video.muted = true;
+          video.loop = true;
+          video.autoplay = true;
+          video.playsInline = true;
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.objectFit = 'contain';
+          video.style.background = 'transparent';
+          video.style.backgroundColor = 'transparent';
+
+          // 等待视频可播放后再隐藏封面，避免出现空白
+          const showVideo = () => {
+            img.style.display = 'none';
+            video.style.display = 'block';
+          };
+
+          video.addEventListener('canplay', showVideo, { once: true });
+          video.addEventListener('loadeddata', showVideo, { once: true });
+
+          // 如果播放失败，则保留封面图
+          video.addEventListener('error', () => {
+            console.warn('Preview video failed to load', videoSrc);
+            video.remove();
+            img.style.display = 'block';
+          }, { once: true });
+
+          // 立即插入但保持隐藏直到canplay
+          video.style.display = 'none';
+          img.parentNode.appendChild(video);
+          // 尝试播放（有的浏览器需要显式）
+          video.play().catch(() => {});
         }
       });
     });

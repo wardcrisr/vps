@@ -31,7 +31,9 @@ router.get('/videos', async (req, res) => {
             thumbnail: '/api/placeholder/video-thumbnail',
             views    : 0,
             size     : stat.size,
-            source   : 'local'
+            source   : 'local',
+            createdAt: stat.birthtime || stat.mtime,  // 使用文件创建时间或修改时间
+            uploadDate: stat.mtime  // 使用文件修改时间作为上传时间
           };
         });
       localFiles.push(...files);
@@ -62,12 +64,15 @@ router.get('/videos', async (req, res) => {
         size     : video.size,
         source   : video.cloudStatus === 'uploaded' ? 'cloud' : 'upload',
         mimetype : video.mimetype,
-        duration : video.duration || 0  // 添加时长字段
+        duration : video.duration || 0,  // 添加时长字段
+        createdAt: video.createdAt,     // 添加创建时间字段
+        uploadDate: video.updatedAt || video.createdAt  // 添加上传时间字段
       };
       
       // 添加 previewUrl 字段，基于 bunnyId 或 guid
       if (video.bunnyId || video.guid) {
         const videoGuid = video.bunnyId || video.guid;
+        obj.previewVideo = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.mp4`;
         obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
       }
       

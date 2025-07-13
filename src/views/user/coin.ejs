@@ -17,6 +17,13 @@
     .section-box{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:24px;margin-bottom:24px;}
     .section-title{font-weight:700;margin-bottom:16px;font-size:1.1rem;}
     .cdk-input{max-width:300px;}
+    .payment-methods{background:#f8f9fa;border-radius:8px;padding:20px;margin-top:16px;}
+    .payment-item{display:flex;align-items:center;padding:8px 12px;background:#fff;border-radius:6px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:all 0.3s ease;}
+    .payment-item:hover{transform:translateY(-2px);box-shadow:0 3px 8px rgba(0,0,0,.15);}
+    .payment-item i{font-size:1.2rem;margin-right:10px;width:24px;text-align:center;}
+    .payment-item span{font-weight:500;color:#333;}
+    .payment-item small{display:block;margin-top:2px;font-size:0.75rem;}
+    .text-purple{color:#8b5cf6!important;}
   </style>
 </head>
 <body>
@@ -67,13 +74,58 @@
             <input type="number" id="rechargeAmount" class="form-control" placeholder="充值金额(元)" value="100" min="1">
             <button id="recharge-btn" class="btn btn-warning"><i class="fas fa-qrcode me-1"></i>立即充值</button>
           </div>
-          <div class="mt-3">
-            <h6 class="mb-2">充值说明</h6>
-            <ol class="small text-muted mb-0">
-              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
-              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
-              <li>购买金币及会员网址： https://fk.51gwl.com/shop/T6RXX4SR</li>
-            </ol>
+                    <div class="mt-3">
+            <h6 class="mb-3">充值说明</h6>
+            <div class="payment-methods">
+              <h6 class="mb-2 text-primary">
+                <i class="fas fa-credit-card me-2"></i>支持的支付方式
+              </h6>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-bitcoin text-warning"></i>
+                    <span>加密货币</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-alipay text-info"></i>
+                    <span>支付宝/微信支付</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-cc-visa text-primary"></i>
+                    <span>Visa/Mastercard</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-apple-pay text-dark"></i>
+                    <span>Apple Pay</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-google-pay text-success"></i>
+                    <span>Google Pay</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fab fa-paypal text-primary"></i>
+                    <span>PayPal</span>
+                    <small class="text-muted">(当前仅美国账户可支付)</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="payment-item">
+                    <i class="fas fa-mobile-alt text-purple"></i>
+                    <span>Venmo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -115,8 +167,11 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label for="contactInput" class="form-label">请输入您的联系方式 (微信/QQ/邮箱等)</label>
+            <label for="contactInput" class="form-label">请输入您的联系方式 (QQ/邮箱/仅用作查询订单，请放心填写)</label>
             <input type="text" class="form-control" id="contactInput" placeholder="联系方式">
+            <div class="mt-2" style="color: red; font-weight: bold;">
+              如果无法打开支付页面, 请关闭VPN或切换网络
+            </div>
           </div>
         </div>
         <div class="modal-footer">

@@ -64,12 +64,12 @@ router.post('/webhook', async (req, res) => {
     // 推送通知
     try {
       const io = req.app && req.app.get('io');
-      if (io) {
-        io.emit('video-duration-updated', { 
-          videoId: VideoGuid, 
-          lengthInSeconds,
-          title: updatedMedia?.title 
-        });
+    if (io) {
+      io.emit('video-duration-updated', { 
+        videoId: VideoGuid, 
+        lengthInSeconds,
+        title: updatedMedia?.title 
+      });
       }
     } catch (ioError) {
       console.warn('[bunnyWebhook] Socket.io notification failed:', ioError.message);

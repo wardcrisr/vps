@@ -491,25 +491,51 @@ app.get('/api/media/:id/download', authenticateToken, async (req, res) => {
 app.get('/search', async (req, res) => {
   try {
     const query = req.query.q || '';
+    
+    // 只搜索视频类型的媒体
     const mediaItems = await Media.find({
+      type: 'video',
+      isPublic: true,
       $or: [
         { title: { $regex: query, $options: 'i' } },
         { description: { $regex: query, $options: 'i' } }
       ]
     }).sort({ createdAt: -1 }).limit(20);
 
+    // 为每个视频添加预览URL
+    const results = mediaItems.map(video => {
+      const obj = video.toObject();
+      
+      // 添加 previewUrl 字段
+      if (obj.bunnyId || obj.guid) {
+        const videoGuid = obj.bunnyId || obj.guid;
+        obj.previewVideo = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.mp4`;
+        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+      }
+      
+      return obj;
+    });
+
     res.render('search', {
       title: '搜索结果',
       query: query,
-      results: mediaItems,
+      results: results,
+      formatDate: (date => {
+        if (!date) return '';
+        const d = new Date(date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}/${m}/${day}`;
+      }),
       layout: false
     });
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).render('error', {
-      title: '搜索错误',
-      message: '搜索时发生错误',
-      layout: false
+    res.status(500).json({
+      success: false,
+      error: 'InternalServerError',
+      message: '服务器内部错误,请稍后重试'
     });
   }
 });

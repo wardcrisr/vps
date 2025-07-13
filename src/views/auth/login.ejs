@@ -217,49 +217,46 @@
                 <p class="subtitle">使用您的X福利姬账户</p>
             </div>
             
-            <div id="alertContainer"></div>
-            
-            <form id="loginForm">
-                <div class="form-group">
+                <div id="alertContainer"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
                     <div class="input-wrapper">
-                        <input type="email" 
-                               class="form-control" 
-                               id="email" 
-                               name="email" 
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
                                placeholder=" "
-                               required>
+                                   required>
                         <label class="form-label" for="email">邮箱地址</label>
                     </div>
                     <div class="help-text">您需要确认此邮箱地址属于您</div>
-                </div>
-                
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="password" 
-                               class="form-control" 
-                               id="password" 
-                               name="password" 
-                               placeholder=" "
-                               required>
-                        <label class="form-label" for="password">密码</label>
                     </div>
-                </div>
-                
+                    
+                    <div class="form-group">
+                    <div class="input-wrapper">
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   name="password" 
+                               placeholder=" "
+                                   required>
+                        <label class="form-label" for="password">密码</label>
+                        </div>
+                    </div>
+                    
                 <div class="clearfix">
                     <button type="submit" class="btn-next">
                         <span id="buttonText">下一步</span>
                     </button>
                 </div>
-            </form>
-            
+                </form>
+                
             <div class="footer">
                 <div class="footer-left">
                     <a href="/api/auth/register" class="footer-link">创建账户</a>
                     <a href="/" class="footer-link">返回首页</a>
-                </div>
-                <div class="language-selector">
-                    中文 (简体)
-                </div>
+                </div>   
             </div>
         </div>
     </div>
@@ -299,11 +296,11 @@
                     showAlert(result.message + '，正在跳转...', 'success');
                     
                     // 根据用户角色决定跳转地址
-                    let redirectUrl = '/';
+                    let redirectUrl = '/user';
                     if (result.user.role === 'admin') {
                         redirectUrl = '/api/admin/dashboard';
                     } else {
-                        redirectUrl = `/api/auth/profile?token=${result.token}`;
+                        redirectUrl = '/user';
                     }
                     
                     // 延迟跳转
