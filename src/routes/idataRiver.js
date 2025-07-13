@@ -4,8 +4,8 @@ const { createRecharge, getOrderInfo } = require('../services/iDataRiverService'
 // 创建订单 + 获取 payUrl
 router.post('/createorder', async (req, res) => {
   try {
-    const { amount, contactInfo } = req.body;
-    const { payUrl, orderId } = await createRecharge(amount, contactInfo);
+    const { amount, contactInfo, skuId } = req.body;
+    const { payUrl, orderId } = await createRecharge(amount, contactInfo, skuId);
     res.json({ code: 0, payUrl, orderId });
   } catch (e) {
     res.status(500).json({ code: 500, msg: e.message });

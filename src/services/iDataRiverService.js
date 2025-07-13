@@ -12,10 +12,10 @@ const http = axios.create({
 });
 
 // ↓ 下单（已验证成功）
-async function addOrder(amountFen, contactInfo) {
+async function addOrder(amountFen, contactInfo, skuId) {
   const body = {
     projectId : process.env.IDR_PROJECT_ID,
-    skuId     : process.env.IDR_SKU_ID,
+    skuId     : skuId || process.env.IDR_SKU_ID,
     orderInfo : {
       quantity    : 1,
       contactInfo,
@@ -45,8 +45,8 @@ async function payOrder(orderId, method='alipay') {
 }
 
 // 聚合：前端只需要这一函数
-async function createRecharge(amountFen, contactInfo) {
-  const orderId = await addOrder(amountFen, contactInfo);
+async function createRecharge(amountFen, contactInfo, skuId) {
+  const orderId = await addOrder(amountFen, contactInfo, skuId);
   const payUrl  = await payOrder(orderId, 'alipay'); // 可按需动态选择
   return { payUrl, orderId };
 }

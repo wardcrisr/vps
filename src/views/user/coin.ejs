@@ -24,6 +24,60 @@
     .payment-item span{font-weight:500;color:#333;}
     .payment-item small{display:block;margin-top:2px;font-size:0.75rem;}
     .text-purple{color:#8b5cf6!important;}
+    .recharge-options{margin-top:16px;}
+    .recharge-card{
+      background:#fff;
+      border-radius:12px;
+      padding:24px 16px;
+      text-align:center;
+      border:2px solid #e9ecef;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      position:relative;
+      height:120px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .recharge-card:hover{
+      border-color:#007bff;
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(0,123,255,0.15);
+    }
+    .recharge-card.active{
+      border-color:#007bff;
+      background:#f8f9ff;
+    }
+    .recharge-card.recommended{
+      border-color:#ff9800;
+      background:#fff8e1;
+    }
+    .recharge-card.recommended:hover{
+      border-color:#ff9800;
+      background:#fff3c4;
+    }
+    .recommend-badge{
+      position:absolute;
+      top:-1px;
+      right:-1px;
+      background:#ff4757;
+      color:#fff;
+      padding:4px 12px;
+      border-radius:0 12px 0 12px;
+      font-size:0.75rem;
+      font-weight:600;
+    }
+    .amount-label{
+      font-size:28px;
+      font-weight:700;
+      color:#333;
+      margin-bottom:4px;
+    }
+    .discount-label{
+      font-size:14px;
+      color:#ff4757;
+      font-weight:500;
+    }
   </style>
 </head>
 <body>
@@ -39,10 +93,6 @@
           <div class="avatar"><i class="fas fa-user"></i></div>
           <h5 class="text-center mb-1"><%= user.username %></h5>
           <p class="text-center text-muted" style="font-size:.85rem;">普通用户</p>
-          <div class="bg-light text-center rounded p-2 my-3">
-            <small>每日可下载(<%= user.dailyDownloadLimit||20 %>)</small><br>
-            <span class="badge bg-primary mt-1">今日剩余(<%= user.todayRemainingDownloads||20 %>)</span>
-          </div>
           <nav class="nav flex-column">
             <a class="nav-link" href="/user">基本信息</a>
             <a class="nav-link active" href="/user/coin">我的余额</a>
@@ -70,9 +120,39 @@
         <!-- 充值余额 -->
         <div class="section-box">
           <div class="section-title">充值余额</div>
-          <div class="input-group" style="max-width:240px;">
-            <input type="number" id="rechargeAmount" class="form-control" placeholder="充值金额(元)" value="100" min="1">
-            <button id="recharge-btn" class="btn btn-warning"><i class="fas fa-qrcode me-1"></i>立即充值</button>
+          <div class="recharge-options">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="10" data-sku="<%= skuIds[10] %>">
+                  <div class="amount-label">10金币</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="30" data-sku="<%= skuIds[30] %>">
+                  <div class="amount-label">30金币</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="50" data-sku="<%= skuIds[50] %>">
+                  <div class="amount-label">50金币</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="100" data-sku="<%= skuIds[100] %>">
+                  <div class="amount-label">100金币</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="200" data-sku="<%= skuIds[200] %>">
+                  <div class="amount-label">200金币</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="recharge-card" data-amount="300" data-sku="<%= skuIds[300] %>">
+                  <div class="amount-label">300金币</div>
+                </div>
+              </div>
+            </div>
           </div>
                     <div class="mt-3">
             <h6 class="mb-3">充值说明</h6>
@@ -116,12 +196,6 @@
                     <i class="fab fa-paypal text-primary"></i>
                     <span>PayPal</span>
                     <small class="text-muted">(当前仅美国账户可支付)</small>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="payment-item">
-                    <i class="fas fa-mobile-alt text-purple"></i>
-                    <span>Venmo</span>
                   </div>
                 </div>
               </div>
@@ -170,7 +244,7 @@
             <label for="contactInput" class="form-label">请输入您的联系方式 (QQ/邮箱/仅用作查询订单，请放心填写)</label>
             <input type="text" class="form-control" id="contactInput" placeholder="联系方式">
             <div class="mt-2" style="color: red; font-weight: bold;">
-              如果无法打开支付页面, 请关闭VPN或切换网络
+              如果无法打开支付页面, 请关闭VPN或切换网络,第三方支付调用支付宝接口,支付宝会收取1%-3%的手续费，因此页面显示金额会比下单金额多几毛钱
             </div>
           </div>
         </div>
@@ -200,12 +274,12 @@
     }
     loadProfile();
 
-    async function topUp(amountYuan, contactInfo){
+    async function topUp(amountYuan, contactInfo, skuId){
       try{
         const { code, payUrl, orderId, msg } = await fetch('/api/idatariver/createorder', {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ amount: Math.round(amountYuan*100), contactInfo })
+          body: JSON.stringify({ amount: Math.round(amountYuan*100), contactInfo, skuId })
         }).then(r=>r.json());
 
         if(code !== 0){
@@ -228,23 +302,37 @@
       }catch(e){ console.error('topUp error',e); alert('网络错误'); }
     }
 
-    const rechargeBtn = document.getElementById('recharge-btn');
     const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
     let pendingAmount = 0;
+    let pendingSkuId = '';
 
-    rechargeBtn.addEventListener('click', ()=>{
-      const val = Number(document.getElementById('rechargeAmount').value);
-      if(!val || val<=0){ alert('请输入有效金额'); return; }
-      pendingAmount = val;
-      document.getElementById('contactInput').value = '';
-      contactModal.show();
+    // 充值卡片点击事件
+    document.querySelectorAll('.recharge-card').forEach(card => {
+      card.addEventListener('click', () => {
+        // 移除其他卡片的active状态
+        document.querySelectorAll('.recharge-card').forEach(c => c.classList.remove('active'));
+        // 添加当前卡片的active状态
+        card.classList.add('active');
+        
+        const amount = Number(card.getAttribute('data-amount'));
+        const skuId = card.getAttribute('data-sku');
+        if(!amount || amount<=0){ alert('请选择有效金额'); return; }
+        pendingAmount = amount;
+        pendingSkuId = skuId;
+        document.getElementById('contactInput').value = '';
+        
+        // 更新模态框标题显示选择的金额
+        document.querySelector('#contactModal .modal-title').textContent = `充值 ${amount}元 - 填写联系方式`;
+        
+        contactModal.show();
+      });
     });
 
     document.getElementById('contactConfirmBtn').addEventListener('click', ()=>{
       const contactInfo = document.getElementById('contactInput').value.trim();
       if(!contactInfo){ alert('请输入联系方式'); return; }
       contactModal.hide();
-      topUp(pendingAmount, contactInfo);
+      topUp(pendingAmount, contactInfo, pendingSkuId);
     });
   </script>
 </body>

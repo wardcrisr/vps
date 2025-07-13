@@ -29,10 +29,21 @@ router.get('/coin', optionalAuth, (req, res) => {
     'Expires': '0'
   });
 
+  // 前端充值面额对应的 SKU ID
+  const skuIds = {
+    10  : process.env.IDR_SKU_ID_1,
+    30  : process.env.IDR_SKU_ID_2,
+    50  : process.env.IDR_SKU_ID_3,
+    100 : process.env.IDR_SKU_ID_4,
+    200 : process.env.IDR_SKU_ID_5,
+    300 : process.env.IDR_SKU_ID_6,
+  };
+
   res.render('user/coin', {
     title: '我的余额',
     user: req.user,
-    current: 'coin'
+    current: 'coin',
+    skuIds
   });
 });
 

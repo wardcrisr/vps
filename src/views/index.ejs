@@ -62,6 +62,37 @@
       margin-right: 4px;
     }
     
+    .telegram-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #030303;
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: 16px;
+      padding: 6px 12px;
+      border-radius: 18px;
+      transition: all 0.2s ease;
+      background: rgba(0, 180, 216, 0.1);
+    }
+    
+    .telegram-link:hover {
+      background: rgba(0, 180, 216, 0.2);
+      color: #030303;
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+    
+    .telegram-text {
+      margin-right: 6px;
+    }
+    
+    .telegram-icon {
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+    }
+    
     .header-center {
       flex: 1;
       max-width: 640px;
@@ -488,6 +519,19 @@
       font-size: 0.75rem;
     }
     
+    .premium-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: linear-gradient(135deg, #ff5722, #d32f2f);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(255, 87, 34, 0.3);
+    }
+    
     .video-info {
       padding: 12px;
     }
@@ -515,6 +559,26 @@
     
     .video-stats i {
       margin-right: 4px;
+    }
+    
+    /* 金币标签样式 */
+    .coin-badge {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 1px 3px rgba(255, 152, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .coin-badge i {
+      font-size: 0.6rem;
+      margin-right: 0;
     }
     
     .loading-skeleton {
@@ -631,6 +695,15 @@
           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMSA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDMgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPgo='; this.onerror=null;"
         >
         福利姬
+      </a>
+      <a href="https://t.me/+muk0tMtyrhYzZmU1" class="telegram-link" target="_blank">
+        <span class="telegram-text">官方电报群</span>
+        <img
+          src="https://fulijix.b-cdn.net/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84%E8%AE%BE%E8%AE%A1.png"
+          alt="Telegram"
+          class="telegram-icon"
+          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40NzcgMiAyIDYuNDc3IDIgMTJTNi40NzcgMjIgMTIgMjJTMjIgMTcuNTIzIDIyIDEyUzE3LjUyMyAyIDEyIDJaTTEyIDIwQzcuNTg5IDIwIDQgMTYuNDExIDQgMTJTNy41ODkgNCA0IDEyUzEwLjQ3NyAyMCAxMiAyMFoiIGZpbGw9IiMwMEI0RDgiLz4KPHBhdGggZD0iTTEyIDJDNi40NzcgMiAyIDYuNDc3IDIgMTJTNi40NzcgMjIgMTIgMjJTMjIgMTcuNTIzIDIyIDEyUzE3LjUyMyAyIDEyIDJaTTEyIDIwQzcuNTg5IDIwIDQgMTYuNDExIDQgMTJTNy41ODkgNCA0IDEyUzEwLjQ3NyAyMCAxMiAyMFoiIGZpbGw9IiMwMEI0RDgiLz4KPC9zdmc+'; this.onerror=null;"
+        >
       </a>
     </div>
     
@@ -1053,8 +1126,8 @@
       card.className = 'video-card';
       card.setAttribute('data-video-id', video.filename || video._id);
       
-      // 使用 previewUrl 作为主要封面源
-      const thumbnailSrc = video.previewUrl || '/api/placeholder/video-thumbnail';
+      // 使用 previewImage > previewUrl 作为封面源
+      const thumbnailSrc = video.previewImage || video.previewUrl || '/api/placeholder/video-thumbnail';
       let fixedThumbnail = thumbnailSrc;
       
       const duration = formatDuration(video.duration || 0);
@@ -1066,21 +1139,30 @@
       const uploaderUid = uploader.uid || uploader._id || 'anonymous';
       const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
 
+      // 检测付费视频的多种可能字段
+      const isPaidVideo = video.isPremiumOnly || video.isPaid || video.category === 'paid' || 
+                         (video.priceCoin && video.priceCoin > 0) || (video.price && video.price > 0) || 
+                         (video.coins && video.coins > 0) || (video.cost && video.cost > 0);
+      
+      // 获取金币数量（优先使用priceCoin字段）
+      const coinPrice = video.priceCoin || video.price || video.coins || video.cost || 5;
+
       card.innerHTML = `
-        <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
-          <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
-          <div class="video-duration">${duration}</div>
-          ${video.isPremiumOnly ? '<div class="premium-badge">付费</div>' : ''}
-        </div>
+                  <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
+            <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
+            <div class="video-duration">${duration}</div>
+            ${isPaidVideo ? '<div class="premium-badge">付费</div>' : ''}
+          </div>
         <div class="video-info">
           <div class="video-title" title="${video.title || video.name}" onclick="location.href='/video/${video._id || video.id}'" style="cursor: pointer;">
             ${video.title || video.name}
           </div>
-          <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+                      <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+                ${isPaidVideo ? `<span class="coin-badge"><i class="fas fa-coins"></i>${coinPrice}金币</span>` : ''}
+              </div>
             </div>
-          </div>
           <div class="video-stats">
             <span class="viewcount visible"><i class="fas fa-eye"></i>${views}</span>
             <span class="video-date visible"><i class="fas fa-clock"></i>${uploadDate}</span>
@@ -1188,16 +1270,23 @@
     document.addEventListener('DOMContentLoaded', () => {
       // 针对所有 .video-card 执行预览替换
       document.querySelectorAll('.video-card, .videocard').forEach(card => {
-        const videoData = card.__data__;       // 在 createVideoCard 里写入 card.__data__ = video;
-        if(!videoData || !videoData.previewUrl) return;
+        const videoData = card.__data__;
+        if(!videoData) return;
 
         const img = card.querySelector('.video-thumbnail img, .coverwrapper img');
         if(!img) return;
 
-        const p = videoData.previewUrl;
+        // 优先使用 previewUrl（可能是 mp4/webm），回退到 previewImage
+        const p = videoData.previewUrl || videoData.previewImage;
+        if(!p) return;
+
         if(/\.(mp4|webm)$/i.test(p)){
           const v = document.createElement('video');
           v.src = p; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+          v.setAttribute('playsinline','');
+          v.setAttribute('webkit-playsinline','');
+          v.setAttribute('muted','');
+          v.setAttribute('autoplay','');
           v.style.width = '100%'; v.style.height = '100%'; v.style.objectFit = 'contain';
           v.style.background = 'transparent'; v.style.backgroundColor = 'transparent';
           img.replaceWith(v);

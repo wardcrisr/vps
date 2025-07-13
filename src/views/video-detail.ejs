@@ -267,12 +267,14 @@
             // 隐藏遮罩并清理计时
             overlay.style.display = 'none';
 
-            // 加载完整版（带 token 的 iframe）
+            // 加载完整版（带 token 的 iframe），追加播放参数
+            const finalUrl = iframeUrl.includes('?') ? `${iframeUrl}&autoplay=true&muted=false&playsinline=true` : `${iframeUrl}?autoplay=true&muted=false&playsinline=true`;
+
             const container = document.getElementById('playerContainer');
             container.innerHTML = '';
             playerEl.style.display = 'none';
             previewIsIframe = false;
-            loadSource(iframeUrl);
+            loadSource(finalUrl);
           }else{
             alert('解锁失败');
           }

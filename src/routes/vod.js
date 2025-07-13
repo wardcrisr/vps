@@ -48,7 +48,7 @@ router.get('/videos', async (req, res) => {
       dbQuery.category = category; // 严格相等匹配
     }
 
-    const dbVideos = await Media.find(dbQuery).sort({ createdAt: -1 });
+    const dbVideos = await Media.find(dbQuery).populate('uploader', 'username displayName _id').sort({ createdAt: -1 });
 
     const dbVideoList = dbVideos.map(video => {
       const obj = {
@@ -56,9 +56,11 @@ router.get('/videos', async (req, res) => {
         id       : video._id,          // 兼容前端使用 id 字段
         filename : video.cloudFileName || video.filename,
         name     : video.title,
+        title    : video.title,        // 添加title字段
         url      : video.url.startsWith('http') ? video.url : `/uploads/${video.filename}`,
         playUrl  : video.url.startsWith('http') ? video.url : `/vod/video/${video.filename}`,
         bunnyId  : video.bunnyId || video.cloudFileName, // Bunny Stream ID
+        guid     : video.bunnyId || video.guid,           // 兼容guid字段
         embedUrl : video.url.startsWith('http') ? video.url : undefined,
         views    : video.views || 0,
         size     : video.size,
@@ -66,14 +68,35 @@ router.get('/videos', async (req, res) => {
         mimetype : video.mimetype,
         duration : video.duration || 0,  // 添加时长字段
         createdAt: video.createdAt,     // 添加创建时间字段
-        uploadDate: video.updatedAt || video.createdAt  // 添加上传时间字段
+        uploadDate: video.updatedAt || video.createdAt,  // 添加上传时间字段
+        
+        // 添加付费相关字段
+        category       : video.category || 'free',                    // 视频分类
+        isPremiumOnly  : video.isPremiumOnly || false,                // 是否仅付费用户可访问
+        priceCoins     : video.priceCoins || 0,                      // 金币价格
+        priceCoin      : video.priceCoins || 0,                      // 前端兼容字段
+        isPaid         : video.isPremiumOnly || video.category === 'paid' || (video.priceCoins && video.priceCoins > 0),  // 是否付费视频
+        downloadPrice  : video.downloadPrice || 0,                   // 下载价格
+        
+        // 上传者信息
+        uploader: video.uploader ? {
+          _id: video.uploader._id,
+          username: video.uploader.username || video.uploader.displayName || '匿名用户',
+          displayName: video.uploader.displayName || video.uploader.username || '匿名用户'
+        } : null,
+        uploaderInfo: video.uploader ? {
+          _id: video.uploader._id,
+          username: video.uploader.username || video.uploader.displayName || '匿名用户',
+          displayName: video.uploader.displayName || video.uploader.username || '匿名用户'
+        } : null
       };
       
       // 添加 previewUrl 字段，基于 bunnyId 或 guid
       if (video.bunnyId || video.guid) {
         const videoGuid = video.bunnyId || video.guid;
-        obj.previewVideo = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.mp4`;
-        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+        // 统一：previewUrl 指向 MP4 动画，previewImage 指向静态 WEBP
+        obj.previewUrl   = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.mp4`;
+        obj.previewImage = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
       }
       
       return obj;
@@ -97,6 +120,20 @@ router.get('/videos', async (req, res) => {
     }
     
     console.log(`📹 VOD API: 返回 ${allVideos.length} 个视频 (本地: ${localFiles.length}, 数据库: ${dbVideoList.length})`);
+    
+    // 调试：显示部分视频的付费信息
+    if (allVideos.length > 0) {
+      const sampleVideo = allVideos[0];
+      console.log('示例视频付费信息:', {
+        title: sampleVideo.title,
+        category: sampleVideo.category,
+        isPaid: sampleVideo.isPaid,
+        priceCoin: sampleVideo.priceCoin,
+        priceCoins: sampleVideo.priceCoins,
+        isPremiumOnly: sampleVideo.isPremiumOnly,
+        uploader: sampleVideo.uploaderInfo?.username
+      });
+    }
     
     res.json({
       success: true,

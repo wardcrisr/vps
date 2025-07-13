@@ -21,7 +21,7 @@ router.get('/:id/preview', async (req, res) => {
     } else if (video.bunnyId) {
       // 构造 Bunny iframe 地址
       const libId = process.env.LIB_ID || process.env.BUNNY_VIDEO_LIBRARY || '461001';
-      previewUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}?start=0&duration=30`;
+      previewUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}?start=0&duration=30&muted=true&autoplay=true&playsinline=true`;
     } else if (video.cdnUrl && video.cdnUrl.startsWith('http')) {
       previewUrl = video.cdnUrl;
     } else {
