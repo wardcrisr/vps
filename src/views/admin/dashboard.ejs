@@ -166,6 +166,17 @@
                         <!-- 统计卡片将在这里动态加载 -->
                     </div>
                     
+                    <!-- UP主空间管理 -->
+                    <div class="stats-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-users"></i> UP主空间管理</h5>
+                            <button id="create-space-btn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 创建UP主空间
+                            </button>
+                        </div>
+                        <p class="text-muted">为新的UP主创建个人空间页面，展示其上传的视频合集</p>
+                    </div>
+                    
                     <div class="chart-container">
                         <h5>用户注册趋势（最近7天）</h5>
                         <canvas id="registrationChart" width="400" height="100"></canvas>
@@ -187,6 +198,9 @@
                                     <option value="free">免费</option>
                                     <option value="paid">付费</option>
                                     <option value="member">会员</option>
+                                </select>
+                                <select id="adminUploaderSelect" class="form-select mb-2">
+                                    <option value="" selected>请选择UP主</option>
                                 </select>
                                 <input type="number" id="adminPriceInput" class="form-control mb-2" placeholder="所需金币" min="1" max="9999" style="display:none;">
                                 <button id="adminUploadBtn" class="btn btn-primary w-100">开始上传</button>
@@ -400,6 +414,7 @@
                 return;
             }
             loadDashboard();
+            loadUploadersList();
             
             // 侧边栏导航
             document.querySelectorAll('[data-section]').forEach(link => {
@@ -432,6 +447,47 @@
             document.getElementById('roleFilter').addEventListener('change', function() {
                 searchUsers();
             });
+
+            // 创建UP主空间按钮事件
+            const createSpaceBtn = document.getElementById('create-space-btn');
+            if (createSpaceBtn) {
+                createSpaceBtn.addEventListener('click', async () => {
+                    try {
+                        // 从用户输入中获取username
+                        const username = prompt('请输入新的UP主用户名：');
+                        if (!username) return alert('用户名不能为空');
+
+                        // 调用后端接口，执行"查找或懒创建"逻辑
+                        const res = await fetch(`/api/admin/space/${encodeURIComponent(username)}`, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                            },
+                            body: JSON.stringify({ username })
+                        });
+                        const data = await res.json();
+                        console.log('API响应:', data); // 调试信息
+                        
+                        if (res.ok) {
+                            // 显示成功提示后跳转到UP主空间页
+                            console.log('objectId:', data.objectId); // 调试信息
+                            if (data.objectId) {
+                                alert('UP主空间创建成功！');
+                                window.location.href = `/space/${data.objectId}`;
+                            } else {
+                                alert('创建成功，但无法获取用户ID，请联系管理员');
+                                console.error('API响应中缺少objectId字段:', data);
+                            }
+                        } else {
+                            alert('创建失败：' + (data.message || data.error || res.statusText));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('网络错误，创建失败');
+                    }
+                });
+            }
 
             // 初始化上传功能
             setTimeout(async () => {
@@ -548,7 +604,12 @@
         // 显示图表
         function displayChart(data) {
             const ctx = document.getElementById('registrationChart').getContext('2d');
-            new Chart(ctx, {
+            // 若已有旧实例，先销毁，避免 Canvas is already in use 错误
+            if (window.registrationChartInstance) {
+                window.registrationChartInstance.destroy();
+            }
+            // 创建并缓存新实例
+            window.registrationChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map(d => d.date),
@@ -846,6 +907,35 @@
         let adminVideos = [];
         let currentAdminFile = null;
 
+        // 加载UP主列表
+        async function loadUploadersList() {
+            try {
+                const res = await fetch('/api/admin/uploaders', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const uploaderSelect = document.getElementById('adminUploaderSelect');
+                    if (uploaderSelect) {
+                        // 清空现有选项（保留默认选项）
+                        uploaderSelect.innerHTML = '<option value="" selected>请选择UP主</option>';
+                        
+                        // 添加UP主选项
+                        data.uploaders.forEach(uploader => {
+                            const option = document.createElement('option');
+                            option.value = uploader._id;
+                            option.textContent = `${uploader.username} (${uploader.displayName || uploader.username})`;
+                            uploaderSelect.appendChild(option);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('加载UP主列表失败', e);
+            }
+        }
+
         // 加载管理员视频列表
         async function loadAdminVideos() {
             try {
@@ -1115,20 +1205,28 @@
 
                         // 3️⃣ 保存视频元数据到数据库
                         try {
-                          const saveRes = await fetch('/api/admin/videos', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-                            },
-                            body: JSON.stringify({
+                          const uploaderSelect = document.getElementById('adminUploaderSelect');
+                          const requestBody = {
                               title: file.name,
                               videoUrl: `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`,
                               coverUrl: coverUrl,
                               category: adminCategorySelect.value,
                               videoId: videoId,
                               priceCoin: adminCategorySelect.value === 'paid' ? parseInt(adminPriceInput.value,10) : 0
-                            })
+                          };
+                          
+                          // 如果选择了UP主，添加到请求体
+                          if (uploaderSelect && uploaderSelect.value) {
+                            requestBody.uploaderId = uploaderSelect.value;
+                          }
+                          
+                          const saveRes = await fetch('/api/admin/videos', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                            },
+                            body: JSON.stringify(requestBody)
                           });
                           const saveData = await saveRes.json();
                           if (!saveData.success) throw new Error(saveData.message || '保存视频信息失败');
@@ -1143,6 +1241,12 @@
                         adminUploadInput.value = '';
                         adminCategorySelect.selectedIndex = 0;
                         adminPriceInput.value = '';
+                        
+                        // 重置UP主选择框
+                        const uploaderSelect = document.getElementById('adminUploaderSelect');
+                        if (uploaderSelect) {
+                          uploaderSelect.selectedIndex = 0;
+                        }
                     } catch (error) {
                         console.error('❌ 上传过程出错:', error);
                         adminUploadStatus.textContent = `❌ 上传失败: ${error.message}`;

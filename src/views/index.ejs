@@ -681,6 +681,15 @@
       background: transparent !important;
       background-color: transparent !important;
     }
+
+    /* 新增样式：用户头像图标 */
+    .avatar-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 4px;
+    }
   </style>
 </head>
 <body>
@@ -754,6 +763,7 @@
       <a href="/free" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'free') ? 'active' : '' %>">免费视频</a>
       <a href="/paid" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'paid') ? 'active' : '' %>">付费视频</a>
       <a href="/vip" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'vip') ? 'active' : '' %>">会员视频</a>
+      <a href="/creator" class="category-chip <%= (typeof activeTag !== 'undefined' && activeTag === 'creator') ? 'active' : '' %>">福利姬合集</a>
     </div>
 
     <!-- 视频网格 -->
@@ -1136,7 +1146,7 @@
       
       // 获取上传者信息
       const uploader = video.uploader || video.uploaderInfo || video.up || {};
-      const uploaderUid = uploader.uid || uploader._id || 'anonymous';
+      const uploaderUid = uploader._id || uploader.uid || 'anonymous';
       const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
 
       // 检测付费视频的多种可能字段
@@ -1159,7 +1169,8 @@
           </div>
                       <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
               <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+                ${uploader.avatarUrl ? `<img class="avatar-icon" src="${uploader.avatarUrl}" alt="${uploaderName} 的头像" style="width:48px; height:48px; border-radius:50%; object-fit:cover; margin-right:4px;"/>` : '👤'}
+                <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">${uploaderName}</span>
                 ${isPaidVideo ? `<span class="coin-badge"><i class="fas fa-coins"></i>${coinPrice}金币</span>` : ''}
               </div>
             </div>

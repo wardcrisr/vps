@@ -48,7 +48,7 @@ router.get('/videos', async (req, res) => {
       dbQuery.category = category; // 严格相等匹配
     }
 
-    const dbVideos = await Media.find(dbQuery).populate('uploader', 'username displayName _id').sort({ createdAt: -1 });
+    const dbVideos = await Media.find(dbQuery).populate('uploader', 'username displayName _id avatarUrl').sort({ createdAt: -1 });
 
     const dbVideoList = dbVideos.map(video => {
       const obj = {
@@ -82,12 +82,14 @@ router.get('/videos', async (req, res) => {
         uploader: video.uploader ? {
           _id: video.uploader._id,
           username: video.uploader.username || video.uploader.displayName || '匿名用户',
-          displayName: video.uploader.displayName || video.uploader.username || '匿名用户'
+          displayName: video.uploader.displayName || video.uploader.username || '匿名用户',
+          avatarUrl: video.uploader.avatarUrl || ''
         } : null,
         uploaderInfo: video.uploader ? {
           _id: video.uploader._id,
           username: video.uploader.username || video.uploader.displayName || '匿名用户',
-          displayName: video.uploader.displayName || video.uploader.username || '匿名用户'
+          displayName: video.uploader.displayName || video.uploader.username || '匿名用户',
+          avatarUrl: video.uploader.avatarUrl || ''
         } : null
       };
       

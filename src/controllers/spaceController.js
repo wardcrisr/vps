@@ -1,18 +1,31 @@
 const User = require('../models/User');
 const Media = require('../models/Media');
 const Collection = require('../models/Collection');
+const mongoose = require('mongoose');
+
+// 辅助函数：构建用户查询条件，支持ObjectId、uid或用户名
+const buildUserQueryConditions = (uid) => {
+  const queryConditions = [
+    { uid: uid },
+    { username: uid.toLowerCase() }
+  ];
+  
+  // 如果uid是有效的ObjectId格式，也添加到查询条件中
+  if (mongoose.Types.ObjectId.isValid(uid)) {
+    queryConditions.push({ _id: new mongoose.Types.ObjectId(uid) });
+  }
+  
+  return queryConditions;
+};
 
 // UP主空间页面
 exports.spacePage = async (req, res) => {
   try {
     const { uid } = req.params;
     
-    // 查找UP主信息（兼容 uid 或用户名），并放宽 isUploader 限制
+    // 查找UP主信息（兼容 ObjectId、uid 或用户名），并放宽 isUploader 限制
     const uploader = await User.findOne({
-      $or: [
-        { uid: uid },
-        { username: uid.toLowerCase() }
-      ]
+      $or: buildUserQueryConditions(uid)
     });
     if (!uploader) {
       return res.status(404).render('error', { 
@@ -57,7 +70,7 @@ exports.spacePage = async (req, res) => {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    res.render('space-simple', {
+    res.render('space', {
       layout: false, // 禁用布局，因为页面已包含完整HTML结构
       uploader,
       videos,
@@ -69,7 +82,8 @@ exports.spacePage = async (req, res) => {
         hasPrev: hasPrevPage,
         totalVideos
       },
-      activeTab: 'newest'
+      activeTab: 'newest',
+      currentUser: req.user || null
     });
 
   } catch (error) {
@@ -87,12 +101,9 @@ exports.getUploaderVideos = async (req, res) => {
     const { uid } = req.params;
     const { sort = 'newest', page = 1, limit = 12 } = req.query;
     
-    // 查找UP主（兼容 uid 或用户名），并放宽 isUploader 限制
+    // 查找UP主（兼容 ObjectId、uid 或用户名），并放宽 isUploader 限制
     const uploader = await User.findOne({
-      $or: [
-        { uid: uid },
-        { username: uid.toLowerCase() }
-      ]
+      $or: buildUserQueryConditions(uid)
     });
     if (!uploader) {
       return res.status(404).json({ success: false, message: 'UP主不存在' });
@@ -180,12 +191,9 @@ exports.getUploaderCollections = async (req, res) => {
     const { uid } = req.params;
     const { page = 1, limit = 10 } = req.query;
     
-    // 查找UP主（兼容 uid 或用户名），并放宽 isUploader 限制
+    // 查找UP主（兼容 ObjectId、uid 或用户名），并放宽 isUploader 限制
     const uploader = await User.findOne({
-      $or: [
-        { uid: uid },
-        { username: uid.toLowerCase() }
-      ]
+      $or: buildUserQueryConditions(uid)
     });
     if (!uploader) {
       return res.status(404).json({ success: false, message: 'UP主不存在' });

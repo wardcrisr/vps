@@ -51,10 +51,10 @@ router.post('/upload-cover', uploadCover.single('cover'), (req, res) => {
 });
 
 // ========== 新增视频（保存元数据） ==========
-// POST /api/admin/videos  { title, videoUrl, coverUrl, category }
+// POST /api/admin/videos  { title, videoUrl, coverUrl, category, uploaderId }
 router.post('/videos', async (req, res) => {
   try {
-    const { title, videoUrl, coverUrl, category, videoId } = req.body;
+    const { title, videoUrl, coverUrl, category, videoId, uploaderId, priceCoin } = req.body;
 
     if (!title || !videoUrl || !coverUrl || !category || !videoId) {
       return res.status(400).json({ success: false, message: '缺少必要字段' });
@@ -72,6 +72,16 @@ router.post('/videos', async (req, res) => {
       cloudStatus: 'uploaded',
       isPublic: true
     };
+
+    // 添加UP主信息
+    if (uploaderId) {
+      updateFields.uploader = uploaderId;
+    }
+
+    // 添加金币价格
+    if (priceCoin && priceCoin > 0) {
+      updateFields.priceCoins = priceCoin;
+    }
 
     const media = await Media.findOneAndUpdate(
       { bunnyId: videoId },
@@ -386,13 +396,14 @@ router.get('/users/:id', async (req, res) => {
 // ——— 更新用户信息 ———
 router.put('/users/:id', async (req, res) => {
   try {
-    const { role, isPremium, premiumExpiry, dailyDownloadLimit } = req.body;
+    const { role, isPremium, premiumExpiry, dailyDownloadLimit, avatarUrl } = req.body;
     const updateData = {};
     
     if (role) updateData.role = role;
     if (isPremium !== undefined) updateData.isPremium = isPremium;
     if (premiumExpiry) updateData.premiumExpiry = new Date(premiumExpiry);
     if (dailyDownloadLimit !== undefined) updateData.dailyDownloadLimit = dailyDownloadLimit;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
     
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -546,6 +557,74 @@ router.post('/users/batch', async (req, res) => {
   } catch (error) {
     console.error('批量操作用户错误:', error);
     res.status(500).json({ success: false, message: '批量操作失败' });
+  }
+});
+
+// ========== 获取UP主列表API ==========
+router.get('/uploaders', async (req, res) => {
+  try {
+    const uploaders = await User.find({ 
+      isUploader: true 
+    }).select('_id username displayName uid bio').sort({ username: 1 });
+    
+    res.json({ success: true, uploaders });
+  } catch (err) {
+    console.error('获取UP主列表失败:', err);
+    res.status(500).json({ success: false, message: '获取UP主列表失败' });
+  }
+});
+
+// ========== 创建UP主空间API ==========
+router.post('/space/:username', async (req, res) => {
+  const username = req.params.username;
+  console.log('收到创建UP主空间请求，username:', username);
+  
+  try {
+    let user = await User.findOne({ username });
+    console.log('查找现有用户结果:', user ? '找到' : '未找到');
+    
+    if (!user) {
+      // 创建新用户
+      console.log('开始创建新用户...');
+      user = new User({ 
+        username,
+        email: `${username}@example.com`, // 临时邮箱
+        password: 'temp_password', // 临时密码  
+        displayName: username,
+        bio: '这位UP主还没有填写个人简介。',
+        isUploader: true,
+        uid: username // 使用username作为uid
+      });
+      console.log('新用户对象创建，保存前的_id:', user._id);
+      await user.save();
+      console.log('新用户保存完成，保存后的_id:', user._id);
+    } else {
+      // 更新已存在的用户为UP主
+      console.log('更新现有用户为UP主，原_id:', user._id);
+      user.isUploader = true;
+      if (!user.uid) {
+        user.uid = username;
+      }
+      if (!user.bio) {
+        user.bio = '这位UP主还没有填写个人简介。';
+      }
+      await user.save();
+      console.log('用户更新完成，更新后的_id:', user._id);
+    }
+    
+    // 确保用户对象有_id字段
+    if (!user._id) {
+      console.error('用户保存后仍然没有_id字段:', user);
+      return res.status(500).json({ success: false, message: '用户创建失败，无法获取用户ID' });
+    }
+    
+    const objectId = user._id.toString();
+    console.log('创建UP主空间成功，objectId:', objectId); // 调试信息
+    console.log('准备返回的数据:', { success: true, objectId });
+    res.json({ success: true, user, objectId });
+  } catch (err) {
+    console.error('创建UP主空间失败:', err);
+    res.status(500).json({ success: false, message: '服务器内部错误' });
   }
 });
 

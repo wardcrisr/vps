@@ -540,38 +540,7 @@ app.get('/search', async (req, res) => {
   }
 });
 
-// 分类页面
-app.get('/category/:type', async (req, res) => {
-  try {
-    const categoryType = req.params.type;
-    const mediaItems = await Media.find({ category: categoryType })
-      .sort({ createdAt: -1 })
-      .limit(50);
 
-    const categoryNames = {
-      'new': '新片速递',
-      'exclusive': '独家银影师专栏',
-      'resources': '独家资源',
-      'models': '国模私拍',
-      'show': '秀人网'
-    };
-
-    res.render('category', {
-      title: categoryNames[categoryType] || '分类',
-      category: categoryType,
-      categoryName: categoryNames[categoryType],
-      items: mediaItems,
-      layout: false
-    });
-  } catch (error) {
-    console.error('Category error:', error);
-    res.status(500).render('error', {
-      title: '分类错误',
-      message: '加载分类时发生错误',
-      layout: false
-    });
-  }
-});
 
 // 评论路由：必须登录
 app.post('/comments', authenticateToken, async (req, res) => {

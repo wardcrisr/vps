@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
   displayName: { type: String, default: '' },    // 显示昵称
   qq: { type: String, default: '' },             // QQ号
   bio: { type: String, default: '' },            // 个人介绍
+  avatarUrl: { type: String, default: '' },      // 头像URL
   
   // 付费相关字段
   isPremium: { type: Boolean, default: false },
