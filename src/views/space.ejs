@@ -793,9 +793,9 @@
 
       <!-- 分类标签 -->
       <div class="category-chips">
-        <a href="#" class="category-chip active" onclick="SpacePage.switchTab('newest'); return false;" data-sort="newest">最新发布</a>
-        <a href="#" class="category-chip" onclick="SpacePage.switchTab('popular'); return false;" data-sort="popular">最多播放</a>
-        <a href="#" class="category-chip" onclick="SpacePage.switchTab('oldest'); return false;" data-sort="oldest">最早发布</a>
+        <a href="#" class="category-chip active" data-sort="newest">最新发布</a>
+        <a href="#" class="category-chip" data-sort="popular">最多播放</a>
+        <a href="#" class="category-chip" data-sort="oldest">最早发布</a>
       </div>
 
       <!-- 视频网格区域 -->
@@ -840,146 +840,10 @@
     </button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
-    // 空间页JavaScript逻辑
-    window.SPACE_CONFIG = {
-      currentPage: <%= pagination && pagination.current ? pagination.current : 1 %>,
-      totalPages: <%= pagination && pagination.total ? pagination.total : 1 %>,
-      uid: '<%= uploader && (uploader.uid || uploader._id || uploader.username) ? (uploader.uid || uploader._id || uploader.username) : "unknown" %>'
-    };
-
-    const SpacePage = {
-      currentPage: window.SPACE_CONFIG.currentPage,
-      totalPages: window.SPACE_CONFIG.totalPages,
-      currentSort: 'newest',
-      uid: window.SPACE_CONFIG.uid,
-      loading: false,
-
-      init: function() {
-        this.bindTabEvents();
-        this.bindPaginationEvents();
-        this.bindLoadMoreEvents();
-      },
-
-      // 绑定标签页切换事件
-      bindTabEvents: function() {
-        const tabs = document.querySelectorAll('.category-chip');
-        const self = this;
-        tabs.forEach(function(tab) {
-          tab.addEventListener('click', function(e) {
-            e.preventDefault();
-            const sort = tab.dataset.sort;
-            self.switchTab(sort);
-          });
-        });
-      },
-
-      // 切换标签页
-      switchTab: function(sort) {
-        const self = this;
-        if (this.loading || this.currentSort === sort) return;
-
-        this.loading = true;
-        this.currentSort = sort;
-
-        // 更新标签状态
-        document.querySelectorAll('.category-chip').forEach(function(tab) {
-          tab.classList.remove('active');
-        });
-        document.querySelector('[data-sort="' + sort + '"]').classList.add('active');
-
-        // 重置页码
-        this.currentPage = 1;
-
-        this.loadVideos().then(function() {
-          self.loading = false;
-        }).catch(function(error) {
-          console.error('切换标签页失败:', error);
-          self.loading = false;
-        });
-      },
-
-      // 加载视频
-      loadVideos: function() {
-        const params = new URLSearchParams({
-          sort: this.currentSort,
-          page: this.currentPage
-        });
-
-        return axios.get('/space/' + this.uid + '?' + params).then(function(response) {
-          if (response.data.success) {
-            // 更新视频列表
-            document.getElementById('video-grid').innerHTML = response.data.html;
-            
-            // 更新分页
-            if (response.data.pagination) {
-              const paginationWrapper = document.querySelector('.pagination-wrapper');
-              if (paginationWrapper) {
-                paginationWrapper.innerHTML = response.data.paginationHtml;
-              }
-            }
-          }
-        });
-      },
-
-      // 绑定分页事件
-      bindPaginationEvents: function() {
-        const self = this;
-        document.addEventListener('click', function(e) {
-          if (e.target.classList.contains('page-link') && !e.target.closest('.page-item').classList.contains('disabled')) {
-            e.preventDefault();
-            const page = parseInt(e.target.dataset.page);
-            if (page && page !== self.currentPage) {
-              self.currentPage = page;
-              self.loadVideos();
-            }
-          }
-        });
-      },
-
-      // 绑定加载更多事件
-      bindLoadMoreEvents: function() {
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        const self = this;
-        if (loadMoreBtn) {
-          loadMoreBtn.addEventListener('click', function() {
-            if (self.loading || self.currentPage >= self.totalPages) return;
-
-            self.loading = true;
-            self.currentPage++;
-
-            const params = new URLSearchParams({
-              sort: self.currentSort,
-              page: self.currentPage
-            });
-
-            axios.get('/space/' + self.uid + '?' + params).then(function(response) {
-              if (response.data.success) {
-                // 追加视频
-                const videoGrid = document.getElementById('video-grid');
-                videoGrid.insertAdjacentHTML('beforeend', response.data.html);
-
-                // 检查是否还有更多
-                if (self.currentPage >= self.totalPages) {
-                  document.getElementById('load-more-container').style.display = 'none';
-                }
-              }
-              self.loading = false;
-            }).catch(function(error) {
-              console.error('加载更多失败:', error);
-              self.currentPage--;
-              self.loading = false;
-            });
-          });
-        }
-      }
-    };
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-      SpacePage.init();
-
       // 管理员上传头像
+    document.addEventListener('DOMContentLoaded', function() {
       const uploadBtn = document.querySelector('.avatar-upload-btn');
       if (uploadBtn) {
         uploadBtn.addEventListener('click', function() {
@@ -1010,5 +874,6 @@
       }
     });
   </script>
+  <script src="/js/space.js"></script>
 </body>
 </html> 

@@ -4,6 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= video.title %> - <%= title %></title>
+    <!-- SEO Meta -->
+    <meta name="description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
+    <% if (typeof canonicalUrl !== 'undefined') { %>
+    <link rel="canonical" href="<%= canonicalUrl %>">
+    <% } %>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="video.other">
+    <meta property="og:title" content="<%= video.title.replace(/"/g,'&quot;') %>">
+    <meta property="og:description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
+    <meta property="og:image" content="<%= video.coverUrl || video.thumbnail %>">
+    <meta property="og:video" content="<%= video.playUrl || video.streamUrl %>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="player">
+    <meta name="twitter:title" content="<%= video.title.replace(/"/g,'&quot;') %>">
+    <meta name="twitter:description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
+    <meta name="twitter:image" content="<%= video.coverUrl || video.thumbnail %>">
+    <meta name="twitter:player" content="<%= video.playUrl || video.streamUrl %>">
+    <meta name="twitter:player:width" content="1280">
+    <meta name="twitter:player:height" content="720">
+
+    <!-- VideoObject JSON-LD -->
+    <script type="application/ld+json"><%- JSON.stringify({
+      "@context":"https://schema.org",
+      "@type":"VideoObject",
+      name: video.title,
+      description: video.description || video.title,
+      thumbnailUrl: video.coverUrl || video.thumbnail,
+      uploadDate: new Date(video.createdAt).toISOString(),
+      duration: `PT${video.duration}S`,
+      embedUrl: video.playUrl || video.streamUrl,
+      contentUrl: video.cdnUrl || video.url,
+      author:{"@type":"Person",name:video.up.name,identifier:video.up.uid},
+      genre: video.category,
+      interactionStatistic:[{"@type":"InteractionCounter","interactionType":{"@type":"WatchAction"},"userInteractionCount":video.views||0},{"@type":"InteractionCounter","interactionType":{"@type":"LikeAction"},"userInteractionCount":video.likes||0}],
+      isAccessibleForFree: !video.isPremiumOnly
+    }) %></script>
     <link rel="stylesheet" href="https://unpkg.com/video.js/dist/video-js.css">
     <link rel="stylesheet" href="https://unpkg.com/@videojs/themes@1/dist/city/index.css">
     <style>
@@ -49,9 +87,13 @@
             </div>
             
             <div class="uploader-info">
+                <% if (video.up && video.up.avatarUrl) { %>
+                <img src="<%= video.up.avatarUrl %>" alt="<%= (video.up.name || video.up.displayName || video.up.username || '未知用户') %> 的头像" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:10px;">
+                <% } else { %>
                 <div class="uploader-avatar"></div>
+                <% } %>
                 <div>
-                    <div><strong><%= video.up.name || '未知用户' %></strong></div>
+                    <div><strong><%= video.up ? (video.up.name || video.up.displayName || video.up.username || '未知用户') : '未知用户' %></strong></div>
                     <div style="font-size: 12px; color: #666;">UP主</div>
                 </div>
             </div>
@@ -66,13 +108,27 @@
             <h3 class="related-title">相关推荐</h3>
             <div class="video-grid">
                 <% relatedVideos.forEach(function(relatedVideo) { %>
-                <div class="video-card" onclick="location.href='/video/<%= relatedVideo._id %>'">
-                    <div class="video-thumbnail">
-                        <span style="color: #999;">封面</span>
+                <% const previewAttr = relatedVideo.previewUrl ? `data-preview="${relatedVideo.previewUrl}"` : '' %>
+                <% const imgAttr = relatedVideo.previewImage ? `data-image="${relatedVideo.previewImage}"` : '' %>
+                <div 
+                  class="video-card" 
+                  onclick="location.href='/video/<%= relatedVideo._id %>'" 
+                >
+                    <div class="video-thumbnail" style="position:relative;height:120px;overflow:hidden;" <%- previewAttr %> <%- imgAttr %>>
+                        <% const thumb = relatedVideo.previewImage || relatedVideo.coverUrl || relatedVideo.thumbnail || '/api/placeholder/video-thumbnail'; %>
+                        <img src="<%= thumb %>" alt="<%= relatedVideo.title %>" style="width:100%;height:100%;object-fit:cover;">
                     </div>
                     <div class="video-card-info">
                         <div class="video-card-title"><%= relatedVideo.title %></div>
-                        <div class="video-card-stats"><%= relatedVideo.views || 0 %> 播放</div>
+                        <div class="video-card-stats">
+                            <% if (relatedVideo.up && (relatedVideo.up.name || relatedVideo.up.displayName || relatedVideo.up.username)) { %>
+                            <span>👤 <%= relatedVideo.up.name || relatedVideo.up.displayName || relatedVideo.up.username %></span> · 
+                            <% } %>
+                            <%= relatedVideo.views || 0 %> 播放
+                        </div>
+                        <% if (relatedVideo.description) { %>
+                        <div class="video-card-desc text-muted" style="font-size:12px;line-height:1.4;max-height:3.6em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;"><%= relatedVideo.description %></div>
+                        <% } %>
                     </div>
                 </div>
                 <% }); %>
@@ -86,17 +142,33 @@
     </div>
     <!-- Video.js & 插件 -->
     <script src="https://unpkg.com/video.js/dist/video.js"></script>
-    <!-- video.js 自带 VHS，避免重复插件 -->
-    <script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.min.js"></script>
-    <script src="https://unpkg.com/videojs-sprite-thumbnails@latest/dist/videojs-sprite-thumbnails.min.js"></script>
+    <!-- 使用 jsDelivr CDN，避免 unpkg 被阻断 -->
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@1/dist/videojs-dash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-sprite-thumbnails@latest/dist/videojs-sprite-thumbnails.min.js"></script>
+
+    <!-- 相关视频数据 -->
+    <script id="related-videos-data" type="application/json">
+      <%- JSON.stringify(relatedVideos || []) %>
+    </script>
+
+    <!-- 页面配置数据，避免在JS中直接写EJS，减少语法冲突 -->
+    <script id="page-config" type="application/json">
+      <%- JSON.stringify({
+        VIDEO_ID: video.id,
+        PRICE: Number.isFinite(video.priceCoins) ? video.priceCoins : 0,
+        CATEGORY: video.category,
+        DEFAULT_PLAY_URL: video.playUrl ? video.playUrl : '',
+        IS_LOGIN: !!user
+      }) %>
+    </script>
+
     <script>
-      const VIDEO_ID = '<%= video.id %>';
-      const PRICE  = <%= (Number.isFinite(video.priceCoins) ? video.priceCoins : 0) %>;
-      // 判断是否付费视频：价格>0 或 分类为 paid
-      const IS_PAID_VIDEO = (PRICE > 0) || ('<%= video.category %>'.trim() === 'paid');
-      // 后端已渲染出的播放地址（对免费或已处理签名的资源最可靠）
-      const DEFAULT_PLAY_URL = '<%= video.playUrl ? video.playUrl : "" %>';
-      const IS_LOGIN = <%= user ? 'true' : 'false' %>;
+      const PAGE_CONF = JSON.parse(document.getElementById('page-config').textContent || '{}');
+      const VIDEO_ID = PAGE_CONF.VIDEO_ID;
+      const PRICE    = PAGE_CONF.PRICE;
+      const IS_PAID_VIDEO = (PRICE > 0) || (PAGE_CONF.CATEGORY && PAGE_CONF.CATEGORY.trim() === 'paid');
+      const DEFAULT_PLAY_URL = PAGE_CONF.DEFAULT_PLAY_URL;
+      const IS_LOGIN = PAGE_CONF.IS_LOGIN;
       let hasPurchase = false; // 后端可渲染已购状态
 
       const playerEl   = document.getElementById('videoPlayer');
@@ -106,8 +178,12 @@
         controlBar:{ pictureInPictureToggle:false, downloadMenuButton:false }
       });
 
-      // 缩略图示例
-      vjsPlayer.spriteThumbnails({ url:'/thumbs/sprite.jpg', width:160, height:90, interval:1 });
+      // 缩略图示例（插件存在时才调用）
+      if (typeof vjsPlayer.spriteThumbnails === 'function') {
+        try {
+          vjsPlayer.spriteThumbnails({ url:'/thumbs/sprite.jpg', width:160, height:90, interval:1 });
+        } catch(e) { console.warn('spriteThumbnails 初始化失败', e); }
+      }
 
       const overlay  = document.getElementById('payOverlay');
       const buyBtn   = document.getElementById('buyBtn');
@@ -192,7 +268,7 @@
           // 先插入 iframe，再把 overlay 置于最上层
           container.appendChild(iframe);
           overlay.style.zIndex = '9999';
-          container.appendChild(overlay); // appendChild 会将已存在的节点移动到末尾
+          container.appendChild(overlay);
 
           // 记录状态
           previewIsIframe = true;
@@ -228,22 +304,19 @@
       }
 
       async function init(){
-        console.log('DEFAULT_PLAY_URL:', DEFAULT_PLAY_URL, 'IS_PAID_VIDEO:', IS_PAID_VIDEO);
         let url;
 
         if(IS_PAID_VIDEO){
-          // 如果已登录且已购买可直接获取完整播放地址，否则回退到试看地址
           url = await getPlayUrl();
           if(!url){
             url = await getPreviewUrl();
           }
         }else{
-          // 免费视频直接使用后端渲染出的最终播放地址，避免 403
           url = DEFAULT_PLAY_URL;
         }
 
         loadSource(url);
-        // 触发浏览器开始加载元数据
+        // 元数据加载后自动播放静音
         vjsPlayer.ready(()=>{
           if(!IS_PAID_VIDEO){
             vjsPlayer.muted(true);
@@ -257,17 +330,11 @@
         try{
           const iframeUrl = await unlockVideo();
           if(iframeUrl){
-            // 购买成功：切换到完整版播放
             hasPurchase = true;
-
-            // 清理计时器 & 任何预览 iframe
             if(previewTimer){ clearTimeout(previewTimer); previewTimer = null; }
             if(previewIsIframe && previewIframe){ previewIframe.remove(); previewIframe = null; }
-
-            // 隐藏遮罩并清理计时
             overlay.style.display = 'none';
 
-            // 加载完整版（带 token 的 iframe），追加播放参数
             const finalUrl = iframeUrl.includes('?') ? `${iframeUrl}&autoplay=true&muted=false&playsinline=true` : `${iframeUrl}?autoplay=true&muted=false&playsinline=true`;
 
             const container = document.getElementById('playerContainer');
@@ -278,10 +345,72 @@
           }else{
             alert('解锁失败');
           }
-        }catch(e){console.error(e);alert('购买失败');}
+        }catch(e){ console.error(e); alert('购买失败'); }
       });
 
       init();
+
+      // 引入视频预览处理脚本 - 直接复制主页的逻辑
+      document.addEventListener('DOMContentLoaded', () => {
+        // 首先为相关推荐视频卡片设置__data__属性
+        const relatedVideosData = JSON.parse(document.getElementById('related-videos-data').textContent || '[]');
+        const videoCards = document.querySelectorAll('.video-card');
+        videoCards.forEach((card, index) => {
+          if (relatedVideosData[index]) {
+            card.__data__ = relatedVideosData[index];
+          }
+        });
+
+        function applyPreviewAnimation(){
+          document.querySelectorAll('.video-card').forEach(card => {
+            const videoData = card.__data__ || {};
+            const img = card.querySelector('.video-thumbnail img');
+            if(!img) return;
+
+            const thumbDiv = card.querySelector('.video-thumbnail');
+            let p = thumbDiv?.dataset.preview || (videoData && videoData.previewUrl) || '';
+            const imgFallback = thumbDiv?.dataset.image || (videoData && videoData.previewImage) || '';
+            if(!p) return;
+
+            if(/\.(mp4|webm)$/i.test(p)){
+              const v = document.createElement('video');
+              v.muted = true;
+              v.loop = true;
+              v.autoplay = true;
+              v.playsInline = true;
+              v.setAttribute('playsinline','');
+              v.setAttribute('webkit-playsinline','');
+              v.setAttribute('muted','');
+              v.style.width = '100%';
+              v.style.height = '100%';
+              v.style.objectFit = 'cover';
+              v.style.background = 'transparent';
+
+              // 尝试 webm 与 mp4 双源
+              const source1 = document.createElement('source');
+              source1.src = p;
+              source1.type = p.endsWith('.webm') ? 'video/webm' : 'video/mp4';
+              const alt = p.endsWith('.webm') ? p.replace('.webm','.mp4') : p.replace('.mp4','.webm');
+              const source2 = document.createElement('source');
+              source2.src = alt;
+              source2.type = alt.endsWith('.webm') ? 'video/webm' : 'video/mp4';
+              v.appendChild(source1);
+              v.appendChild(source2);
+              v.src = p; // 设置首选源，Safari 需要
+
+              // 出错时回退到图片
+              v.onerror = ()=>{ if(imgFallback){ img.src = imgFallback; }
+              };
+
+              img.replaceWith(v);
+            }else{
+              img.src = p;
+            }
+          });
+        }
+
+        applyPreviewAnimation();
+      });
     </script>
 </body>
 </html>

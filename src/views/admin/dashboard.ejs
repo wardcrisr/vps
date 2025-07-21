@@ -203,6 +203,10 @@
                                     <option value="" selected>请选择UP主</option>
                                 </select>
                                 <input type="number" id="adminPriceInput" class="form-control mb-2" placeholder="所需金币" min="1" max="9999" style="display:none;">
+
+                                <!-- 描述输入 -->
+                                <label class="form-label mt-2" for="adminDescriptionInput">Description</label>
+                                <textarea id="adminDescriptionInput" class="form-control mb-3" rows="4" placeholder="Tell viewers about your video (type @ to mention a channel)"></textarea>
                                 <button id="adminUploadBtn" class="btn btn-primary w-100">开始上传</button>
                                 <div id="adminUploadStatus" class="small text-muted mt-2"></div>
                             </div>
@@ -1170,11 +1174,23 @@
                               filetype: file.type,
                               title: file.name
                             },
-                            chunkSize: 5 * 1024 * 1024,
-                            retryDelays: [0, 3000, 5000, 10000],
+                            // 采用更大的分片，减少请求次数，官方推荐>6MB
+                            chunkSize: 8 * 1024 * 1024,
+                            // 更长的重试等待时间，提升弱网稳定性
+                            retryDelays: [0, 3000, 5000, 10000, 20000, 60000],
+                            // 告诉 tus 在创建请求时直接上传首块数据，可减少一次请求
+                            uploadDataDuringCreation: true,
+                            // 上传成功后清理本地指纹，避免重复上传时异常
+                            removeFingerprintOnSuccess: true,
+                            // 提前告知文件大小，避免额外 HEAD 校验
+                            uploadSize: file.size,
                             onError: err => {
                               console.error('tus error', err);
-                              adminUploadStatus.textContent = '❌ 上传失败: ' + err.message;
+                              let msg = err.message;
+                              if (msg === 'Failed to fetch') {
+                                msg = '网络连接中断或跨域请求受阻，请检查网络后重试';
+                              }
+                              adminUploadStatus.textContent = '❌ 上传失败: ' + msg;
                               adminUploadStatus.className = 'small text-danger mt-2';
                               rejectUpload(err);
                             },
@@ -1212,7 +1228,8 @@
                               coverUrl: coverUrl,
                               category: adminCategorySelect.value,
                               videoId: videoId,
-                              priceCoin: adminCategorySelect.value === 'paid' ? parseInt(adminPriceInput.value,10) : 0
+                              priceCoin: adminCategorySelect.value === 'paid' ? parseInt(adminPriceInput.value,10) : 0,
+                              description: document.getElementById('adminDescriptionInput').value.trim()
                           };
                           
                           // 如果选择了UP主，添加到请求体

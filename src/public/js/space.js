@@ -15,6 +15,9 @@ const SpacePage = {
     this.bindTabEvents();
     this.bindPaginationEvents();
     this.bindLoadMoreEvents();
+
+    // 首次渲染也应用预览动画（初始SSR视频）
+    this.applyPreviewAnimation();
   },
 
   // 从URL获取UID
@@ -30,15 +33,24 @@ const SpacePage = {
     return parseInt(urlParams.get('page')) || 1;
   },
 
-  // 从URL获取当前排序
+  // 从URL或DOM获取当前排序
   getCurrentSortFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('sort') || 'newest';
+    const urlSort = urlParams.get('sort');
+    if (urlSort) return urlSort;
+    
+    // 从DOM中的active标签获取
+    const activeTab = document.querySelector('.category-chip.active');
+    if (activeTab && activeTab.dataset.sort) {
+      return activeTab.dataset.sort;
+    }
+    
+    return 'newest';
   },
 
   // 绑定标签页切换事件
   bindTabEvents() {
-    const tabs = document.querySelectorAll('.tab-item');
+    const tabs = document.querySelectorAll('.category-chip');
     tabs.forEach(tab => {
       tab.addEventListener('click', (e) => {
         e.preventDefault();
@@ -56,7 +68,7 @@ const SpacePage = {
     this.currentPage = 1;
     
     // 更新标签页样式
-    document.querySelectorAll('.tab-item').forEach(tab => {
+    document.querySelectorAll('.category-chip').forEach(tab => {
       tab.classList.remove('active');
     });
     document.querySelector(`[data-sort="${sort}"]`).classList.add('active');
@@ -80,7 +92,7 @@ const SpacePage = {
     
     try {
       const response = await axios.get(`/space/${this.uid}/videos`, {
-        params: { page, sort, limit: 12 }
+        params: { page: page || this.currentPage, sort: sort || this.currentSort, limit: 12 }
       });
 
       if (response.data.success) {
@@ -111,6 +123,45 @@ const SpacePage = {
       const videoCard = this.createVideoCard(video);
       grid.appendChild(videoCard);
     });
+
+    // 应用预览动画
+    this.applyPreviewAnimation();
+  },
+
+  // 预览动画替换（与首页逻辑保持一致）
+  applyPreviewAnimation() {
+    document.querySelectorAll('.video-card').forEach(card => {
+      const videoData = card.__data__ || {};
+
+      const img = card.querySelector('.video-thumbnail img');
+      if (!img) return;
+
+      // 优先使用传入数据，其次读取DOM data属性
+      let p = (videoData && (videoData.previewUrl || videoData.previewImage)) || card.dataset.previewUrl || card.querySelector('.video-thumbnail').dataset.preview;
+
+      // 若仍为空则跳过
+      if (!p) return;
+
+      if (/\.(mp4|webm)$/i.test(p)) {
+        const v = document.createElement('video');
+        v.src = p;
+        v.muted = true;
+        v.loop = true;
+        v.autoplay = true;
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.setAttribute('muted', '');
+        v.style.width = '100%';
+        v.style.height = '100%';
+        v.style.objectFit = 'contain';
+        v.style.background = 'transparent';
+        v.style.backgroundColor = 'transparent';
+        img.replaceWith(v);
+      } else {
+        img.src = p;
+      }
+    });
   },
 
   // 创建视频卡片
@@ -124,9 +175,15 @@ const SpacePage = {
     const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
           // 头像功能已删除
     
+    // 选择最佳封面/预览源（优先previewImage）
+    const previewSrc = video.previewImage || video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail';
+
+    // 设置data-preview属性供后续动画脚本使用
+    const previewDataAttr = video.previewUrl ? `data-preview="${video.previewUrl}"` : '';
+    
     div.innerHTML = `
-      <div class="video-thumbnail" onclick="location.href='/vod/${video._id}'">
-        <img src="${video.coverUrl || video.thumbnail || '/api/placeholder/video-thumbnail'}" 
+      <div class="video-thumbnail" ${previewDataAttr} onclick="location.href='/vod/${video._id}'">
+        <img src="${previewSrc}" 
              alt="${this.escapeHtml(video.title)}" loading="lazy">
         <div class="video-duration">${this.formatDuration(video.duration)}</div>
         ${video.isPremiumOnly ? '<div class="premium-badge">付费</div>' : ''}
@@ -147,6 +204,9 @@ const SpacePage = {
         </div>
       </div>
     `;
+
+    // 保存原始数据，用于后续预览替换
+    div.__data__ = video;
     
     return div;
   },
@@ -154,13 +214,15 @@ const SpacePage = {
   // 绑定分页事件
   bindPaginationEvents() {
     document.addEventListener('click', (e) => {
-      if (e.target.matches('.page-link') && e.target.dataset.page) {
+      // 通过冒泡捕获任何带.page-link 类的祖先
+      const link = e.target.closest('.page-link');
+      if (link && link.dataset.page) {
         e.preventDefault();
-        const page = parseInt(e.target.dataset.page);
+        const page = parseInt(link.dataset.page);
         if (page && page !== this.currentPage) {
           this.loadVideos(page, this.currentSort, true);
           
-          // 更新URL
+          // 更新 URL 查询参数
           const url = new URL(window.location);
           url.searchParams.set('page', page.toString());
           window.history.pushState({}, '', url);

@@ -54,7 +54,7 @@ router.post('/upload-cover', uploadCover.single('cover'), (req, res) => {
 // POST /api/admin/videos  { title, videoUrl, coverUrl, category, uploaderId }
 router.post('/videos', async (req, res) => {
   try {
-    const { title, videoUrl, coverUrl, category, videoId, uploaderId, priceCoin } = req.body;
+    const { title, videoUrl, coverUrl, category, videoId, uploaderId, priceCoin, description } = req.body;
 
     if (!title || !videoUrl || !coverUrl || !category || !videoId) {
       return res.status(400).json({ success: false, message: '缺少必要字段' });
@@ -62,6 +62,7 @@ router.post('/videos', async (req, res) => {
 
     const updateFields = {
       title,
+      description: description || title,
       originalName: title,
       mimetype: 'video/mp4',
       size: 0,

@@ -39,7 +39,7 @@ exports.spacePage = async (req, res) => {
     const limit = 12; // 每页12个视频
     const skip = (page - 1) * limit;
 
-    const videos = await Media.find({ 
+    let videos = await Media.find({ 
       uploader: uploader._id, 
       type: 'video',
       isPublic: true 
@@ -48,6 +48,17 @@ exports.spacePage = async (req, res) => {
     .limit(limit)
     .skip(skip)
           .populate('uploader', 'uid name');
+
+    // 为SSR视频添加预览字段
+    videos = videos.map(v => {
+      const obj = v.toObject();
+      if (obj.bunnyId || obj.guid) {
+        const guid = obj.bunnyId || obj.guid;
+        obj.previewImage = `https://vz-48ed4217-ce4.b-cdn.net/${guid}/preview.webp`;
+        obj.previewUrl   = `https://vz-48ed4217-ce4.b-cdn.net/${guid}/preview.mp4`;
+      }
+      return obj;
+    });
 
     // 获取视频总数（用于分页）
     const totalVideos = await Media.countDocuments({ 
@@ -145,16 +156,17 @@ exports.getUploaderVideos = async (req, res) => {
       isPublic: true 
     });
 
-    // 处理视频数据，添加 previewUrl 并删除旧字段
+    // 处理视频数据，若可用则添加预览字段（保留 coverUrl/thumbnail 以便前端回退）
     const processedVideos = videos.map(video => {
       const obj = video.toObject();
-      delete obj.coverUrl;
-      delete obj.thumbnail;
       
-      // 添加 previewUrl 字段
+      // 仅在 Bunny 视频存在时才生成预览
       if (obj.bunnyId || obj.guid) {
         const videoGuid = obj.bunnyId || obj.guid;
-        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+        // 静态 WebP 预览
+        obj.previewImage = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.webp`;
+        // 动态 MP4/WebM 预览
+        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${videoGuid}/preview.mp4`;
       }
       
       return obj;

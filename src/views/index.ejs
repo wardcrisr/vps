@@ -708,7 +708,7 @@
       <a href="https://t.me/+muk0tMtyrhYzZmU1" class="telegram-link" target="_blank">
         <span class="telegram-text">官方电报群</span>
         <img
-          src="https://fulijix.b-cdn.net/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84%E8%AE%BE%E8%AE%A1.png"
+          src="https://fulijix.b-cdn.net/telegramlogo.png"
           alt="Telegram"
           class="telegram-icon"
           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40NzcgMiAyIDYuNDc3IDIgMTJTNi40NzcgMjIgMTIgMjJTMjIgMTcuNTIzIDIyIDEyUzE3LjUyMyAyIDEyIDJaTTEyIDIwQzcuNTg5IDIwIDQgMTYuNDExIDQgMTJTNy41ODkgNCA0IDEyUzEwLjQ3NyAyMCAxMiAyMFoiIGZpbGw9IiMwMEI0RDgiLz4KPHBhdGggZD0iTTEyIDJDNi40NzcgMiAyIDYuNDc3IDIgMTJTNi40NzcgMjIgMTIgMjJTMjIgMTcuNTIzIDIyIDEyUzE3LjUyMyAyIDEyIDJaTTEyIDIwQzcuNTg5IDIwIDQgMTYuNDExIDQgMTJTNy41ODkgNCA0IDEyUzEwLjQ3NyAyMCAxMiAyMFoiIGZpbGw9IiMwMEI0RDgiLz4KPC9zdmc+'; this.onerror=null;"
@@ -1087,11 +1087,18 @@
           
           if (reset) {
             allVideos = videos;
+            renderVideos(videos, reset);
           } else {
-            allVideos = [...allVideos, ...videos];
+            // 过滤掉已存在的视频，避免重复
+            const existingIds = new Set(allVideos.map(v => v._id || v.id || v.filename));
+            const newVideos = videos.filter(v => {
+              const id = v._id || v.id || v.filename;
+              return !existingIds.has(id);
+            });
+            
+            allVideos = [...allVideos, ...newVideos];
+            renderVideos(newVideos, false); // 只渲染新视频
           }
-
-          renderVideos(allVideos, reset);
           
           hasMore = videos.length >= 20; // 假设每页20个
           toggleLoadMore();
@@ -1123,10 +1130,8 @@
       }
 
       videos.forEach(video => {
-        if (reset || !document.querySelector(`[data-video-id="${video.filename}"]`)) {
-          const videoCard = createVideoCard(video);
-          grid.appendChild(videoCard);
-        }
+        const videoCard = createVideoCard(video);
+        grid.appendChild(videoCard);
       });
     }
 
@@ -1307,6 +1312,20 @@
       });
     });
   </script>
+
+  <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/687ce26b2188e71915f5d064/1j0k29qv4';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+  <!--End of Tawk.to Script-->
 </body>
 </html>
 
