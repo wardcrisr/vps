@@ -474,7 +474,9 @@
             <div class="video-thumbnail">
               <img src="<%= video.previewUrl || '/api/placeholder/video-thumbnail' %>" data-preview="<%= video.previewVideo || '' %>" alt="<%= video.title || video.name %>" onerror="this.src='/api/placeholder/video-thumbnail'">
               <div class="video-duration"><%= formatDuration(video.duration || 0) %></div>
-              <% if (video.isPremiumOnly) { %>
+              <% if (video.isPremiumOnly || video.category === 'member') { %>
+                <div class="premium-badge">会员</div>
+              <% } else if (video.category === 'paid' || (video.priceCoin && video.priceCoin > 0) || (video.priceCoins && video.priceCoins > 0)) { %>
                 <div class="premium-badge">付费</div>
               <% } %>
             </div>

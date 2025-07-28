@@ -38,7 +38,7 @@
 
 <div class="video-card" data-preview-url="<%= video.previewUrl || '' %>" data-preview-image="<%= video.previewImage || '' %>">
   <!-- 视频缩略图区域 - 点击播放视频 -->
-  <div class="video-thumbnail" onclick="location.href='/vod/<%= video._id %>'" data-preview="<%= video.previewUrl || '' %>">
+  <div class="video-thumbnail" onclick="location.href='/video/<%= video._id %>'" data-preview="<%= video.previewUrl || '' %>">
     <picture>
       <% if (video.previewImage) { %>
         <source srcset="<%= video.previewImage %>" type="image/webp">
@@ -47,7 +47,9 @@
            alt="<%= video.title %>" loading="lazy">
     </picture>
     <div class="video-duration"><%= formatDuration(video.duration) %></div>
-    <% if (video.isPremiumOnly) { %>
+    <% if (video.isPremiumOnly || video.category === 'member') { %>
+      <div class="premium-badge">会员</div>
+    <% } else if (video.category === 'paid' || (video.priceCoin && video.priceCoin > 0) || (video.priceCoins && video.priceCoins > 0)) { %>
       <div class="premium-badge">付费</div>
     <% } %>
   </div>
@@ -55,7 +57,7 @@
   <!-- 视频信息区域 -->
   <div class="video-info">
     <!-- 视频标题 - 点击播放视频 -->
-    <h4 class="video-title" title="<%= video.title %>" onclick="location.href='/vod/<%= video._id %>'">
+    <h4 class="video-title" title="<%= video.title %>" onclick="location.href='/video/<%= video._id %>'">
       <%= video.title %>
     </h4>
     

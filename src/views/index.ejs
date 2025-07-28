@@ -682,6 +682,52 @@
       background-color: transparent !important;
     }
 
+    /* UP主头像展示区 */
+    .uploader-section {
+      margin: 24px auto;
+      max-width: 640px;
+      text-align: center;
+    }
+    .uploader-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #0f0f0f;
+    }
+    .uploader-grid {
+      display: grid;
+      gap: 15px;
+      justify-items: center;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (min-width: 576px) {
+      .uploader-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .uploader-item {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .uploader-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e5e5e5;
+    }
+    .uploader-name {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      max-width: 72px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     /* 新增样式：用户头像图标 */
     .avatar-icon {
       width: 48px;
@@ -755,6 +801,23 @@
           <i class="fas fa-search"></i>
         </button>
       </form>
+    </div>
+
+    <!-- UP主头像展示区 -->
+    <div class="uploader-section">
+      <h5 class="uploader-title">探索UP主</h5>
+      <div class="uploader-grid">
+        <% if (typeof uploaders !== 'undefined' && uploaders.length) { %>
+          <% uploaders.forEach(function(up) { %>
+            <a href="/space/<%= up.uid || up._id %>" class="uploader-item" title="<%= up.name || up.displayName || up.username %>">
+              <img src="<%= up.avatarUrl || '/images/default-avatar.png' %>" alt="<%= up.name || up.displayName || up.username %>" class="uploader-avatar" onerror="this.src='/images/default-avatar.png';">
+              <span class="uploader-name"><%= up.name || up.displayName || up.username %></span>
+            </a>
+          <% }); %>
+        <% } else { %>
+          <p class="text-muted">暂无UP主信息</p>
+        <% } %>
+      </div>
     </div>
 
     <!-- 分类标签 -->
@@ -1154,19 +1217,20 @@
       const uploaderUid = uploader._id || uploader.uid || 'anonymous';
       const uploaderName = uploader.name || uploader.displayName || uploader.username || '匿名用户';
 
-      // 检测付费视频的多种可能字段
-      const isPaidVideo = video.isPremiumOnly || video.isPaid || video.category === 'paid' || 
+      // 区分付费视频和会员视频
+      const isVipVideo = video.isPremiumOnly || video.category === 'member';
+      const isPaidVideo = video.category === 'paid' || 
                          (video.priceCoin && video.priceCoin > 0) || (video.price && video.price > 0) || 
                          (video.coins && video.coins > 0) || (video.cost && video.cost > 0);
       
-      // 获取金币数量（优先使用priceCoin字段）
-      const coinPrice = video.priceCoin || video.price || video.coins || video.cost || 5;
+      // 获取金币数量（只有付费视频才显示金币）
+      const coinPrice = video.priceCoin || video.price || video.coins || video.cost || 0;
 
       card.innerHTML = `
                   <div class="video-thumbnail" onclick="location.href='/video/${video._id || video.id}'">
             <img src="${fixedThumbnail}" alt="${video.title || video.name}" onerror="this.src='/api/placeholder/video-thumbnail'">
             <div class="video-duration">${duration}</div>
-            ${isPaidVideo ? '<div class="premium-badge">付费</div>' : ''}
+            ${isVipVideo ? '<div class="premium-badge">会员</div>' : (isPaidVideo ? '<div class="premium-badge">付费</div>' : '')}
           </div>
         <div class="video-info">
           <div class="video-title" title="${video.title || video.name}" onclick="location.href='/video/${video._id || video.id}'" style="cursor: pointer;">
@@ -1176,7 +1240,7 @@
               <div style="display: flex; align-items: center; gap: 6px;">
                 ${uploader.avatarUrl ? `<img class="avatar-icon" src="${uploader.avatarUrl}" alt="${uploaderName} 的头像" style="width:48px; height:48px; border-radius:50%; object-fit:cover; margin-right:4px;"/>` : '👤'}
                 <span class="uploader-name visible" style="color: #666; font-size: 0.8rem; font-weight: 500;">${uploaderName}</span>
-                ${isPaidVideo ? `<span class="coin-badge"><i class="fas fa-coins"></i>${coinPrice}金币</span>` : ''}
+                ${isPaidVideo && coinPrice > 0 ? `<span class="coin-badge"><i class="fas fa-coins"></i>${coinPrice}金币</span>` : ''}
               </div>
             </div>
           <div class="video-stats">

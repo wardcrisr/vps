@@ -70,12 +70,26 @@ router.post('/:id/purchase', authenticateToken, async (req,res)=>{
 // GET /api/video/:id/play
 router.get('/:id/play', authenticateToken, async (req,res)=>{
   try{
-    const purchased = await Purchase.findOne({ userId:req.user._id, videoId:req.params.id });
-    if(!purchased) return err(res,1,'not purchased',403);
-    
+    const user = await User.findById(req.user._id);
     const video = await Media.findById(req.params.id);
+
     if(!video) return err(res,1,'video not found',404);
-    
+
+    // 访问权限判断
+    let hasAccess = false;
+    if(video.isPremiumOnly){
+      // 会员视频：仅会员可直接观看
+      hasAccess = user && user.isPremium;
+    }else{
+      // 付费视频：检查是否已购买
+      const purchased = await Purchase.findOne({ userId:user._id, videoId:req.params.id });
+      hasAccess = !!purchased;
+    }
+
+    if(!hasAccess){
+      return err(res,1,'no permission',403);
+    }
+
     // 生成视频播放地址，按优先级处理
     let playUrl;
     

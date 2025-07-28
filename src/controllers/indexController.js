@@ -97,10 +97,30 @@ exports.renderIndex = async (req, res) => {
       console.warn('❌ indexController renderIndex still contains cover/thumbnail');
     }
 
+    // ==================== 新增：获取 UP 主头像数据 ====================
+    // 仅查询 isUploader: true 的用户，按粉丝数倒序取前 12 个
+    const uploaders = await User.find(
+      { isUploader: true },
+      {
+        _id: 1,
+        uid: 1,
+        username: 1,
+        displayName: 1,
+        name: 1,
+        avatarUrl: 1,
+        fansCount: 1
+      }
+    )
+      .sort({ fansCount: -1 })
+      .limit(12)
+      .lean();
+    // ===============================================================
+
     // 渲染首页
     res.render('index', {
       title: 'X福利姬 - 视频分享平台',
       videos: processedVideos,
+      uploaders, // 传递到模板
       activeTag: 'home',
       disableDynamicLoad: false,
       user: req.user || null

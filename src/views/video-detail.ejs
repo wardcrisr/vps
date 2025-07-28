@@ -158,18 +158,42 @@
         PRICE: Number.isFinite(video.priceCoins) ? video.priceCoins : 0,
         CATEGORY: video.category,
         DEFAULT_PLAY_URL: video.playUrl ? video.playUrl : '',
-        IS_LOGIN: !!user
+        IS_LOGIN: !!user,
+        IS_PREMIUM_USER: (typeof user !== 'undefined' && user && user.isPremium === true) ? true : false,
+        VIDEO_IS_PREMIUM_ONLY: !!video.isPremiumOnly
       }) %>
     </script>
 
     <script>
       const PAGE_CONF = JSON.parse(document.getElementById('page-config').textContent || '{}');
+      
       const VIDEO_ID = PAGE_CONF.VIDEO_ID;
       const PRICE    = PAGE_CONF.PRICE;
+      let hasPurchase = false; // 后端可渲染已购状态
       const IS_PAID_VIDEO = (PRICE > 0) || (PAGE_CONF.CATEGORY && PAGE_CONF.CATEGORY.trim() === 'paid');
+      const IS_VIP_VIDEO = PAGE_CONF.VIDEO_IS_PREMIUM_ONLY;
+      const IS_PREMIUM_USER = PAGE_CONF.IS_PREMIUM_USER;
+
+      // 正常模式：根据数据库中的isPremiumOnly字段判断是否为会员视频
+      const FORCE_VIP_TEST = false; // 生产环境设为false
+      console.log('=== 会员视频测试模式 ===');
+      console.log('原始 IS_VIP_VIDEO:', IS_VIP_VIDEO);
+      console.log('强制测试模式:', FORCE_VIP_TEST);
+
+      // 计算是否需要试看限制（实时计算，购买/开通会员后可动态变化）
+      const needRestrict = () => {
+        const result = (IS_PAID_VIDEO && !hasPurchase) || ((IS_VIP_VIDEO || FORCE_VIP_TEST) && !IS_PREMIUM_USER);
+        console.log('needRestrict() 计算结果:', result, {
+          IS_PAID_VIDEO,
+          hasPurchase,
+          IS_VIP_VIDEO: IS_VIP_VIDEO || FORCE_VIP_TEST,
+          IS_PREMIUM_USER
+        });
+        return result;
+      };
+
       const DEFAULT_PLAY_URL = PAGE_CONF.DEFAULT_PLAY_URL;
       const IS_LOGIN = PAGE_CONF.IS_LOGIN;
-      let hasPurchase = false; // 后端可渲染已购状态
 
       const playerEl   = document.getElementById('videoPlayer');
       const vjsPlayer  = videojs(playerEl, {
@@ -181,12 +205,18 @@
       // 缩略图示例（插件存在时才调用）
       if (typeof vjsPlayer.spriteThumbnails === 'function') {
         try {
-          vjsPlayer.spriteThumbnails({ url:'/thumbs/sprite.jpg', width:160, height:90, interval:1 });
+      vjsPlayer.spriteThumbnails({ url:'/thumbs/sprite.jpg', width:160, height:90, interval:1 });
         } catch(e) { console.warn('spriteThumbnails 初始化失败', e); }
       }
 
       const overlay  = document.getElementById('payOverlay');
       const buyBtn   = document.getElementById('buyBtn');
+
+      // 根据视频类型动态修改提示文案
+      if((IS_VIP_VIDEO || FORCE_VIP_TEST) && !IS_PREMIUM_USER){
+        overlay.querySelector('p').textContent = '试看已结束，请开通会员继续观看';
+        buyBtn.textContent = '立即开通会员';
+      }
 
       const PREVIEW_SECONDS = 30;
 
@@ -207,7 +237,12 @@
 
       // 监听试看限制（Video.js）
       vjsPlayer.on('timeupdate', ()=>{
-        if(IS_PAID_VIDEO && !hasPurchase && vjsPlayer.currentTime() >= PREVIEW_SECONDS){
+        const currentTime = vjsPlayer.currentTime();
+        if(currentTime > 25) { // 在接近30秒时开始打印调试信息
+          console.log(`时间: ${currentTime.toFixed(1)}s, needRestrict: ${needRestrict()}, PREVIEW_SECONDS: ${PREVIEW_SECONDS}`);
+        }
+        if(needRestrict() && vjsPlayer.currentTime() >= PREVIEW_SECONDS){
+          console.log('触发试看限制，显示支付遮罩');
           showPayOverlay();
         }
       });
@@ -216,7 +251,7 @@
       let previewTimer = null;
       function startPreviewCountdown(){
         if(previewTimer){ clearTimeout(previewTimer); }
-        if(IS_PAID_VIDEO && !hasPurchase){
+        if(needRestrict()){
           previewTimer = setTimeout(()=>{
             showPayOverlay();
           }, PREVIEW_SECONDS * 1000);
@@ -306,19 +341,29 @@
       async function init(){
         let url;
 
-        if(IS_PAID_VIDEO){
+        if(IS_VIP_VIDEO || FORCE_VIP_TEST){
+          if(IS_PREMIUM_USER){
+            url = DEFAULT_PLAY_URL;
+          }else{
+            url = await getPreviewUrl();
+          }
+        } else if(IS_PAID_VIDEO){
           url = await getPlayUrl();
           if(!url){
             url = await getPreviewUrl();
           }
-        }else{
+        } else {
           url = DEFAULT_PLAY_URL;
         }
 
         loadSource(url);
         // 元数据加载后自动播放静音
         vjsPlayer.ready(()=>{
-          if(!IS_PAID_VIDEO){
+          if(!needRestrict()){
+            vjsPlayer.muted(true);
+            vjsPlayer.play().catch(()=>{});
+          } else {
+            // 对于需要限制的视频，也允许播放但会在30秒后暂停
             vjsPlayer.muted(true);
             vjsPlayer.play().catch(()=>{});
           }
@@ -326,6 +371,12 @@
       }
 
       buyBtn.addEventListener('click', async ()=>{
+        // 若为会员视频，则跳转会员开通页
+        if(IS_VIP_VIDEO || FORCE_VIP_TEST){
+          location.href = '/vip';
+          return;
+        }
+        // 付费视频购买流程
         if(!IS_LOGIN){ alert('请先登录'); return; }
         try{
           const iframeUrl = await unlockVideo();

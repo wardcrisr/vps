@@ -87,14 +87,14 @@ router.get('/:id', optionalAuth, async (req, res) => {
     // 优先同UP主的视频
     if (video.uploader) {
       relatedVideos = await Media.find({
-        type: 'video',
-        isPublic: true,
+      type: 'video',
+      isPublic: true,
         uploader: video.uploader._id,
-        _id: { $ne: videoId }
-      })
+      _id: { $ne: videoId }
+    })
       .populate('uploader', 'username displayName _id avatarUrl')
-      .sort({ createdAt: -1 })
-      .limit(8)
+    .sort({ createdAt: -1 })
+    .limit(8)
       .select('_id title coverUrl thumbnail duration views description bunnyId guid uploader');
     }
 

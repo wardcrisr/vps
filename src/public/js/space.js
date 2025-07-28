@@ -182,14 +182,14 @@ const SpacePage = {
     const previewDataAttr = video.previewUrl ? `data-preview="${video.previewUrl}"` : '';
     
     div.innerHTML = `
-      <div class="video-thumbnail" ${previewDataAttr} onclick="location.href='/vod/${video._id}'">
+      <div class="video-thumbnail" ${previewDataAttr} onclick="location.href='/video/${video._id}'">
         <img src="${previewSrc}" 
              alt="${this.escapeHtml(video.title)}" loading="lazy">
         <div class="video-duration">${this.formatDuration(video.duration)}</div>
-        ${video.isPremiumOnly ? '<div class="premium-badge">付费</div>' : ''}
+        ${(video.isPremiumOnly || video.category === 'member') ? '<div class="premium-badge">会员</div>' : (video.category === 'paid' ? '<div class="premium-badge">付费</div>' : '')}
       </div>
       <div class="video-info">
-        <h4 class="video-title" title="${this.escapeHtml(video.title)}" onclick="location.href='/vod/${video._id}'" style="cursor: pointer;">
+        <h4 class="video-title" title="${this.escapeHtml(video.title)}" onclick="location.href='/video/${video._id}'" style="cursor: pointer;">
           ${this.escapeHtml(video.title)}
         </h4>
                   <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">

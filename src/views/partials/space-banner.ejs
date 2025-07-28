@@ -17,14 +17,6 @@
         </div>
         <div class="uploader-details">
           <h1 class="uploader-name">
-            <% if (uploader.avatarUrl) { %>
-              <img
-                class="avataricon"
-                src="<%= uploader.avatarUrl %>"
-                alt="<%= uploader.name || uploader.displayName || uploader.username %> 的头像"
-                style="width:32px; height:32px; borderradius:50%; objectfit:cover; marginright:8px;"
-              />
-            <% } %>       
             <%= uploader.name || uploader.displayName || uploader.username %>
           </h1>
           <div class="uploader-meta">
