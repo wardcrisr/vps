@@ -182,7 +182,7 @@ const videoPaymentRoutes = require('./routes/videoPayment');
 app.use('/api/video', videoPaymentRoutes);
 
 // 新增：用户API路由（实时资料）
-const userApiRoutes = require('./routes/userApi');
+const userApiRoutes = require('./routes/api/user');
 app.use('/api/user', userApiRoutes);
 
 // 用户个人中心路由
@@ -717,7 +717,7 @@ app.use(express.json());                // application/json
 app.use(express.urlencoded({ extended: true })); // application/x-www-form-urlencoded
 
 
-const idatariverRoutes = require('./routes/idataRiver');  
+const idatariverRoutes = require('./routes/idatariver');  
 app.use('/api/idatariver', idatariverRoutes);
 
 // ③ 一切路由都匹配失败后，才落到 404

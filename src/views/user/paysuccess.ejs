@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>支付结果 - 福利姬</title>
+  <!-- Umami Analytics -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="0447789b-3880-4f93-bcc4-e0c5db71972d"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #f8f8f8;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .pay-result-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .result-header {
+      padding: 40px 20px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      color: white;
+    }
+    
+    .result-icon {
+      font-size: 60px;
+      margin-bottom: 16px;
+      animation: bounce 1s ease-in-out;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    .result-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .result-desc {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .result-body {
+      padding: 30px 20px;
+    }
+    
+    .order-info {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .order-item:last-child {
+      margin-bottom: 0;
+      font-weight: 600;
+      color: #4CAF50;
+    }
+    
+    .order-label {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .order-value {
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .btn-secondary:hover {
+      background: #e8e8e8;
+      color: #333;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-1px);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4CAF50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-result .result-header {
+      background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+    }
+    
+    .error-result .order-item:last-child {
+      color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="pay-result-container">
+    <div id="loadingState" class="loading">
+      <div class="spinner"></div>
+      <div>正在确认支付结果...</div>
+    </div>
+    
+    <div id="successState" class="result-success" style="display: none;">
+      <div class="result-header">
+        <div class="result-icon">✅</div>
+        <div class="result-title">支付成功</div>
+        <div class="result-desc">恭喜您成功开通VIP会员</div>
+      </div>
+      <div class="result-body">
+        <div class="order-info">
+          <div class="order-item">
+            <span class="order-label">套餐类型</span>
+            <span class="order-value" id="planName">-</span>
+          </div>
+          <div class="order-item">
+            <span class="order-label">有效期</span>
+            <span class="order-value" id="planDays">-</span>
+          </div>
+          <div class="order-item">
+            <span class="order-label">支付金额</span>
+            <span class="order-value" id="payAmount">-</span>
+          </div>
+          <div class="order-item">
+            <span class="order-label">VIP到期时间</span>
+            <span class="order-value" id="vipExpire">-</span>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <a href="/user" class="btn btn-secondary">个人中心</a>
+          <a href="/" class="btn btn-primary">开始体验</a>
+        </div>
+      </div>
+    </div>
+    
+    <div id="errorState" class="result-error error-result" style="display: none;">
+      <div class="result-header">
+        <div class="result-icon">❌</div>
+        <div class="result-title">支付失败</div>
+        <div class="result-desc">很抱歉，支付过程中出现了问题</div>
+      </div>
+      <div class="result-body">
+        <div class="order-info">
+          <div class="order-item">
+            <span class="order-label">错误信息</span>
+            <span class="order-value" id="errorMsg">支付未完成或订单状态异常</span>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <a href="/user" class="btn btn-secondary">返回个人中心</a>
+          <a href="/user" class="btn btn-primary">重新开通</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 从sessionStorage获取订单信息
+    const orderId = sessionStorage.getItem('lastOrderId');
+    
+    async function checkPaymentResult() {
+      if (!orderId) {
+        showError('未找到订单信息');
+        return;
+      }
+      
+      try {
+        // 轮询检查支付状态
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const checkStatus = async () => {
+          attempts++;
+          
+          const response = await fetch(`/api/idatariver/orderinfo?id=${orderId}`);
+          const result = await response.json();
+          
+          if (result.code === 0 && result.data && result.data.result) {
+            const orderStatus = result.data.result.status;
+            
+            if (orderStatus === 'paid' || orderStatus === 'success' || orderStatus === 'completed') {
+              // 支付成功，调用后端更新VIP状态
+              await updateVipStatus();
+              return;
+            } else if (orderStatus === 'failed' || orderStatus === 'cancelled') {
+              showError('支付失败或已取消');
+              return;
+            }
+          }
+          
+          // 继续轮询
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatus, 2000); // 2秒后重试
+          } else {
+            showError('支付确认超时，请联系客服');
+          }
+        };
+        
+        checkStatus();
+        
+      } catch (error) {
+        console.error('检查支付状态失败:', error);
+        showError('网络错误，请稍后重试');
+      }
+    }
+    
+    async function updateVipStatus() {
+      try {
+        // 这里应该从URL参数或sessionStorage获取套餐信息
+        const planType = new URLSearchParams(window.location.search).get('planType') || 'monthly';
+        
+        const response = await fetch('/api/idatariver/checkpayment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            orderId: orderId,
+            planType: planType
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.code === 0) {
+          showSuccess(result);
+        } else {
+          showError(result.msg || '更新VIP状态失败');
+        }
+        
+      } catch (error) {
+        console.error('更新VIP状态失败:', error);
+        showError('网络错误，请稍后重试');
+      }
+    }
+    
+    function showSuccess(result) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+      
+      // 填充订单信息
+      const planType = new URLSearchParams(window.location.search).get('planType') || 'monthly';
+      const planNames = {
+        monthly: '包月会员',
+        quarterly: '包季会员',
+        yearly: '包年会员'
+      };
+      const planDays = {
+        monthly: '30天',
+        quarterly: '90天',
+        yearly: '365天'
+      };
+      const planAmounts = {
+        monthly: '30金币',
+        quarterly: '90金币',
+        yearly: '300金币'
+      };
+      
+      document.getElementById('planName').textContent = planNames[planType] || '未知套餐';
+      document.getElementById('planDays').textContent = planDays[planType] || '未知';
+      document.getElementById('payAmount').textContent = planAmounts[planType] || '未知';
+      
+      if (result.vipExpireDate) {
+        const expireDate = new Date(result.vipExpireDate);
+        document.getElementById('vipExpire').textContent = expireDate.toLocaleDateString('zh-CN');
+      }
+      
+      // 清除订单号
+      sessionStorage.removeItem('lastOrderId');
+    }
+    
+    function showError(message) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display = 'block';
+      document.getElementById('errorMsg').textContent = message;
+      
+      // 清除订单号
+      sessionStorage.removeItem('lastOrderId');
+    }
+    
+    // 页面加载时开始检查
+    checkPaymentResult();
+  </script>
+</body>
+</html>

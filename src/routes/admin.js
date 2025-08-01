@@ -70,6 +70,7 @@ router.post('/videos', async (req, res) => {
       url: videoUrl,
       coverUrl,
       category,
+      isPremiumOnly: category === 'member', // 会员分类设为会员专属
       cloudStatus: 'uploaded',
       isPublic: true
     };
@@ -173,7 +174,11 @@ router.put('/videos/:id', async (req, res) => {
     
     if (title) updateData.title = title;
     if (description !== undefined) updateData.description = description;
-    if (category) updateData.category = category;
+    if (category) {
+      updateData.category = category;
+      // 当分类改变时，自动设置isPremiumOnly
+      updateData.isPremiumOnly = category === 'member';
+    }
     if (isPremiumOnly !== undefined) updateData.isPremiumOnly = isPremiumOnly;
     if (downloadPrice !== undefined) updateData.downloadPrice = downloadPrice;
     if (isPublic !== undefined) updateData.isPublic = isPublic;
@@ -229,6 +234,8 @@ router.post('/videos/batch', async (req, res) => {
     switch (action) {
       case 'setCategory':
         updateData.category = data.category;
+        // 当批量设置分类时，也要相应设置isPremiumOnly
+        updateData.isPremiumOnly = data.category === 'member';
         message = `已将 ${videoIds.length} 个视频的分类设置为 ${data.category}`;
         break;
       case 'setPremium':

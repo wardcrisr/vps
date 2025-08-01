@@ -16,12 +16,12 @@ router.get('/:id/preview', async (req, res) => {
     // 优先使用 HLS 试看片段，其次回退到 CDN / 本地 URL。
     let previewUrl;
     if (video.streamUrl) {
-      // 已有 HLS 地址，拼试看参数（30秒）
-      previewUrl = `${video.streamUrl}?start=0&duration=30`;
+      // 已有 HLS 地址，拼试看参数（150秒）
+      previewUrl = `${video.streamUrl}?start=0&duration=150`;
     } else if (video.bunnyId) {
       // 构造 Bunny iframe 地址
       const libId = process.env.LIB_ID || process.env.BUNNY_VIDEO_LIBRARY || '461001';
-      previewUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}?start=0&duration=30&muted=true&autoplay=true&playsinline=true`;
+      previewUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}?start=0&duration=150&muted=true&autoplay=true&playsinline=true&metrics=false`;
     } else if (video.cdnUrl && video.cdnUrl.startsWith('http')) {
       previewUrl = video.cdnUrl;
     } else {
@@ -100,7 +100,7 @@ router.get('/:id/play', authenticateToken, async (req,res)=>{
     // 2. 使用Bunny Stream iframe
     else if (video.bunnyId) {
       const libId = process.env.BUNNY_VIDEO_LIBRARY || '461001';
-      playUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}`;
+      playUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}?metrics=false`;
       
       // 添加签名认证
       if (process.env.BUNNY_SECRET) {

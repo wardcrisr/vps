@@ -186,7 +186,7 @@ const SpacePage = {
         <img src="${previewSrc}" 
              alt="${this.escapeHtml(video.title)}" loading="lazy">
         <div class="video-duration">${this.formatDuration(video.duration)}</div>
-        ${(video.isPremiumOnly || video.category === 'member') ? '<div class="premium-badge">会员</div>' : (video.category === 'paid' ? '<div class="premium-badge">付费</div>' : '')}
+        ${(video.isPremiumOnly || video.category === 'member') ? '<div class="premium-badge">会员</div>' : (video.category === 'paid' ? '<div class="premium-badge">付费</div>' : '<div class="free-badge">免费</div>')}
       </div>
       <div class="video-info">
         <h4 class="video-title" title="${this.escapeHtml(video.title)}" onclick="location.href='/video/${video._id}'" style="cursor: pointer;">
@@ -194,7 +194,7 @@ const SpacePage = {
         </h4>
                   <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 ${uploaderName}</span>
+              ${uploader.avatarUrl ? `<img src="${uploader.avatarUrl}" alt="${uploaderName}" style=\"width:48px;height:48px;border-radius:50%;object-fit:cover;\">` : '<span style="font-size:14px;">👤</span>'} <span style="color: #666; font-size: 0.8rem; font-weight: 500;">${uploaderName}</span>
             </div>
           </div>
         <div class="video-stats">

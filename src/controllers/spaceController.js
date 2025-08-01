@@ -47,7 +47,7 @@ exports.spacePage = async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(limit)
     .skip(skip)
-          .populate('uploader', 'uid name');
+          .populate('uploader', 'uid name displayName username avatarUrl');
 
     // 为SSR视频添加预览字段
     videos = videos.map(v => {
@@ -146,7 +146,7 @@ exports.getUploaderVideos = async (req, res) => {
     .sort(sortCondition)
     .limit(parseInt(limit))
     .skip(skip)
-            .populate('uploader', 'uid name')
+            .populate('uploader', 'uid name displayName username avatarUrl')
     .select('title duration views danmakuCount favoriteCount createdAt url bunnyId guid');
 
     // 获取总数

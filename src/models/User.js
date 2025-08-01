@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
   // 金币余额
   coins: { type: Number, default: 0 },
   
+  // VIP会员相关字段
+  isVip: { type: Boolean, default: false },
+  vipExpireDate: { type: Date, default: null },
+  
   // UP主相关字段
   uid: { type: String, unique: true, sparse: true }, // UP主唯一ID
   name: { type: String, default: '' },               // UP主名称
@@ -41,6 +45,11 @@ const UserSchema = new mongoose.Schema({
 // 检查用户是否为付费用户
 UserSchema.methods.isPremiumUser = function() {
   return this.isPremium && this.premiumExpiry > new Date();
+};
+
+// 检查用户是否为VIP会员
+UserSchema.methods.isVipUser = function() {
+  return this.isVip && this.vipExpireDate > new Date();
 };
 
 // 检查用户每日下载限制

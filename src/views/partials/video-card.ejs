@@ -51,6 +51,8 @@
       <div class="premium-badge">会员</div>
     <% } else if (video.category === 'paid' || (video.priceCoin && video.priceCoin > 0) || (video.priceCoins && video.priceCoins > 0)) { %>
       <div class="premium-badge">付费</div>
+    <% } else { %>
+      <div class="free-badge">免费</div>
     <% } %>
   </div>
   
@@ -64,7 +66,12 @@
     <!-- 上传者信息 - 点击进入上传者主页 -->
     <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/<%= uploaderUid %>'" style="cursor: pointer; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="color: #666; font-size: 0.8rem; font-weight: 500;">👤 <%= uploaderName %></span>
+        <% if (uploader && uploader.avatarUrl) { %>
+          <img src="<%= uploader.avatarUrl %>" alt="<%= uploaderName %>" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+        <% } else { %>
+          <span style="font-size:14px;">👤</span>
+        <% } %>
+        <span style="color: #666; font-size: 0.8rem; font-weight: 500;"><%= uploaderName %></span>
       </div>
     </div>
     

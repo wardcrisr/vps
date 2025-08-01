@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= video.title %> - <%= title %></title>
+    <!-- Umami Analytics -->
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="0447789b-3880-4f93-bcc4-e0c5db71972d"></script>
     <!-- SEO Meta -->
     <meta name="description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
     <% if (typeof canonicalUrl !== 'undefined') { %>
@@ -178,6 +180,7 @@
       const FORCE_VIP_TEST = false; // 生产环境设为false
       console.log('=== 会员视频测试模式 ===');
       console.log('原始 IS_VIP_VIDEO:', IS_VIP_VIDEO);
+      console.log('IS_PREMIUM_USER:', IS_PREMIUM_USER);
       console.log('强制测试模式:', FORCE_VIP_TEST);
 
       // 计算是否需要试看限制（实时计算，购买/开通会员后可动态变化）
@@ -212,56 +215,207 @@
       const overlay  = document.getElementById('payOverlay');
       const buyBtn   = document.getElementById('buyBtn');
 
+      console.log('初始化元素检查:');
+      console.log('overlay:', overlay);
+      console.log('buyBtn:', buyBtn);
+
       // 根据视频类型动态修改提示文案
       if((IS_VIP_VIDEO || FORCE_VIP_TEST) && !IS_PREMIUM_USER){
-        overlay.querySelector('p').textContent = '试看已结束，请开通会员继续观看';
-        buyBtn.textContent = '立即开通会员';
+        if(overlay && overlay.querySelector('p')) {
+          overlay.querySelector('p').textContent = '试看已结束，请开通会员继续观看';
+          console.log('✅ 已设置会员提示文案');
+        }
+        if(buyBtn) {
+          buyBtn.textContent = '立即开通会员';
+          console.log('✅ 已设置会员按钮文案');
+        }
       }
 
-      const PREVIEW_SECONDS = 30;
+      const PREVIEW_SECONDS = 150;
 
       // 追踪预览媒介（video 或 iframe）
       let previewIsIframe = false;
       let previewIframe   = null;
 
+      let overlayShown = false; // 防止重复显示遮罩
+      
       function showPayOverlay(){
-        overlay.style.display = 'flex';
+        if(overlayShown) {
+          console.log('⚠️ 遮罩已经显示过了，跳过重复调用');
+          return;
+        }
+        
+        console.log('🚀 执行showPayOverlay，显示遮罩层');
+        overlayShown = true;
+        
+        // 清理所有计时器
+        if(previewTimer) {
+          clearTimeout(previewTimer);
+          previewTimer = null;
+          console.log('🧹 清理previewTimer');
+        }
+        if(forceCheckTimer) {
+          clearInterval(forceCheckTimer);
+          forceCheckTimer = null;
+          console.log('🧹 清理forceCheckTimer');
+        }
+        
+        // 直接通过ID获取元素，确保获取到最新的DOM
+        const overlayElement = document.getElementById('payOverlay');
+        console.log('🔍 overlay元素:', overlayElement);
+        
+        if (!overlayElement) {
+          console.error('❌ overlay元素未找到！');
+          return;
+        }
+        
+        overlayElement.style.display = 'flex';
+        overlayElement.style.zIndex = '9999';
+        overlayElement.style.position = 'absolute';
+        console.log('✅ 遮罩层样式已设置');
+        console.log('📊 当前overlay样式:', {
+          display: overlayElement.style.display,
+          zIndex: overlayElement.style.zIndex,
+          position: overlayElement.style.position
+        });
+        
         if(previewIsIframe && previewIframe){
           // 停止 iframe 播放
+          console.log('🛑 移除iframe播放器');
           previewIframe.remove();
           previewIframe = null;
         }else{
-          vjsPlayer.pause();
+          console.log('⏸️ 暂停Video.js播放器');
+          try {
+            vjsPlayer.pause();
+          } catch(e) {
+            console.error('❌ 暂停播放器失败:', e);
+          }
         }
       }
 
-      // 监听试看限制（Video.js）
+      // 监听试看限制（Video.js）- 防止用户跳跃播放绕过限制
+      let totalWatchedTime = 0;
+      let lastCheckTime = 0;
+      
       vjsPlayer.on('timeupdate', ()=>{
         const currentTime = vjsPlayer.currentTime();
-        if(currentTime > 25) { // 在接近30秒时开始打印调试信息
-          console.log(`时间: ${currentTime.toFixed(1)}s, needRestrict: ${needRestrict()}, PREVIEW_SECONDS: ${PREVIEW_SECONDS}`);
-        }
-        if(needRestrict() && vjsPlayer.currentTime() >= PREVIEW_SECONDS){
-          console.log('触发试看限制，显示支付遮罩');
-          showPayOverlay();
+        
+        // 计算实际观看时间，防止用户跳跃播放
+        if(needRestrict()) {
+          const timeDiff = currentTime - lastCheckTime;
+          // 只有连续播放时才累计观看时间（时间差小于2秒且为正数）
+          if(timeDiff > 0 && timeDiff <= 2) {
+            totalWatchedTime += timeDiff;
+          }
+          lastCheckTime = currentTime;
+          
+          // 调试信息
+          if(currentTime > 120 && Math.floor(currentTime) % 5 === 0) {
+            console.log(`播放时间: ${currentTime.toFixed(1)}s, 实际观看: ${totalWatchedTime.toFixed(1)}s, PREVIEW_SECONDS: ${PREVIEW_SECONDS}`);
+          }
+          
+          // 检查是否达到限制条件（任一条件满足都会触发）
+          if(currentTime >= PREVIEW_SECONDS || totalWatchedTime >= PREVIEW_SECONDS){
+            console.log('触发试看限制 - 播放时间:', currentTime.toFixed(1), 's, 观看时间:', totalWatchedTime.toFixed(1), 's');
+            showPayOverlay();
+          }
         }
       });
 
-      // 试看计时器
+      // 试看计时器 - 区分iframe和Video.js两种播放器
+      let forceCheckTimer = null;
       let previewTimer = null;
+      let previewStarted = false;
+      
       function startPreviewCountdown(){
-        if(previewTimer){ clearTimeout(previewTimer); }
-        if(needRestrict()){
-          previewTimer = setTimeout(()=>{
-            showPayOverlay();
-          }, PREVIEW_SECONDS * 1000);
+        if(forceCheckTimer){ clearInterval(forceCheckTimer); forceCheckTimer = null; }
+        if(previewTimer){ clearTimeout(previewTimer); previewTimer = null; }
+        
+        if(needRestrict() && !previewStarted){
+          console.log('✅ 满足启动预览限制的条件');
+          previewStarted = true;
+          
+          if(previewIsIframe) {
+            // 对于iframe播放器，使用基于实际时间的计时器（因为无法监听跨域iframe内部事件）
+            console.log(`🎬 iframe播放器启动${PREVIEW_SECONDS}秒预览限制，基于实际时间`);
+            console.log(`⏰ 将在${PREVIEW_SECONDS}秒后显示支付遮罩`);
+            previewTimer = setTimeout(() => {
+              console.log('🔴 iframe预览時間到達限制（實際時間），顯示支付遮罩');
+              console.log('🎯 即將調用showPayOverlay()函數');
+              showPayOverlay();
+            }, PREVIEW_SECONDS * 1000);
+            console.log('✅ iframe计时器已设置成功！');
+            console.log('📊 计时器详情:', {
+              timerID: previewTimer,
+              delaySeconds: PREVIEW_SECONDS,
+              delayMs: PREVIEW_SECONDS * 1000,
+              startTime: new Date().toLocaleTimeString()
+            });
+          } else {
+            // 对于Video.js播放器，使用基于视频播放时间的检查机制
+            console.log(`🎬 Video.js播放器启动${PREVIEW_SECONDS}秒预览限制，基于视频播放时间`);
+            forceCheckTimer = setInterval(() => {
+              if(vjsPlayer && (vjsPlayer.currentTime() >= PREVIEW_SECONDS || totalWatchedTime >= PREVIEW_SECONDS)) {
+                console.log('🔴 Video.js预览时间到达限制 - 播放时间:', vjsPlayer.currentTime().toFixed(1), 's, 观看时间:', totalWatchedTime.toFixed(1), 's');
+                clearInterval(forceCheckTimer);
+                showPayOverlay();
+              }
+            }, 500); // 每500ms检查一次，提高精度
+            console.log('✅ Video.js检查计时器已设置，Timer ID:', forceCheckTimer);
+          }
+        } else {
+          console.log('❌ 不满足启动预览限制的条件:', {
+            needRestrict: needRestrict(),
+            previewStarted: previewStarted,
+            IS_VIP_VIDEO: IS_VIP_VIDEO,
+            IS_PREMIUM_USER: IS_PREMIUM_USER,
+            FORCE_VIP_TEST: typeof FORCE_VIP_TEST !== 'undefined' ? FORCE_VIP_TEST : 'undefined'
+          });
         }
       }
 
       // 当 HTML5 视频真正开始播放后再启动计时，避免用户未点击播放计时先结束
       vjsPlayer.on('play', ()=>{
+        console.log('视频开始播放，previewIsIframe:', previewIsIframe);
         if(!previewIsIframe){
+          console.log('启动预览限制计时');
           startPreviewCountdown();
+        }
+      });
+
+      // 额外监听loadeddata事件，确保视频加载后也启动计时
+      vjsPlayer.on('loadeddata', ()=>{
+        console.log('视频数据加载完成，检查是否需要启动限制');
+        if(needRestrict() && !previewStarted && !previewIsIframe){
+          console.log('通过loadeddata事件启动预览限制计时');
+          startPreviewCountdown();
+        }
+      });
+
+      // 监听playing事件作为备用触发
+      vjsPlayer.on('playing', ()=>{
+        console.log('视频正在播放，检查计时器状态');
+        if(needRestrict() && !previewStarted && !previewIsIframe){
+          console.log('通过playing事件启动预览限制计时');
+          startPreviewCountdown();
+        }
+      });
+
+      // 防止用户调整播放速度绕过限制
+      vjsPlayer.on('ratechange', ()=>{
+        if(needRestrict() && vjsPlayer.playbackRate() !== 1) {
+          console.log('检测到播放速度变化，重置为正常速度');
+          vjsPlayer.playbackRate(1);
+        }
+      });
+
+      // 防止用户通过拖拽进度条跳过内容
+      vjsPlayer.on('seeking', ()=>{
+        const seekTime = vjsPlayer.currentTime();
+        if(needRestrict() && seekTime > PREVIEW_SECONDS) {
+          console.log('检测到用户尝试跳过预览限制，显示支付遮罩');
+          showPayOverlay();
         }
       });
 
@@ -309,8 +463,28 @@
           previewIsIframe = true;
           previewIframe   = iframe;
 
-          // 开始 iframe 试看计时
-          startPreviewCountdown();
+          // 等待iframe加载完成后再启动计时器
+          console.log('使用iframe播放，等待加载完成后启动预览计时');
+          console.log('当前needRestrict()状态:', needRestrict());
+          console.log('当前previewStarted状态:', previewStarted);
+          
+          // 由于跨域iframe的onload事件可能不可靠，直接使用延迟启动
+          console.log('🎬 跨域iframe播放器，使用延迟启动策略');
+          setTimeout(() => {
+            console.log('🕒 3秒延迟到达，检查启动条件:', {
+              previewStarted: previewStarted,
+              needRestrict: needRestrict(),
+              IS_VIP_VIDEO: IS_VIP_VIDEO,
+              IS_PREMIUM_USER: IS_PREMIUM_USER
+            });
+            if(!previewStarted && needRestrict()) {
+              console.log('⏰ 延迟3秒后启动iframe预览计时');
+              startPreviewCountdown();
+            } else {
+              console.log('❌ 不满足启动条件，跳过计时器设置');
+            }
+          }, 3000); // 3秒后启动，给iframe足够的加载和播放时间
+          
           return;
         }
 
@@ -345,7 +519,9 @@
           if(IS_PREMIUM_USER){
             url = DEFAULT_PLAY_URL;
           }else{
-            url = await getPreviewUrl();
+            // 对于会员视频，非会员用户使用完整URL，仅依赖前端150秒限制
+            console.log('非会员观看会员视频，使用完整URL + 前端150秒限制');
+            url = DEFAULT_PLAY_URL;
           }
         } else if(IS_PAID_VIDEO){
           url = await getPlayUrl();
@@ -359,21 +535,35 @@
         loadSource(url);
         // 元数据加载后自动播放静音
         vjsPlayer.ready(()=>{
+          console.log('Video.js播放器准备就绪');
           if(!needRestrict()){
+            console.log('无需限制，正常播放');
             vjsPlayer.muted(true);
             vjsPlayer.play().catch(()=>{});
           } else {
-            // 对于需要限制的视频，也允许播放但会在30秒后暂停
+            // 对于需要限制的视频，也允许播放但会在150秒后暂停
+            console.log('需要限制的视频，启动播放和计时');
             vjsPlayer.muted(true);
-            vjsPlayer.play().catch(()=>{});
+            vjsPlayer.play().then(() => {
+              console.log('视频播放成功，强制启动计时器');
+              if(!previewStarted) {
+                startPreviewCountdown();
+              }
+            }).catch((e) => {
+              console.log('视频播放失败，但仍启动计时器:', e);
+              if(!previewStarted) {
+                startPreviewCountdown();
+              }
+            });
           }
         });
       }
 
       buyBtn.addEventListener('click', async ()=>{
-        // 若为会员视频，则跳转会员开通页
+        // 若为会员视频，则跳转个人中心页面（可使用VIP购买弹窗）
         if(IS_VIP_VIDEO || FORCE_VIP_TEST){
-          location.href = '/vip';
+          console.log('🎯 会员视频：跳转到个人中心页面');
+          location.href = '/user';
           return;
         }
         // 付费视频购买流程
@@ -383,6 +573,7 @@
           if(iframeUrl){
             hasPurchase = true;
             if(previewTimer){ clearTimeout(previewTimer); previewTimer = null; }
+            if(forceCheckTimer){ clearInterval(forceCheckTimer); forceCheckTimer = null; }
             if(previewIsIframe && previewIframe){ previewIframe.remove(); previewIframe = null; }
             overlay.style.display = 'none';
 
