@@ -6,69 +6,90 @@ const User = require('../models/User');
  */
 exports.renderIndex = async (req, res) => {
   try {
-    // 联表查询视频和UP主信息
-    const videos = await Media.aggregate([
-      // 只查询视频类型且公开的内容
-      {
-        $match: {
-          type: 'video',
-          isPublic: true
-        }
-      },
-      // 联表查询UP主信息
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'uploader',
-          foreignField: '_id',
-          as: 'uploaderInfo'
-        }
-      },
-      // 展开UP主信息
-      {
-        $unwind: {
-          path: '$uploaderInfo',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      // 选择需要的字段，明确排除旧字段
-      {
-        $project: {
-          _id: 1,
-          id: '$_id',
-          title: 1,
-          duration: 1,
-          createdAt: 1,
-          views: 1,
-          likes: 1,
-          danmakuCount: 1,
-          isPremiumOnly: 1,
-          bunnyId: 1,
-          guid: 1,
-          up: {
-            uid: '$uploaderInfo.uid',
-            name: {
-              $ifNull: [
-                '$uploaderInfo.name',
-                {
-                  $ifNull: [
-                    '$uploaderInfo.displayName',
-                    '$uploaderInfo.username'
-                  ]
+    // 性能优化：使用索引查询 + 并行处理
+    const [videos, uploaders] = await Promise.all([
+      // 联表查询视频和UP主信息 - 优化版
+      Media.aggregate([
+        // 使用复合索引：type + isPublic + createdAt
+        {
+          $match: {
+            type: 'video',
+            isPublic: true
+          }
+        },
+        // 按创建时间降序排列（索引优化）
+        {
+          $sort: { createdAt: -1 }
+        },
+        // 限制数量，减少数据传输
+        {
+          $limit: 20
+        },
+        // 联表查询UP主信息（只查询必要字段）
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'uploader',
+            foreignField: '_id',
+            as: 'uploaderInfo',
+            pipeline: [
+              {
+                $project: {
+                  uid: 1,
+                  name: 1,
+                  displayName: 1,
+                  username: 1,
+                  uploaderAvatarUrl: 1
                 }
-              ]
+              }
+            ]
+          }
+        },
+        // 展开UP主信息
+        {
+          $unwind: {
+            path: '$uploaderInfo',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // 选择需要的字段，减少内存使用
+        {
+          $project: {
+            _id: 1,
+            id: '$_id',
+            title: 1,
+            duration: 1,
+            createdAt: 1,
+            views: 1,
+            likes: 1,
+            danmakuCount: 1,
+            isPremiumOnly: 1,
+            bunnyId: 1,
+            guid: 1,
+            up: {
+              uid: '$uploaderInfo.uid',
+              name: {
+                $ifNull: [
+                  '$uploaderInfo.name',
+                  {
+                    $ifNull: [
+                      '$uploaderInfo.displayName',
+                      '$uploaderInfo.username'
+                    ]
+                  }
+                ]
+              },
+              avatarUrl: '$uploaderInfo.uploaderAvatarUrl'
             }
           }
         }
-      },
-      // 按创建时间降序排列
-      {
-        $sort: { createdAt: -1 }
-      },
-      // 限制数量
-      {
-        $limit: 20
-      }
+      ]),
+      
+      // 并行查询UP主头像数据
+      User.find({ isUploader: true })
+        .select('uid name displayName username uploaderAvatarUrl')
+        .lean()
+        .limit(50) // 限制数量，提升性能
     ]);
 
     // 处理没有UP主信息的视频
@@ -97,24 +118,7 @@ exports.renderIndex = async (req, res) => {
       console.warn('❌ indexController renderIndex still contains cover/thumbnail');
     }
 
-    // ==================== 新增：获取 UP 主头像数据 ====================
-    // 仅查询 isUploader: true 的用户，按粉丝数倒序取前 12 个
-    const uploaders = await User.find(
-      { isUploader: true },
-      {
-        _id: 1,
-        uid: 1,
-        username: 1,
-        displayName: 1,
-        name: 1,
-        avatarUrl: 1,
-        fansCount: 1
-      }
-    )
-      .sort({ fansCount: -1 })
-      // 取消限制，展示全部UP主头像
-      .lean();
-    // ===============================================================
+
 
     // 渲染首页
     res.render('index', {

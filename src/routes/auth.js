@@ -85,7 +85,9 @@ router.post('/register', [
     const user = new User({ 
       username, 
       email, 
-      password: hash 
+      password: hash
+      // avatarUrl会使用模型默认值：https://fulijix.b-cdn.net/momo.jpg
+      // uploaderAvatarUrl保持为空字符串，只有UP主才设置
     });
     
     await user.save();

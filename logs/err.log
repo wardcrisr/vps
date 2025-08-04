@@ -1,0 +1,221 @@
+2025-08-03T05:25:22: (node:215021) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-03T06:01:40: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-03T06:18:41: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-03T07:55:44: [video-detail] Video 687bcbe776cc513163d5d301 缺少描述，已回退为标题
+2025-08-03T08:42:39: [bunnyWebhook] No Media found for bunnyId: 26a72a4e-cf9e-4331-a3c4-4a55698fb0b5
+2025-08-03T08:42:59: [bunnyWebhook] No Media found for bunnyId: 26a72a4e-cf9e-4331-a3c4-4a55698fb0b5
+2025-08-03T08:47:22: [video-detail] Video 68777c8876cc513163d57a9c 缺少描述，已回退为标题
+2025-08-03T08:48:03: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-03T09:13:59: [bunnyWebhook] No Media found for bunnyId: 215bc11f-f142-442a-ab1f-dc64355cf45e
+2025-08-03T09:14:16: [bunnyWebhook] No Media found for bunnyId: 215bc11f-f142-442a-ab1f-dc64355cf45e
+2025-08-03T10:09:46: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-03T10:09:48: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-03T10:09:48: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-03T10:10:02: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-03T10:10:04: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-03T10:10:04: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-03T10:12:20: [bunnyWebhook] No Media found for bunnyId: e6fa7486-fdcc-44b6-97df-6b2e451d6b25
+2025-08-03T10:12:55: [bunnyWebhook] No Media found for bunnyId: e6fa7486-fdcc-44b6-97df-6b2e451d6b25
+2025-08-03T10:45:14: [bunnyWebhook] No Media found for bunnyId: cfeb796f-1ed7-4bff-a75d-4a85045c3f26
+2025-08-03T10:45:35: [bunnyWebhook] No Media found for bunnyId: cfeb796f-1ed7-4bff-a75d-4a85045c3f26
+2025-08-03T10:54:19: [bunnyWebhook] No Media found for bunnyId: a160a731-6208-4dc3-b565-1ec7d240471f
+2025-08-03T10:54:46: [bunnyWebhook] No Media found for bunnyId: a160a731-6208-4dc3-b565-1ec7d240471f
+2025-08-03T11:01:14: [bunnyWebhook] No Media found for bunnyId: b7421469-a222-4f3d-bc4c-035d5eceb5fa
+2025-08-03T11:01:33: [bunnyWebhook] No Media found for bunnyId: b7421469-a222-4f3d-bc4c-035d5eceb5fa
+2025-08-03T11:03:53: [bunnyWebhook] No Media found for bunnyId: 474ec2ef-63af-4a2e-9ab7-7787578c3bcd
+2025-08-03T11:04:02: [bunnyWebhook] No Media found for bunnyId: 474ec2ef-63af-4a2e-9ab7-7787578c3bcd
+2025-08-03T11:43:44: [video-detail] Video 687d4ec33f6e8808195f8b13 缺少描述，已回退为标题
+2025-08-03T12:13:54: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-03T12:14:13: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-03T12:14:24: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-03T13:43:44: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-03T14:04:17: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-03T15:19:08: [video-detail] Video 687ad47d76cc513163d5bf69 缺少描述，已回退为标题
+2025-08-03T15:30:37: [video-detail] Video 687ad20276cc513163d5bf47 缺少描述，已回退为标题
+2025-08-03T15:31:19: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-03T15:32:10: [video-detail] Video 68777c8876cc513163d57a9c 缺少描述，已回退为标题
+2025-08-03T15:33:57: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-03T15:41:24: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-03T15:42:37: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-03T15:43:26: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-03T15:44:45: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-03T15:45:11: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-03T16:19:16: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:610:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-03T16:48:46: [video-detail] Video 687bd17776cc513163d5d36c 缺少描述，已回退为标题
+2025-08-03T18:22:37: [video-detail] Video 687a0dff76cc513163d5b0a2 缺少描述，已回退为标题
+2025-08-03T18:58:31: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-03T19:18:50: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-03T19:43:46: [video-detail] Video 687d35973f6e8808195f89bc 缺少描述，已回退为标题
+2025-08-03T20:02:08: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-03T20:02:34: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-03T20:02:35: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-03T20:02:35: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-03T20:02:55: [video-detail] Video 6878357a76cc513163d5897d 缺少描述，已回退为标题
+2025-08-03T20:16:27: [bunnyWebhook] No Media found for bunnyId: 7e3c9a93-8a0f-4089-8ec6-264a903acffc
+2025-08-03T20:16:42: [bunnyWebhook] No Media found for bunnyId: 7e3c9a93-8a0f-4089-8ec6-264a903acffc
+2025-08-03T20:19:41: [bunnyWebhook] No Media found for bunnyId: 2c42c821-8444-4cb0-ab48-4bae12ad8cf8
+2025-08-03T20:19:47: [bunnyWebhook] No Media found for bunnyId: 2c42c821-8444-4cb0-ab48-4bae12ad8cf8
+2025-08-03T20:29:58: [bunnyWebhook] No Media found for bunnyId: 53ec65df-e86b-48fc-bf79-510f1ff6d25e
+2025-08-03T20:30:13: [bunnyWebhook] No Media found for bunnyId: 53ec65df-e86b-48fc-bf79-510f1ff6d25e
+2025-08-03T20:43:46: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-03T20:45:01: [bunnyWebhook] No Media found for bunnyId: a4d3c6df-056d-4716-9c36-84d09b581941
+2025-08-03T20:45:35: [bunnyWebhook] No Media found for bunnyId: a4d3c6df-056d-4716-9c36-84d09b581941
+2025-08-03T21:42:04: [bunnyWebhook] No Media found for bunnyId: b71121bf-80db-4f3d-925d-b889db5f529a
+2025-08-03T21:42:31: [bunnyWebhook] No Media found for bunnyId: b71121bf-80db-4f3d-925d-b889db5f529a
+2025-08-03T21:50:13: [video-detail] Video 68795ab276cc513163d5a28b 缺少描述，已回退为标题
+2025-08-03T21:51:39: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-03T21:56:56: [bunnyWebhook] No Media found for bunnyId: 453271c6-efce-414c-ab80-4445a67e4746
+2025-08-03T21:57:18: [bunnyWebhook] No Media found for bunnyId: 453271c6-efce-414c-ab80-4445a67e4746
+2025-08-03T22:03:30: [bunnyWebhook] No Media found for bunnyId: 5f78d34e-67d1-47be-b499-06acac551c8d
+2025-08-03T22:03:52: [bunnyWebhook] No Media found for bunnyId: 5f78d34e-67d1-47be-b499-06acac551c8d
+2025-08-03T22:07:03: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-03T22:10:42: [bunnyWebhook] No Media found for bunnyId: 61a321f1-e99c-4c1a-be0f-f9355bc5c1cd
+2025-08-03T22:10:53: [bunnyWebhook] No Media found for bunnyId: 61a321f1-e99c-4c1a-be0f-f9355bc5c1cd
+2025-08-03T22:13:57: [bunnyWebhook] No Media found for bunnyId: f2ab235f-a59c-4fd4-9f17-08a62096eb07
+2025-08-03T22:14:14: [bunnyWebhook] No Media found for bunnyId: f2ab235f-a59c-4fd4-9f17-08a62096eb07
+2025-08-03T22:18:54: [bunnyWebhook] No Media found for bunnyId: 34542a0d-3dc3-46af-b1f1-4cb6cb0df12a
+2025-08-03T22:19:07: [bunnyWebhook] No Media found for bunnyId: 34542a0d-3dc3-46af-b1f1-4cb6cb0df12a
+2025-08-03T22:21:24: [bunnyWebhook] No Media found for bunnyId: 004d9683-144b-4df9-9378-1d96320168ce
+2025-08-03T22:21:35: [bunnyWebhook] No Media found for bunnyId: 004d9683-144b-4df9-9378-1d96320168ce
+2025-08-03T22:23:22: [bunnyWebhook] No Media found for bunnyId: 200e198f-5c2b-4bdf-b6fd-4c8301c9e37f
+2025-08-03T22:23:32: [bunnyWebhook] No Media found for bunnyId: 200e198f-5c2b-4bdf-b6fd-4c8301c9e37f
+2025-08-03T22:24:25: [bunnyWebhook] No Media found for bunnyId: 90c82e28-803a-415c-9c9f-d500c3c0cf5f
+2025-08-03T22:24:31: [bunnyWebhook] No Media found for bunnyId: 90c82e28-803a-415c-9c9f-d500c3c0cf5f
+2025-08-03T22:26:12: [bunnyWebhook] No Media found for bunnyId: 4ce52593-9417-48b4-a6f9-c206614f1eeb
+2025-08-03T22:26:20: [bunnyWebhook] No Media found for bunnyId: 4ce52593-9417-48b4-a6f9-c206614f1eeb
+2025-08-03T22:27:32: [bunnyWebhook] No Media found for bunnyId: fadb5502-bfa7-4b5c-9e1f-8a67d2e7c86a
+2025-08-03T22:27:39: [bunnyWebhook] No Media found for bunnyId: fadb5502-bfa7-4b5c-9e1f-8a67d2e7c86a
+2025-08-03T22:29:09: [bunnyWebhook] No Media found for bunnyId: e9a5c22e-a52d-461a-8f8c-12d813c1f0fa
+2025-08-03T22:29:17: [bunnyWebhook] No Media found for bunnyId: e9a5c22e-a52d-461a-8f8c-12d813c1f0fa
+2025-08-03T22:30:26: [bunnyWebhook] No Media found for bunnyId: e2c6f33c-4a33-4647-b067-377bd7f8549f
+2025-08-03T22:30:33: [bunnyWebhook] No Media found for bunnyId: e2c6f33c-4a33-4647-b067-377bd7f8549f
+2025-08-03T22:33:33: [bunnyWebhook] No Media found for bunnyId: 1d1a1caa-8509-4702-a4ab-e367ec85cf54
+2025-08-03T22:33:48: [bunnyWebhook] No Media found for bunnyId: 1d1a1caa-8509-4702-a4ab-e367ec85cf54
+2025-08-03T22:35:28: [bunnyWebhook] No Media found for bunnyId: 0feb1ae5-22d6-4aac-a9af-ce85d40e9118
+2025-08-03T22:35:40: [bunnyWebhook] No Media found for bunnyId: 0feb1ae5-22d6-4aac-a9af-ce85d40e9118
+2025-08-03T22:39:25: [bunnyWebhook] No Media found for bunnyId: 1b20dc29-41d0-4ee6-913d-a8045ed151c8
+2025-08-03T22:39:47: [bunnyWebhook] No Media found for bunnyId: 1b20dc29-41d0-4ee6-913d-a8045ed151c8
+2025-08-03T22:43:47: [video-detail] Video 687bc70776cc513163d5d283 缺少描述，已回退为标题
+2025-08-04T00:40:01: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T00:52:46: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-04T00:55:24: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-04T00:56:10: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-04T00:57:30: (node:240944) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T01:15:10: (node:242422) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T01:19:25: (node:243192) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T01:36:39: (node:244411) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T01:37:23: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-04T01:40:30: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-04T01:43:04: [video-detail] Video 687a212a76cc513163d5b245 缺少描述，已回退为标题
+2025-08-04T01:44:08: (node:245211) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T01:45:09: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-04T01:51:55: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-04T02:00:22: [video-detail] Video 6876a60476cc513163d5696b 缺少描述，已回退为标题
+2025-08-04T02:14:01: [video-detail] Video 687a017976cc513163d5af9d 缺少描述，已回退为标题
+2025-08-04T02:14:13: [video-detail] Video 687a017976cc513163d5af9d 缺少描述，已回退为标题
+2025-08-04T03:02:51: (node:251284) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T03:05:09: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T03:09:01: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T03:28:11: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-04T03:40:29: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T03:56:16: (node:255561) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T04:26:28: (node:260231) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T04:40:23: (node:262338) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T04:42:02: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T04:45:44: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T04:48:31: (node:263467) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T04:49:20: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:00:18: (node:264777) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T05:02:40: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:07:23: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:07:41: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:22:39: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:34:18: (node:269265) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T05:35:49: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T05:38:03: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T06:08:37: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T06:30:53: (node:275651) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T06:31:23: (node:275747) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T06:33:01: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T06:34:25: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T06:38:20: (node:276629) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T06:41:43: (node:279807) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T06:43:04: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T06:43:04: [iDataRiver] fallbackRecharge error i18n:server_order_project_or_sku_offline
+2025-08-04T06:43:04: [支付] 创建订单失败: Error: i18n:server_order_project_or_sku_offline
+    at addOrder (/root/content-distribution/src/utils/idatariver.js:84:57)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fallbackRecharge (/root/content-distribution/src/utils/idatariver.js:177:23)
+    at async /root/content-distribution/src/routes/idatariver.js:67:20
+2025-08-04T06:59:14: (node:282234) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T07:01:34: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T07:42:08: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T07:43:04: [video-detail] Video 687b886776cc513163d5ccfb 缺少描述，已回退为标题
+2025-08-04T09:33:56: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T09:33:56: [iDataRiver] fallbackRecharge error i18n:server_order_project_or_sku_offline
+2025-08-04T09:33:56: [支付] 创建订单失败: Error: i18n:server_order_project_or_sku_offline
+    at addOrder (/root/content-distribution/src/utils/idatariver.js:84:57)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fallbackRecharge (/root/content-distribution/src/utils/idatariver.js:177:23)
+    at async /root/content-distribution/src/routes/idatariver.js:67:20
+2025-08-04T09:34:22: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T09:34:23: [iDataRiver] fallbackRecharge error i18n:server_order_project_or_sku_offline
+2025-08-04T09:34:23: [支付] 创建订单失败: Error: i18n:server_order_project_or_sku_offline
+    at addOrder (/root/content-distribution/src/utils/idatariver.js:84:57)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fallbackRecharge (/root/content-distribution/src/utils/idatariver.js:177:23)
+    at async /root/content-distribution/src/routes/idatariver.js:67:20
+2025-08-04T09:48:33: (node:289726) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T10:42:37: (node:293756) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T10:56:50: (node:295088) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T11:03:11: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T11:15:08: (node:296632) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T11:35:33: (node:298591) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-04T11:59:16: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-04T12:13:04: [video-detail] Video 687937b176cc513163d5a04f 缺少描述，已回退为标题
+2025-08-04T12:18:28: [video-detail] Video 687a017976cc513163d5af9d 缺少描述，已回退为标题
+2025-08-04T12:18:40: [video-detail] Video 68795ab276cc513163d5a28b 缺少描述，已回退为标题
+2025-08-04T12:19:12: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-04T12:19:21: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题

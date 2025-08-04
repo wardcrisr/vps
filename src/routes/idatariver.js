@@ -17,57 +17,84 @@ const VIP_PLANS = {
 };
 
 /**
- * 创建VIP支付订单
+ * 创建支付订单（支持VIP购买和金币充值）
  * POST /api/idatariver/createorder
  */
 router.post('/createorder', authenticateToken, async (req, res) => {
   try {
-    const { amount, planType, planDays, planName, contactInfo } = req.body;
+    const { amount, planType, contactInfo, skuId } = req.body;
     const userId = req.user.id;
 
-    // 验证套餐类型
-    if (!VIP_PLANS[planType]) {
+    let desc, orderType;
+
+    // 判断是VIP购买还是金币充值
+    if (planType) {
+      // VIP购买流程
+      if (!VIP_PLANS[planType]) {
+        return res.json({
+          code: 1,
+          msg: '无效的VIP套餐类型'
+        });
+      }
+
+      const plan = VIP_PLANS[planType];
+      
+      // 验证金额是否匹配
+      if (amount !== plan.amount * 100) {
+        return res.json({
+          code: 1,
+          msg: '支付金额与套餐价格不匹配'
+        });
+      }
+
+      desc = `${plan.name} - ${plan.days}天VIP会员`;
+      orderType = 'vip';
+      console.log(`[VIP支付] 用户 ${req.user.username} 尝试购买 ${desc}`);
+    } else if (skuId) {
+      // 金币充值流程
+      const coinAmount = Math.round(amount / 100); // 将分转换为元，再作为金币数量
+      desc = `金币充值 - ${coinAmount}金币`;
+      orderType = 'coin';
+      console.log(`[金币充值] 用户 ${req.user.username} 尝试充值 ${desc}`);
+    } else {
       return res.json({
         code: 1,
-        msg: '无效的VIP套餐类型'
+        msg: '缺少必要参数：planType 或 skuId'
       });
     }
-
-    const plan = VIP_PLANS[planType];
-    
-    // 验证金额是否匹配
-    if (amount !== plan.amount * 100) {
-      return res.json({
-        code: 1,
-        msg: '支付金额与套餐价格不匹配'
-      });
-    }
-
-    // 创建订单描述
-    const desc = `${plan.name} - ${plan.days}天VIP会员`;
-
-    console.log(`[VIP支付] 用户 ${req.user.username} 尝试购买 ${desc}`);
 
     // 调用idatariver创建支付订单
-    const result = await createRecharge(amount, contactInfo || req.user.username, desc);
+    const result = await createRecharge(amount, contactInfo || req.user.username, desc, skuId);
 
     if (result && result.payUrl) {
-      // 记录订单信息到数据库（可选）
-      // 这里可以创建一个Order模型来记录订单
-      console.log(`[VIP支付] 订单创建成功，订单号: ${result.orderId}`);
+      console.log(`[${orderType === 'vip' ? 'VIP支付' : '金币充值'}] 订单创建成功，订单号: ${result.orderId}`);
       
-      return res.json({
+      const responseData = {
         code: 0,
         msg: '订单创建成功',
         payUrl: result.payUrl,
         orderId: result.orderId,
-        planInfo: {
+        orderType
+      };
+
+      // 如果是VIP购买，添加套餐信息
+      if (orderType === 'vip') {
+        const plan = VIP_PLANS[planType];
+        responseData.planInfo = {
           type: planType,
           days: plan.days,
           amount: plan.amount,
           name: plan.name
-        }
-      });
+        };
+      } else {
+        // 金币充值信息
+        responseData.coinInfo = {
+          amount: Math.round(amount / 100),
+          skuId
+        };
+      }
+      
+      return res.json(responseData);
     } else {
       return res.json({
         code: 1,
@@ -76,7 +103,7 @@ router.post('/createorder', authenticateToken, async (req, res) => {
     }
 
   } catch (error) {
-    console.error('[VIP支付] 创建订单失败:', error);
+    console.error('[支付] 创建订单失败:', error);
     return res.json({
       code: 1,
       msg: error.message || '系统错误，请稍后重试'
@@ -146,21 +173,34 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
     // 只处理支付成功的回调
     if (status === 'paid' || status === 'success' || status === 'completed') {
-      // 这里需要根据订单信息更新用户VIP状态
-      // 由于我们没有在数据库中存储订单与用户的关联，
-      // 这里需要从订单描述或其他方式获取用户信息
-      
       // 获取订单详情
       try {
         const orderDetail = await getOrderInfo(orderId);
-        console.log('[VIP支付] 订单详情:', JSON.stringify(orderDetail, null, 2));
+        console.log('[支付回调] 订单详情:', JSON.stringify(orderDetail, null, 2));
         
-        // 这里应该根据实际的订单数据结构来更新用户VIP状态
-        // 需要从订单中获取用户信息和VIP天数
+        // 根据订单描述判断是VIP购买还是金币充值
+        const description = orderDetail.description || orderDetail.desc || '';
         
-        console.log(`[VIP支付] 订单 ${orderId} 支付成功，VIP状态更新完成`);
+        if (description.includes('VIP会员')) {
+          // VIP购买处理逻辑
+          console.log(`[VIP支付] 订单 ${orderId} 支付成功，VIP状态更新完成`);
+        } else if (description.includes('金币充值')) {
+          // 金币充值处理逻辑
+          console.log(`[金币充值] 订单 ${orderId} 支付成功，开始处理金币充值`);
+          
+          // 从描述中提取金币数量
+          const coinMatch = description.match(/(\d+)金币/);
+          if (coinMatch) {
+            const coinAmount = parseInt(coinMatch[1]);
+            
+            // 这里需要根据实际情况找到用户并更新金币余额
+            // 由于没有存储用户关联，暂时记录日志
+            console.log(`[金币充值] 需要为用户充值 ${coinAmount} 金币`);
+          }
+        }
+        
       } catch (error) {
-        console.error('[VIP支付] 获取订单详情失败:', error);
+        console.error('[支付回调] 获取订单详情失败:', error);
       }
     }
 
@@ -174,18 +214,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 });
 
 /**
- * 手动检查支付状态并更新VIP
+ * 手动检查支付状态并更新VIP或充值金币
  * POST /api/idatariver/checkpayment
  */
 router.post('/checkpayment', authenticateToken, async (req, res) => {
   try {
-    const { orderId, planType } = req.body;
+    const { orderId, planType, orderType, coinAmount } = req.body;
     const userId = req.user.id;
 
-    if (!orderId || !planType) {
+    if (!orderId) {
       return res.json({
         code: 1,
-        msg: '缺少必要参数'
+        msg: '缺少订单号'
       });
     }
 
@@ -194,11 +234,35 @@ router.post('/checkpayment', authenticateToken, async (req, res) => {
     const status = orderInfo.result?.status || orderInfo.status;
 
     if (status === 'paid' || status === 'success' || status === 'completed') {
-      // 更新用户VIP状态
-      const plan = VIP_PLANS[planType];
-      if (plan) {
-        const user = await User.findById(userId);
-        if (user) {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.json({
+          code: 1,
+          msg: '用户不存在'
+        });
+      }
+
+      if (orderType === 'coin' || coinAmount) {
+        // 金币充值处理
+        const rechargeAmount = coinAmount || Math.round((orderInfo.amount || 0) / 100);
+        
+        if (rechargeAmount > 0) {
+          user.coins = (user.coins || 0) + rechargeAmount;
+          await user.save();
+          
+          console.log(`[金币充值] 用户 ${user.username} 充值 ${rechargeAmount} 金币成功，当前余额: ${user.coins}`);
+          
+          return res.json({
+            code: 0,
+            msg: '金币充值成功',
+            coins: user.coins,
+            rechargeAmount
+          });
+        }
+      } else if (planType) {
+        // VIP购买处理
+        const plan = VIP_PLANS[planType];
+        if (plan) {
           const now = new Date();
           const currentVipExpire = user.vipExpireDate && user.vipExpireDate > now ? user.vipExpireDate : now;
           const newVipExpire = new Date(currentVipExpire.getTime() + plan.days * 24 * 60 * 60 * 1000);
@@ -224,7 +288,7 @@ router.post('/checkpayment', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[VIP支付] 检查支付状态失败:', error);
+    console.error('[支付] 检查支付状态失败:', error);
     return res.json({
       code: 1,
       msg: error.message || '检查支付状态失败'

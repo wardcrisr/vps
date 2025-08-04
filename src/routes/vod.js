@@ -48,7 +48,7 @@ router.get('/videos', async (req, res) => {
       dbQuery.category = category; // 严格相等匹配
     }
 
-    const dbVideos = await Media.find(dbQuery).populate('uploader', 'username displayName _id avatarUrl').sort({ createdAt: -1 });
+    const dbVideos = await Media.find(dbQuery).populate('uploader', 'username displayName _id uploaderAvatarUrl').sort({ createdAt: -1 });
 
     const dbVideoList = dbVideos.map(video => {
       const obj = {
@@ -83,13 +83,13 @@ router.get('/videos', async (req, res) => {
           _id: video.uploader._id,
           username: video.uploader.username || video.uploader.displayName || '匿名用户',
           displayName: video.uploader.displayName || video.uploader.username || '匿名用户',
-          avatarUrl: video.uploader.avatarUrl || ''
+          avatarUrl: video.uploader.uploaderAvatarUrl || ''
         } : null,
         uploaderInfo: video.uploader ? {
           _id: video.uploader._id,
           username: video.uploader.username || video.uploader.displayName || '匿名用户',
           displayName: video.uploader.displayName || video.uploader.username || '匿名用户',
-          avatarUrl: video.uploader.avatarUrl || ''
+          avatarUrl: video.uploader.uploaderAvatarUrl || ''
         } : null
       };
       
@@ -151,8 +151,8 @@ router.get('/videos', async (req, res) => {
 });
 
 // 视频流式传输路由 - 支持Range请求和云端视频
-// 允许文件名包含任意字符（如含目录、特殊符号），使用 (.*) 正则以兼容 path-to-regexp v6
-router.get('/video/:filename(.*)', async (req, res) => {
+// 修复path-to-regexp路由参数语法错误
+router.get('/video/:filename(*)', async (req, res) => {
   try {
     const filename = req.params.filename; // 使用参数名
     const filePath = path.join(VIDEOS_DIR, filename);

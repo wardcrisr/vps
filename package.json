@@ -6,7 +6,17 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test-performance.js",
+    "perf": "node test-performance.js",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop content-distribution",
+    "pm2:restart": "pm2 restart content-distribution",
+    "pm2:logs": "pm2 logs content-distribution",
+    "pm2:status": "pm2 status",
+    "pm2:monit": "pm2 monit",
+    "deploy": "./deploy.sh",
+    "monitor": "./monitor.sh",
+    "health": "curl -s http://localhost:3000/health | jq ."
   },
   "repository": {
     "type": "git",
@@ -28,6 +38,7 @@
     "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.0",
     "bunnycdn-stream": "^2.4.3",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.6.1",
     "ejs": "^3.1.10",
@@ -37,9 +48,9 @@
     "fluent-ffmpeg": "^2.1.2",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^8.16.0",
-    "morgan": "^1.10.0",
+    "morgan": "^1.10.1",
     "multer": "^1.4.5-lts.1",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

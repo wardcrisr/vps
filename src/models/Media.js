@@ -199,4 +199,12 @@ MediaSchema.methods.incrementView = function() {
   return this.save();
 };
 
+// 性能优化：添加复合索引
+MediaSchema.index({ type: 1, isPublic: 1, createdAt: -1 }); // 首页查询优化
+MediaSchema.index({ uploader: 1, type: 1, isPublic: 1 }); // UP主页面查询优化
+MediaSchema.index({ title: 'text' }); // 搜索功能优化
+MediaSchema.index({ views: -1 }); // 热门视频查询优化
+MediaSchema.index({ bunnyId: 1 }); // 视频ID查询优化
+MediaSchema.index({ guid: 1 }); // GUID查询优化
+
 module.exports = mongoose.model('Media', MediaSchema); 

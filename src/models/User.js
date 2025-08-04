@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true, index: true },
+  email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true },     // 存储 bcrypt.hash 后的值
-  role:     { type: String, enum: ['user','vip','admin'], default: 'user' },
+  role:     { type: String, enum: ['user','vip','admin'], default: 'user', index: true },
   
   // 用户资料字段
   displayName: { type: String, default: '' },    // 显示昵称
   qq: { type: String, default: '' },             // QQ号
   bio: { type: String, default: '' },            // 个人介绍
-  avatarUrl: { type: String, default: '' },      // 头像URL
+  avatarUrl: { type: String, default: 'https://fulijix.b-cdn.net/momo.jpg' },      // 头像URL，默认萌萌头像
   
   // 付费相关字段
   isPremium: { type: Boolean, default: false },
@@ -39,7 +39,8 @@ const UserSchema = new mongoose.Schema({
   likeCount: { type: Number, default: 0 },           // 获赞总数
   playCount: { type: Number, default: 0 },           // 播放总量
   isUploader: { type: Boolean, default: false },     // 是否为UP主
-  uploaderDescription: { type: String, default: '' } // UP主简介
+  uploaderDescription: { type: String, default: '' }, // UP主简介
+  uploaderAvatarUrl: { type: String, default: '' }    // UP主专用头像URL
 });
 
 // 检查用户是否为付费用户
@@ -78,5 +79,11 @@ UserSchema.methods.incrementDownload = function() {
   this.totalDownloads += 1;
   return this.save();
 };
+
+// 性能优化：添加复合索引
+UserSchema.index({ isVip: 1, vipExpireDate: 1 }); // VIP查询优化
+UserSchema.index({ role: 1, isUploader: 1 }); // 用户角色查询优化
+UserSchema.index({ lastLogin: -1 }); // 最近登录时间查询优化
+UserSchema.index({ coins: -1 }); // 金币排序查询优化
 
 module.exports = mongoose.model('User', UserSchema);

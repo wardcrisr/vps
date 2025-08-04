@@ -121,4 +121,63 @@ router.get('/vip-status', authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * 更新用户头像
+ * POST /api/user/update-avatar
+ */
+router.post('/update-avatar', authenticateToken, async (req, res) => {
+  try {
+    const { avatarUrl } = req.body;
+    
+    if (!avatarUrl) {
+      return res.json({
+        code: 1,
+        msg: '头像URL不能为空'
+      });
+    }
+
+    // 验证头像URL是否为允许的CDN链接
+    const allowedAvatars = [
+      'https://fulijix.b-cdn.net/momo.jpg',
+      'https://fulijix.b-cdn.net/devil%20momo.jpg'
+    ];
+
+    if (!allowedAvatars.includes(avatarUrl)) {
+      return res.json({
+        code: 1,
+        msg: '无效的头像选择'
+      });
+    }
+
+    // 更新用户头像
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatarUrl: avatarUrl },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.json({
+        code: 1,
+        msg: '用户不存在'
+      });
+    }
+
+    return res.json({
+      code: 0,
+      msg: '头像更新成功',
+      data: {
+        avatarUrl: updatedUser.avatarUrl
+      }
+    });
+
+  } catch (error) {
+    console.error('更新头像失败:', error);
+    return res.json({
+      code: 1,
+      msg: '服务器错误，请稍后重试'
+    });
+  }
+});
+
 module.exports = router;

@@ -3,8 +3,8 @@
     <div class="banner-content">
       <div class="uploader-info">
         <div class="avatar-container">
-          <% if (uploader.avatarUrl) { %>
-            <img src="<%= uploader.avatarUrl %>" alt="<%= uploader.name || uploader.displayName || uploader.username %>" class="uploader-avatar-img">
+              <% if (uploader.uploaderAvatarUrl) { %>
+      <img src="<%= uploader.uploaderAvatarUrl %>" alt="<%= uploader.name || uploader.displayName || uploader.username %>" class="uploader-avatar-img">
           <% } else { %>
             <div class="user-icon uploader-avatar-img">👤</div>
           <% } %>

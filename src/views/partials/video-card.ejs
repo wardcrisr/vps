@@ -66,8 +66,8 @@
     <!-- 上传者信息 - 点击进入上传者主页 -->
     <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/<%= uploaderUid %>'" style="cursor: pointer; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 6px;">
-        <% if (uploader && uploader.avatarUrl) { %>
-          <img src="<%= uploader.avatarUrl %>" alt="<%= uploaderName %>" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+        <% if (uploader && uploader.uploaderAvatarUrl) { %>
+          <img src="<%= uploader.uploaderAvatarUrl %>" alt="<%= uploaderName %>" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
         <% } else { %>
           <span style="font-size:14px;">👤</span>
         <% } %>

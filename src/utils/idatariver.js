@@ -51,20 +51,27 @@ function safeUrl(urlObj) {
 }
 
 // 添加订单
-async function addOrder(amountFen, desc = 'VIP会员充值', contactInfo = '', currency = 'CNY') {
+async function addOrder(amountFen, desc = 'VIP会员充值', contactInfo = '', currency = 'CNY', skuId = null) {
   let data;
   const addBody = {
     projectId: PROJECT_ID,
-    skuId: SKU_ID,
     orderInfo: {
       quantity: 1,
       contactInfo: contactInfo || 'anonymous',   // iDataRiver 要求 5-100 字符
       coupon: ''
     },
-    amount: amountFen,
-    currency,
     desc
   };
+
+  // 如果有SKU ID，只传SKU相关参数，不传amount
+  if (skuId) {
+    addBody.skuId = skuId;
+    // SKU模式不传amount，让iDataRiver使用SKU预设价格
+  } else {
+    // 无SKU时，使用自定义金额
+    addBody.amount = amountFen;
+    addBody.currency = currency;
+  }
   
   try {
     ({ data } = await http.post('/order/add', addBody));
@@ -110,26 +117,41 @@ async function payOrder(orderId, method = 'alipay') {
 }
 
 // 创建VIP充值订单
-async function createRecharge(amountFen, contactInfo = '', desc = 'VIP会员充值') {
+async function createRecharge(amountFen, contactInfo = '', desc = 'VIP会员充值', skuId = null) {
   let data;
   try {
     // 优先尝试新版 merchant 接口
-    ({ data } = await http.post('/merchant/createOrder', {
-      amount: +(amountFen / 100).toFixed(2), // 元为单位
-      currency: 'CNY',
-      desc,
-      notify_url: 'https://fulijix.com/api/idatariver/webhook',
-      ...(contactInfo ? { contactInfo } : {})
-    }));
+    // 根据是否传入skuId决定订单创建方式
+    let orderData;
+    if (skuId) {
+      // SKU下单，不需要显式amount，由平台根据skuID价格生成
+      orderData = {
+        skuId,
+        quantity: 1,
+        desc,
+        notify_url: 'https://fulijix.com/api/idatariver/webhook',
+        ...(contactInfo ? { contactInfo } : {})
+      };
+    } else {
+      // 指定金额下单
+      orderData = {
+        amount: +(amountFen / 100).toFixed(2), // 元为单位
+        currency: 'CNY',
+        desc,
+        notify_url: 'https://fulijix.com/api/idatariver/webhook',
+        ...(contactInfo ? { contactInfo } : {})
+      };
+    }
+    ({ data } = await http.post('/merchant/createOrder', orderData));
     console.log('[iDataRiver] merchant/createOrder resp:', JSON.stringify(data, null, 2));
   } catch (err) {
     console.warn('[iDataRiver] merchant/createOrder failed, fallback to addOrder/payOrder', err.response?.status || err.message);
-    return fallbackRecharge(amountFen, contactInfo, desc);
+    return fallbackRecharge(amountFen, contactInfo, desc, skuId);
   }
 
   if (data.code !== 0 && data.code !== undefined) {
     console.warn('[iDataRiver] merchant/createOrder code!=0, fallback. resp=', JSON.stringify(data));
-    return fallbackRecharge(amountFen, contactInfo, desc);
+    return fallbackRecharge(amountFen, contactInfo, desc, skuId);
   }
 
   // 兼容不同返回格式
@@ -140,7 +162,7 @@ async function createRecharge(amountFen, contactInfo = '', desc = 'VIP会员充�
 
   if (!payUrl) {
     console.warn('[iDataRiver] merchant/createOrder returned no payUrl, fallback');
-    return fallbackRecharge(amountFen, contactInfo, desc);
+    return fallbackRecharge(amountFen, contactInfo, desc, skuId);
   }
 
   console.log('PAYRESPRAW', JSON.stringify(data, null, 2));
@@ -150,9 +172,9 @@ async function createRecharge(amountFen, contactInfo = '', desc = 'VIP会员充�
   };
 
   // ===== 内部帮助函数 =====
-  async function fallbackRecharge(amountFenLocal, contactInfoLocal, descLocal) {
+  async function fallbackRecharge(amountFenLocal, contactInfoLocal, descLocal, skuIdLocal) {
     try {
-      const orderId = await addOrder(amountFenLocal, descLocal, contactInfoLocal);
+      const orderId = await addOrder(amountFenLocal, descLocal, contactInfoLocal, 'CNY', skuIdLocal);
       const method = await getEnabledMethod(orderId);
       const url = await payOrder(orderId, method);
       return {

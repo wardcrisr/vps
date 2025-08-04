@@ -16,26 +16,26 @@ const authenticateToken = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({ success: false, message: '访问被拒绝，请提供有效的token' });
+      return res.status(401).json({ code: 1, msg: '访问被拒绝，请提供有效的token' });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(decoded.id);
     
     if (!user) {
-      return res.status(401).json({ success: false, message: '用户不存在' });
+      return res.status(401).json({ code: 1, msg: '用户不存在' });
     }
 
     req.user = user;
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
-      return res.status(403).json({ success: false, message: '无效的token' });
+      return res.status(403).json({ code: 1, msg: '无效的token' });
     }
     if (error.name === 'TokenExpiredError') {
-      return res.status(403).json({ success: false, message: 'Token已过期，请重新登录' });
+      return res.status(403).json({ code: 1, msg: 'Token已过期，请重新登录' });
     }
-    return res.status(500).json({ success: false, message: '服务器错误' });
+    return res.status(500).json({ code: 1, msg: '服务器错误' });
   }
 };
 
@@ -58,7 +58,10 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);
-      const user = await User.findById(decoded.id);
+      // 性能优化：只查询必要的基础字段，减少数据传输
+      const user = await User.findById(decoded.id)
+        .select('username email displayName avatarUrl role isVip vipExpireDate coins')
+        .lean(); // 使用lean()返回普通对象，性能更好
       if (user) {
         req.user = user;
       }
@@ -73,11 +76,11 @@ const optionalAuth = async (req, res, next) => {
 // 管理员权限检查中间件
 const requireAdmin = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ success: false, message: '请先登录' });
+    return res.status(401).json({ code: 1, msg: '请先登录' });
   }
   
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: '需要管理员权限' });
+    return res.status(403).json({ code: 1, msg: '需要管理员权限' });
   }
   
   next();
@@ -86,11 +89,11 @@ const requireAdmin = (req, res, next) => {
 // VIP权限检查中间件
 const requireVIP = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ success: false, message: '请先登录' });
+    return res.status(401).json({ code: 1, msg: '请先登录' });
   }
   
   if (!req.user.isPremiumUser() && req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: '需要VIP会员权限' });
+    return res.status(403).json({ code: 1, msg: '需要VIP会员权限' });
   }
   
   next();

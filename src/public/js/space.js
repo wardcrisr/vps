@@ -194,7 +194,7 @@ const SpacePage = {
         </h4>
                   <div class="uploader-info" onclick="event.stopPropagation(); location.href='/space/${uploaderUid}'" style="cursor: pointer; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              ${uploader.avatarUrl ? `<img src="${uploader.avatarUrl}" alt="${uploaderName}" style=\"width:48px;height:48px;border-radius:50%;object-fit:cover;\">` : '<span style="font-size:14px;">👤</span>'} <span style="color: #666; font-size: 0.8rem; font-weight: 500;">${uploaderName}</span>
+              ${uploader.uploaderAvatarUrl ? `<img src="${uploader.uploaderAvatarUrl}" alt="${uploaderName}" style=\"width:48px;height:48px;border-radius:50%;object-fit:cover;\">` : '<span style="font-size:14px;">👤</span>'} <span style="color: #666; font-size: 0.8rem; font-weight: 500;">${uploaderName}</span>
             </div>
           </div>
         <div class="video-stats">

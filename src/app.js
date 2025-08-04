@@ -16,6 +16,7 @@ const expressLayouts = require('express-ejs-layouts');
 const mongoose       = require('mongoose');
 const multer         = require('multer');
 const fs             = require('fs');
+const compression    = require('compression');
 const { Types: MongooseTypes } = require('mongoose');
 
 // 引入模型
@@ -39,6 +40,20 @@ const { optionalAuth, authenticateToken, requireVIP } = require('./routes/middle
 // 创建 Express 实例
 const app = express();
 app.set('view cache', false);
+
+// 性能优化：启用Gzip压缩
+app.use(compression({
+  level: 6, // 压缩级别 (1-9, 6是平衡点)
+  threshold: 1024, // 只压缩大于1KB的响应
+  filter: (req, res) => {
+    // 不压缩标记为不可压缩的内容
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // 使用默认的compression过滤器
+    return compression.filter(req, res);
+  }
+}));
 
 // 确保上传目录存在（临时存储）
 const uploadDir = path.join(__dirname, '../uploads');
@@ -88,8 +103,24 @@ app.use(cookieParser());
 // 静态文件服务（本地文件）
 app.use('/uploads', express.static(uploadDir));
 
-// 静态文件服务（CSS、JS等）
-app.use(express.static(path.join(__dirname, 'public')));
+// 静态文件服务（CSS、JS等）- 性能优化
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d', // 缓存7天
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    // 对CSS和JS文件设置更长的缓存时间
+    if (path.endsWith('.css') || path.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800'); // 7天
+    }
+    // 对图片文件设置更长的缓存时间
+    if (path.match(/\.(jpg|jpeg|png|gif|webp|svg|ico)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30天
+    }
+    // 安全头部
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
+}));
 
 // 静态文件服务（根目录）
 app.use('/static', express.static(path.join(__dirname, '../..')));
@@ -778,6 +809,21 @@ app.use((req, res, next) => {
 
 // 禁用etag
 app.disable('etag');
+
+// 健康检查端点
+app.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const healthStatus = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    version: require('../../package.json').version || '1.0.0'
+  };
+  
+  res.status(200).json(healthStatus);
+});
 
 
  module.exports = app;

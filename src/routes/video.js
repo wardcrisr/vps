@@ -22,7 +22,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
     
     // 直接使用populate方式查询，和主页保持一致
-    const videoData = await Media.findById(videoId).populate('uploader', 'username displayName _id avatarUrl uid name');
+    const videoData = await Media.findById(videoId).populate('uploader', 'username displayName _id uploaderAvatarUrl uid name');
     
     if (!videoData) {
       return res.status(404).render('error', {
@@ -49,7 +49,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
       up: videoData.uploader ? {
         uid: videoData.uploader._id,
         name: videoData.uploader.name || videoData.uploader.displayName || videoData.uploader.username || '匿名用户',
-        avatarUrl: videoData.uploader.avatarUrl
+        avatarUrl: videoData.uploader.uploaderAvatarUrl
       } : null,
       streamUrl: videoData.streamUrl,
       hlsStatus: videoData.hlsStatus,
@@ -92,7 +92,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
         uploader: video.uploader._id,
       _id: { $ne: videoId }
     })
-      .populate('uploader', 'username displayName _id avatarUrl')
+      .populate('uploader', 'username displayName _id uploaderAvatarUrl')
     .sort({ createdAt: -1 })
     .limit(8)
       .select('_id title coverUrl thumbnail duration views description bunnyId guid uploader');
@@ -114,7 +114,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
         obj.up = {
           uid: obj.uploader._id,
           name: obj.uploader.name || obj.uploader.displayName || obj.uploader.username || '匿名用户',
-          avatarUrl: obj.uploader.avatarUrl
+          avatarUrl: obj.uploader.uploaderAvatarUrl
         };
       }
       return obj;

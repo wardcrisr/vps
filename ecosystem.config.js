@@ -1,43 +1,44 @@
 module.exports = {
   apps: [{
     name: 'content-distribution',
-    script: 'src/app.js',
-    // 简单开启时间戳
-    time             : true,
-    // 或自定义格式
-    log_date_format  : "YYYY-MM-DD HH:mm:ss Z",
-    cwd: '/root/content-distribution',  // 确保指向你的项目根目录
-
-    // 集群模式，按 CPU 核心启动多个实例，提升并发
-    instances: 'max',
-    exec_mode: 'cluster',
-
+    script: 'src/server.js',
+    instances: 1,
+    autorestart: true,
     watch: false,
     max_memory_restart: '1G',
-
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true,
     env: {
       NODE_ENV: 'production',
-      PORT: 3000,
-
-      /* iDataRiver 必备 */
-      IDR_SECRET:       'sk_dd369cf8391ef8c7841cde49beeaa5a1',
-      IDR_PROJECT_ID:   '685e041e9a39b8585ce9fe0a',
-      IDR_SKU_ID:       '685e6d3881b5e4938026c6aa',
-      IDATARIVER_HOST:  'https://open.idatariver.com',
-      PAY_CALLBACK:     'https://fulijix.com/api/idatariver/webhook',
-      PAY_REDIRECT:     'https://fulijix.com/user/paysuccess',
-
-      /* Bunny 相关 */
-      BUNNY_API_KEY:        '0811767b-c5f6-4b79-b94bd422582d-6729-4826',
-      BUNNY_VIDEO_LIBRARY:  '461001'
+      PORT: 3000
     },
-
-    /* 日志 */
-    log_file:   '/var/log/content-distribution.log',
-    out_file:   '/var/log/content-distribution-out.log',
-    error_file: '/var/log/content-distribution-error.log',
+    // 健康检查配置
+    health_check_grace_period: 3000,
+    health_check_fatal_exceptions: true,
+    
+    // 重启策略 - 防止无限重启循环
+    min_uptime: '10s',        // 应用必须运行至少10秒才算成功启动
+    max_restarts: 10,         // 15分钟内最多重启10次
+    restart_delay: 4000,      // 重启延迟4秒
+    
+    // 进程管理
+    kill_timeout: 5000,       // 强制杀死进程前等待5秒
+    listen_timeout: 3000,     // 端口监听超时3秒
+    
+    // 日志配置
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     merge_logs: true,
-    time: true
+    
+    // 环境变量
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    env_development: {
+      NODE_ENV: 'development',
+      PORT: 3000
+    }
   }]
 };
-

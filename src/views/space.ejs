@@ -868,7 +868,7 @@
         uploadBtn.addEventListener('click', function() {
           const url = prompt('请输入头像URL');
           if (!url) return;
-          axios.put('/api/admin/users/<%= uploader._id %>', { avatarUrl: url })
+          axios.put('/api/admin/users/<%= uploader._id %>', { uploaderAvatarUrl: url })
             .then(function(res) {
               if (res.data && res.data.success) {
                 let imgElem = document.querySelector('.uploader-avatar-img');

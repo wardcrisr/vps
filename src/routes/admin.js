@@ -404,7 +404,7 @@ router.get('/users/:id', async (req, res) => {
 // ——— 更新用户信息 ———
 router.put('/users/:id', async (req, res) => {
   try {
-    const { role, isPremium, premiumExpiry, dailyDownloadLimit, avatarUrl } = req.body;
+    const { role, isPremium, premiumExpiry, dailyDownloadLimit, avatarUrl, uploaderAvatarUrl } = req.body;
     const updateData = {};
     
     if (role) updateData.role = role;
@@ -412,6 +412,7 @@ router.put('/users/:id', async (req, res) => {
     if (premiumExpiry) updateData.premiumExpiry = new Date(premiumExpiry);
     if (dailyDownloadLimit !== undefined) updateData.dailyDownloadLimit = dailyDownloadLimit;
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+    if (uploaderAvatarUrl !== undefined) updateData.uploaderAvatarUrl = uploaderAvatarUrl;
     
     const user = await User.findByIdAndUpdate(
       req.params.id,

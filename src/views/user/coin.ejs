@@ -262,9 +262,9 @@
       try{
         const headers = {};
         if(localStorage.authToken){ headers['Authorization'] = 'Bearer '+localStorage.authToken; }
-        const res = await fetch('/api/user/profile', { credentials:'include', headers });
+        const res = await fetch('/api/user/info', { credentials:'include', headers });
         const json = await res.json();
-        if(json.success){
+        if(json.code === 0){
           document.getElementById('coinAmount').innerText = json.data.coins + ' 金币';
         }else{
           document.getElementById('coinAmount').innerText = '获取失败';
