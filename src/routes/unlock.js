@@ -6,6 +6,7 @@ const Media    = require('../models/Media');
 const User     = require('../models/User');
 const Purchase = require('../models/Purchase');
 const { authenticateToken } = require('./middleware/auth');
+const { ensureAllowedUA } = require('../middleware/uaGuard');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const router = express.Router();
  * Body: { hoursValid?: number }
  * Response: { iframe: string }
  */
-router.post('/:videoId', authenticateToken, async (req, res) => {
+router.post('/:videoId', ensureAllowedUA(), authenticateToken, async (req, res) => {
   const session = await mongoose.startSession();
   const { videoId }  = req.params;
   const hoursValid   = Number(req.body.hoursValid) || 72; // 默认72小时

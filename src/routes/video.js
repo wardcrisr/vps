@@ -4,11 +4,12 @@ const mongoose = require('mongoose');
 const Media = require('../models/Media');
 const User = require('../models/User');
 const { optionalAuth } = require('./middleware/auth');
+const { ensureAllowedUA } = require('../middleware/uaGuard');
 
 /**
  * 视频详情页 - 兼容/video/:id路由
  */
-router.get('/:id', optionalAuth, async (req, res) => {
+router.get('/:id', ensureAllowedUA(), optionalAuth, async (req, res) => {
   try {
     const videoId = req.params.id;
     
@@ -139,18 +140,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
       }
     }
 
-    // 对 Bunny Stream 嵌入（可能403）自动添加签名 token（免费视频无需购买）
-    if (playUrl && playUrl.includes('iframe.mediadelivery.net/embed') && process.env.BUNNY_SECRET) {
-      const crypto = require('crypto');
-      try {
-        const expires = Math.floor(Date.now() / 1000) + 3600 * 24 * 7; // 7 天
-        const raw     = `${process.env.BUNNY_SECRET}${video.bunnyId}${expires}`;
-        const token   = crypto.createHash('sha256').update(raw).digest('hex');
-        if(!playUrl.includes('token=')){
-          playUrl += `${playUrl.includes('?') ? '&' : '?'}token=${token}&expires=${expires}`;
-        }
-      } catch(e) { console.error('生成 Bunny 签名失败', e); }
-    }
+    // 不在 SSR 中输出直链与签名，以免被抓包绕过 UA/鉴权
+    playUrl = '';
 
     if (!playUrl) {
       playUrl = '';

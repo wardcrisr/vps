@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const Media = require('../models/Media');
+const { ensureAllowedUA } = require('../middleware/uaGuard');
 // B2直传服务已移除
 const router = express.Router();
 
@@ -14,7 +15,7 @@ if (!fs.existsSync(VIDEOS_DIR)) {
 }
 
 // 获取视频文件列表 - 合并本地文件和数据库记录（支持 ?category=<free|paid|member>）
-router.get('/videos', async (req, res) => {
+router.get('/videos', ensureAllowedUA(), async (req, res) => {
   try {
     const { category } = req.query;
     // 1. 获取本地videos目录中的文件
@@ -152,7 +153,7 @@ router.get('/videos', async (req, res) => {
 
 // 视频流式传输路由 - 支持Range请求和云端视频
 // 修复path-to-regexp路由参数语法错误
-router.get('/video/:filename(*)', async (req, res) => {
+router.get('/video/:filename(*)', ensureAllowedUA(), async (req, res) => {
   try {
     const filename = req.params.filename; // 使用参数名
     const filePath = path.join(VIDEOS_DIR, filename);
@@ -232,7 +233,7 @@ router.get('/video/:filename(*)', async (req, res) => {
 });
 
 // 视频信息API
-router.get('/info/:filename', (req, res) => {
+router.get('/info/:filename', ensureAllowedUA(), (req, res) => {
   try {
     const filename = req.params.filename;
     const filePath = path.join(VIDEOS_DIR, filename);

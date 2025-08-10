@@ -257,6 +257,32 @@
     <script>
         let videos = [];
         let currentVideo = null;
+        // 前端 UA 白名单检查：PC Chrome、Android Chrome、iOS Safari、iOS Chrome（CriOS）
+        (function enforceUA(){
+            try{
+                const ua = (navigator.userAgent||'').toLowerCase();
+                const isIOS = /iphone|ipad|ipod/.test(ua);
+                const isAndroid = /android/.test(ua);
+                const isDesktop = !isIOS && !isAndroid;
+                const blocked = /edg|edgios|edga|opr|opios|firefox|fxios|ucbrowser|samsungbrowser|huawei|harmony|miuibrowser|baidubrowser|bidubrowser|qqbrowser|dingtalk|micromessenger/.test(ua);
+                let allowed = false;
+                if(!blocked){
+                    if(isIOS){
+                        const isCriOS = /crios/.test(ua);
+                        const isSafari = /safari/.test(ua) && /version\//.test(ua) && !isCriOS;
+                        allowed = isSafari || isCriOS;
+                    } else if(isAndroid){
+                        allowed = /chrome\//.test(ua);
+                    } else if(isDesktop){
+                        allowed = /chrome\//.test(ua);
+                    }
+                }
+                if(!allowed){
+                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;color:#fff;background:#111;">当前浏览器不被支持，请使用 PC Chrome、Android Chrome 或 iOS Safari/Chrome</div>';
+                    throw new Error('Blocked UA');
+                }
+            }catch(e){ console.warn('UA blocked or check failed:', e && e.message); }
+        })();
         
         // 页面加载时获取视频列表
         window.addEventListener('load', () => {

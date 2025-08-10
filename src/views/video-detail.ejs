@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="origin-when-cross-origin">
     <title><%= video.title %> - <%= title %></title>
     <!-- Umami Analytics -->
     <script defer src="https://cloud.umami.is/script.js" data-website-id="0447789b-3880-4f93-bcc4-e0c5db71972d"></script>
@@ -17,14 +18,15 @@
     <meta property="og:title" content="<%= video.title.replace(/"/g,'&quot;') %>">
     <meta property="og:description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
     <meta property="og:image" content="<%= video.coverUrl || video.thumbnail %>">
-    <meta property="og:video" content="<%= video.playUrl || video.streamUrl %>">
+    <!-- 恢复社交卡片可用性（不放签名直链，保持兼容） -->
+    <meta property="og:video" content="<%= canonicalUrl %>">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="player">
     <meta name="twitter:title" content="<%= video.title.replace(/"/g,'&quot;') %>">
     <meta name="twitter:description" content="<%= (video.description || video.title).replace(/"/g,'&quot;') %>">
     <meta name="twitter:image" content="<%= video.coverUrl || video.thumbnail %>">
-    <meta name="twitter:player" content="<%= video.playUrl || video.streamUrl %>">
+    <meta name="twitter:player" content="<%= canonicalUrl %>">
     <meta name="twitter:player:width" content="1280">
     <meta name="twitter:player:height" content="720">
 
@@ -37,8 +39,9 @@
       thumbnailUrl: video.coverUrl || video.thumbnail,
       uploadDate: new Date(video.createdAt).toISOString(),
       duration: `PT${video.duration}S`,
-      embedUrl: video.playUrl || video.streamUrl,
-      contentUrl: video.cdnUrl || video.url,
+      // 避免在结构化数据中暴露直链
+      embedUrl: canonicalUrl,
+      contentUrl: canonicalUrl,
       author:{"@type":"Person",name:video.up.name,identifier:video.up.uid},
       genre: video.category,
       interactionStatistic:[{"@type":"InteractionCounter","interactionType":{"@type":"WatchAction"},"userInteractionCount":video.views||0},{"@type":"InteractionCounter","interactionType":{"@type":"LikeAction"},"userInteractionCount":video.likes||0}],
@@ -168,6 +171,37 @@
 
     <script>
       const PAGE_CONF = JSON.parse(document.getElementById('page-config').textContent || '{}');
+
+      // 前端 UA 白名单：PC Chrome、Android Chrome、iOS Safari、iOS Chrome（CriOS）
+      (function enforceUA(){
+        try{
+          const ua = (navigator.userAgent||'').toLowerCase();
+          const isIOS = /iphone|ipad|ipod/.test(ua);
+          const isAndroid = /android/.test(ua);
+          const isDesktop = !isIOS && !isAndroid;
+          const blocked = /edg|edgios|edga|opr|opios|firefox|fxios|ucbrowser|samsungbrowser|huawei|harmony|miuibrowser|baidubrowser|bidubrowser|qqbrowser|dingtalk|micromessenger/.test(ua);
+          let allowed = false;
+          if(!blocked){
+            if(isIOS){
+              const isCriOS = /crios/.test(ua);
+              const isSafari = /safari/.test(ua) && /version\//.test(ua) && !isCriOS;
+              allowed = isSafari || isCriOS;
+            } else if(isAndroid){
+              allowed = /chrome\//.test(ua);
+            } else if(isDesktop){
+              allowed = /chrome\//.test(ua);
+            }
+          }
+          if(!allowed){
+            // 拒绝初始化 Video.js
+            const container = document.getElementById('playerContainer');
+            if(container){
+              container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:220px;background:#111;color:#fff;border-radius:8px;">当前浏览器不被支持，请使用 PC Chrome、Android Chrome 或 iOS Safari/Chrome</div>';
+            }
+            throw new Error('Blocked UA');
+          }
+        }catch(e){ console.warn('UA blocked or check failed:', e && e.message); }
+      })();
       
       const VIDEO_ID = PAGE_CONF.VIDEO_ID;
       const PRICE    = PAGE_CONF.PRICE;
@@ -442,6 +476,8 @@
           // 创建并插入 iframe，而不替换整个容器，以保留遮罩层
           const iframe = document.createElement('iframe');
           iframe.src = url;
+          // 确保跨域 iframe 发送站点来源，配合 Bunny 的 Allowed domains/Block empty referer
+          iframe.setAttribute('referrerpolicy','origin-when-cross-origin');
           iframe.allow = 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture';
           iframe.allowFullscreen = true;
           iframe.style.position = 'absolute';
@@ -515,13 +551,12 @@
       async function init(){
         let url;
 
+        // 统一走受控接口，避免直接使用 DEFAULT_PLAY_URL 绕过 UA/鉴权
         if(IS_VIP_VIDEO || FORCE_VIP_TEST){
           if(IS_PREMIUM_USER){
-            url = DEFAULT_PLAY_URL;
-          }else{
-            // 对于会员视频，非会员用户使用完整URL，仅依赖前端150秒限制
-            console.log('非会员观看会员视频，使用完整URL + 前端150秒限制');
-            url = DEFAULT_PLAY_URL;
+            url = await getPlayUrl();
+          } else {
+            url = await getPreviewUrl();
           }
         } else if(IS_PAID_VIDEO){
           url = await getPlayUrl();
@@ -529,7 +564,16 @@
             url = await getPreviewUrl();
           }
         } else {
-          url = DEFAULT_PLAY_URL;
+          // 免费视频：仍走受控 preview（保持 UA 校验），预留后端返回完整地址
+          url = await getPreviewUrl();
+          if(!url){ url = DEFAULT_PLAY_URL; }
+        }
+
+        // 仍优先使用 Bunny iframe（嵌入播放器会自动对分片签名）；我们已设置 referrerpolicy 以满足 Allowed domains/Block empty referrer
+
+        if(!url){
+          console.error('无法获取播放地址');
+          return;
         }
 
         loadSource(url);

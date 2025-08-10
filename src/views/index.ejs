@@ -76,6 +76,16 @@
       justify-content: center;
       min-width: 0;
     }
+    /* 顶部提示条（放在标题正下方，避免挤压导航布局） */
+    .ua-note-bar {
+      max-width: 1284px;
+      margin: 6px auto 0;
+      padding: 6px 12px;
+      color: #d32f2f;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.4;
+    }
     
     .header-right {
       display: flex;
@@ -155,6 +165,9 @@
       margin: 0 auto;
       display: flex;
       align-items: center;
+    }
+    @media (max-width: 768px) {
+      .ua-note-bar { margin: 6px 12px 0; font-size: 12px; }
     }
     
     .search-container {
@@ -1003,6 +1016,8 @@
 
   <!-- 主要内容区域 -->
   <main class="main-content">
+    <!-- 顶部提示：放在主内容内部首行，确保位于固定导航栏下方 -->
+    <div class="ua-note-bar">本站已禁用安卓自带浏览器，请使用 Chrome 浏览器打开网页</div>
     <!-- 主内容区域中的搜索框 -->
     <div class="main-search-container">
       <form class="main-search-form" onsubmit="handleSearch(event)">
@@ -1134,19 +1149,15 @@
         const container = document.querySelector(containerId);
         container.innerHTML = '';
 
-        // 获取播放URL
+        // 通过受控 API 获取播放 URL（带 UA/权限校验）
         let playUrl = null;
-        
-        if (video.streamUrl) {
-          playUrl = video.streamUrl;
-        } else if (video.bunnyId) {
-          const libId = '461001'; 
-          playUrl = `https://iframe.mediadelivery.net/embed/${libId}/${video.bunnyId}`;
-        } else if (video.cdnUrl) {
-          playUrl = video.cdnUrl;
-        } else if (video.url) {
-          playUrl = video.url;
-        }
+        try {
+          const resp = await fetch(`/api/video/${video._id}/preview`);
+          if (resp.ok) {
+            const j = await resp.json();
+            playUrl = j && j.data && j.data.url;
+          }
+        } catch(e) { console.warn('preview api failed', e); }
 
         if (!playUrl) {
           throw new Error('无法获取视频播放地址');

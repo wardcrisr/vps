@@ -6,9 +6,11 @@ const Purchase  = require('../models/Purchase');
 const Log       = require('../models/Log');
 const { ok, err }= require('../utils/response');
 const crypto = require('crypto');
+const { ensureAllowedUA } = require('../middleware/uaGuard');
+const { debugBunnyToken } = require('../utils/bunnyDebug');
 
 // GET /api/video/:id/preview  (无需登录)
-router.get('/:id/preview', async (req, res) => {
+router.get('/:id/preview', ensureAllowedUA(), async (req, res) => {
   try {
     const video = await Media.findById(req.params.id);
     if (!video) return err(res,1,'video not found',404);
@@ -36,6 +38,7 @@ router.get('/:id/preview', async (req, res) => {
       const raw   = `${process.env.BUNNY_SECRET}${video.bunnyId}${expires}`;
       const token = crypto.createHash('sha256').update(raw).digest('hex');
       previewUrl += `${previewUrl.includes('?') ? '&' : '?'}token=${token}&expires=${expires}`;
+      debugBunnyToken('preview', { libId: process.env.BUNNY_VIDEO_LIBRARY, bunnyId: video.bunnyId, expires, token, url: previewUrl, ua: req.get('user-agent') });
     }
 
     if(!previewUrl){
@@ -68,7 +71,7 @@ router.post('/:id/purchase', authenticateToken, async (req,res)=>{
 });
 
 // GET /api/video/:id/play
-router.get('/:id/play', authenticateToken, async (req,res)=>{
+router.get('/:id/play', ensureAllowedUA(), authenticateToken, async (req,res)=>{
   try{
     const user = await User.findById(req.user._id);
     const video = await Media.findById(req.params.id);
@@ -107,7 +110,8 @@ router.get('/:id/play', authenticateToken, async (req,res)=>{
         const expires = Math.floor(Date.now() / 1000) + 3600; // 1小时有效期
         const raw = `${process.env.BUNNY_SECRET}${video.bunnyId}${expires}`;
         const token = crypto.createHash('sha256').update(raw).digest('hex');
-        playUrl += `?token=${token}&expires=${expires}`;
+        playUrl += `${playUrl.includes('?') ? '&' : '?'}token=${token}&expires=${expires}`;
+        debugBunnyToken('play', { libId, bunnyId: video.bunnyId, expires, token, url: playUrl, ua: req.get('user-agent') });
       }
     }
     // 3. 使用CDN地址
