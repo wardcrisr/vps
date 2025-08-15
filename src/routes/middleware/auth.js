@@ -59,8 +59,9 @@ const optionalAuth = async (req, res, next) => {
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);
       // 性能优化：只查询必要的基础字段，减少数据传输
+      // 注意：前端会员判定依赖 isPremium/premiumExpiry
       const user = await User.findById(decoded.id)
-        .select('username email displayName avatarUrl role isVip vipExpireDate coins')
+        .select('username email displayName avatarUrl role isPremium premiumExpiry coins')
         .lean(); // 使用lean()返回普通对象，性能更好
       if (user) {
         req.user = user;

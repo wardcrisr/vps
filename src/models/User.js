@@ -27,9 +27,8 @@ const UserSchema = new mongoose.Schema({
   // 金币余额
   coins: { type: Number, default: 0 },
   
-  // VIP会员相关字段
-  isVip: { type: Boolean, default: false },
-  vipExpireDate: { type: Date, default: null },
+  // 统一会员字段（废弃 isVip/vipExpireDate）
+  // 请仅使用 isPremium/premiumExpiry
   
   // UP主相关字段
   uid: { type: String, unique: true, sparse: true }, // UP主唯一ID
@@ -48,9 +47,9 @@ UserSchema.methods.isPremiumUser = function() {
   return this.isPremium && this.premiumExpiry > new Date();
 };
 
-// 检查用户是否为VIP会员
+// 移除旧的 isVipUser（保持空实现避免旧代码调用出错）
 UserSchema.methods.isVipUser = function() {
-  return this.isVip && this.vipExpireDate > new Date();
+  return this.isPremium && (!this.premiumExpiry || this.premiumExpiry > new Date());
 };
 
 // 检查用户每日下载限制
@@ -81,7 +80,8 @@ UserSchema.methods.incrementDownload = function() {
 };
 
 // 性能优化：添加复合索引
-UserSchema.index({ isVip: 1, vipExpireDate: 1 }); // VIP查询优化
+// 兼容旧索引注释：VIP查询优化已统一到 isPremium/premiumExpiry
+UserSchema.index({ isPremium: 1, premiumExpiry: 1 });
 UserSchema.index({ role: 1, isUploader: 1 }); // 用户角色查询优化
 UserSchema.index({ lastLogin: -1 }); // 最近登录时间查询优化
 UserSchema.index({ coins: -1 }); // 金币排序查询优化

@@ -64,6 +64,25 @@ class BunnyStreamClient {
       throw error;
     }
   }
+
+  // 通过 API 直传二进制内容（服务端中转上传）
+  async uploadVideo(videoGuid, fileBuffer, mimeType = 'video/mp4') {
+    try {
+      const url = `${this.baseURL}/library/${this.videoLibrary}/videos/${videoGuid}`;
+      const response = await axios.put(url, fileBuffer, {
+        headers: {
+          'AccessKey': this.apiKey,
+          'Content-Type': mimeType,
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('[BunnyStreamClient] uploadVideo error:', error.response?.data || error.message);
+      throw error;
+    }
+  }
 }
 
 // 创建实例
@@ -78,7 +97,8 @@ const bunny = {
     get: (videoGuid) => bunnyClient.getVideo(videoGuid),
     list: () => bunnyClient.listVideos()
   },
-  createVideo: (options) => bunnyClient.createVideo(options)
+  createVideo: (options) => bunnyClient.createVideo(options),
+  uploadVideo: (videoGuid, fileBuffer, mimeType) => bunnyClient.uploadVideo(videoGuid, fileBuffer, mimeType)
 };
 
 module.exports = bunny;

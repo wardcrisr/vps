@@ -164,7 +164,14 @@
         CATEGORY: video.category,
         DEFAULT_PLAY_URL: video.playUrl ? video.playUrl : '',
         IS_LOGIN: !!user,
-        IS_PREMIUM_USER: (typeof user !== 'undefined' && user && user.isPremium === true) ? true : false,
+        IS_PREMIUM_USER: (function(u){
+          if(!u) return false;
+          if(u.isPremium){
+            if(!u.premiumExpiry) return true;
+            try { return new Date(u.premiumExpiry) > new Date(); } catch(e){ return true; }
+          }
+          return false;
+        })(typeof user !== 'undefined' ? user : null),
         VIDEO_IS_PREMIUM_ONLY: !!video.isPremiumOnly
       }) %>
     </script>

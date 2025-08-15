@@ -182,7 +182,7 @@
       <div class="result-header">
         <div class="result-icon">✅</div>
         <div class="result-title">支付成功</div>
-        <div class="result-desc">恭喜您成功开通VIP会员</div>
+        <div class="result-desc">恭喜您成功开通会员</div>
       </div>
       <div class="result-body">
         <div class="order-info">
@@ -199,7 +199,7 @@
             <span class="order-value" id="payAmount">-</span>
           </div>
           <div class="order-item">
-            <span class="order-label">VIP到期时间</span>
+            <span class="order-label">会员到期时间</span>
             <span class="order-value" id="vipExpire">-</span>
           </div>
         </div>
@@ -337,9 +337,11 @@
       document.getElementById('planDays').textContent = planDays[planType] || '未知';
       document.getElementById('payAmount').textContent = planAmounts[planType] || '未知';
       
-      if (result.vipExpireDate) {
-        const expireDate = new Date(result.vipExpireDate);
+      if (result.premiumExpiry) {
+        const expireDate = new Date(result.premiumExpiry);
         document.getElementById('vipExpire').textContent = expireDate.toLocaleDateString('zh-CN');
+      } else {
+        document.getElementById('vipExpire').textContent = '永久';
       }
       
       // 清除订单号

@@ -178,6 +178,10 @@ app.use('/api/admin', adminRoutes);
 const bunnySignRoutes = require('./routes/bunnySign');
 app.use('/api/bunny-sign', bunnySignRoutes);
 
+// Bunny 服务端中转上传（管理员兜底方案）
+const bunnyUploadRoutes = require('./routes/bunnyUpload');
+app.use('/api/bunny-upload', bunnyUploadRoutes);
+
 // Bunny Stream 上传完成状态更新
 const bunnyUpdateRoutes = require('./routes/bunnyUpdate');
 app.use('/api/bunny-update', bunnyUpdateRoutes);

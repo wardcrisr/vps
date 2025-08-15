@@ -81,8 +81,9 @@ router.get('/:id/play', ensureAllowedUA(), authenticateToken, async (req,res)=>{
     // 访问权限判断
     let hasAccess = false;
     if(video.isPremiumOnly){
-      // 会员视频：仅会员可直接观看
-      hasAccess = user && user.isPremium;
+      // 会员视频：仅会员可直接观看（统一字段）
+      const isPremium = (user && ((user.isPremium && (!user.premiumExpiry || new Date(user.premiumExpiry) > new Date()))));
+      hasAccess = !!(isPremium || (user && user.role === 'admin'));
     }else{
       // 付费视频：检查是否已购买
       const purchased = await Purchase.findOne({ userId:user._id, videoId:req.params.id });

@@ -10,12 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET || '请设为复杂字符串';
 
 // ——— 显示登录页面 ———
 router.get('/login', (req, res) => {
-  res.render('auth/login', { title: '用户登录 - X福利姬' });
+  // 关闭全局布局，避免额外资源阻塞移动端首屏
+  res.render('auth/login', { title: '用户登录 - X福利姬', layout: false });
 });
 
 // ——— 显示注册页面 ———
 router.get('/register', (req, res) => {
-  res.render('auth/register', { title: '用户注册 - X福利姬' });
+  // 关闭全局布局，避免额外资源阻塞移动端首屏
+  res.render('auth/register', { title: '用户注册 - X福利姬', layout: false });
 });
 
 // ——— 显示用户资料页面 ———

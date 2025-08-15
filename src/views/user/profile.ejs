@@ -1047,15 +1047,15 @@
       <div class="vip-status-row">
         <div class="vip-status-text">
           <span class="vip-label">VIP会员</span>
-          <% if (user.isVip && user.vipExpireDate && new Date(user.vipExpireDate) > new Date()) { %>
+          <% if (user.isPremium && (!user.premiumExpiry || new Date(user.premiumExpiry) > new Date())) { %>
             <span class="vip-expired" style="color: #4CAF50;">
-              <%= new Date(user.vipExpireDate).toLocaleDateString('zh-CN') %>到期
+              <%= user.premiumExpiry ? new Date(user.premiumExpiry).toLocaleDateString('zh-CN') : '永久' %>
             </span>
           <% } else { %>
             <span class="vip-expired">未开通</span>
           <% } %>
         </div>
-        <% if (!user.isVip || !user.vipExpireDate || new Date(user.vipExpireDate) <= new Date()) { %>
+        <% if (!user.isPremium || (user.premiumExpiry && new Date(user.premiumExpiry) <= new Date())) { %>
           <button class="vip-upgrade-btn" onclick="openMonthlyVip()">开通月度会员</button>
         <% } else { %>
           <button class="vip-upgrade-btn" onclick="openMonthlyVip()" style="background: #4CAF50;">续费月度会员</button>

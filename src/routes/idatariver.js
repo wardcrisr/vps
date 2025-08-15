@@ -264,11 +264,11 @@ router.post('/checkpayment', authenticateToken, async (req, res) => {
         const plan = VIP_PLANS[planType];
         if (plan) {
           const now = new Date();
-          const currentVipExpire = user.vipExpireDate && user.vipExpireDate > now ? user.vipExpireDate : now;
-          const newVipExpire = new Date(currentVipExpire.getTime() + plan.days * 24 * 60 * 60 * 1000);
+          const base = user.premiumExpiry && user.premiumExpiry > now ? user.premiumExpiry : now;
+          const newExpiry = new Date(base.getTime() + plan.days * 24 * 60 * 60 * 1000);
           
-          user.isVip = true;
-          user.vipExpireDate = newVipExpire;
+          user.isPremium = true;
+          user.premiumExpiry = newExpiry;
           await user.save();
           
           console.log(`[VIP支付] 用户 ${user.username} VIP状态更新成功，到期时间: ${newVipExpire}`);
@@ -276,7 +276,7 @@ router.post('/checkpayment', authenticateToken, async (req, res) => {
           return res.json({
             code: 0,
             msg: 'VIP开通成功',
-            vipExpireDate: newVipExpire
+            premiumExpiry: newExpiry
           });
         }
       }

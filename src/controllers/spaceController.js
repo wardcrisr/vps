@@ -22,67 +22,60 @@ const buildUserQueryConditions = (uid) => {
 exports.spacePage = async (req, res) => {
   try {
     const { uid } = req.params;
-    
-    // 查找UP主信息（兼容 ObjectId、uid 或用户名），并放宽 isUploader 限制
-    const uploader = await User.findOne({
-      $or: buildUserQueryConditions(uid)
-    });
+
+    // 先查UP主信息（兼容 ObjectId、uid 或用户名）
+    const uploader = await User.findOne({ $or: buildUserQueryConditions(uid) }).lean();
     if (!uploader) {
-      return res.status(404).render('error', { 
+      return res.status(404).render('error', {
         message: 'UP主不存在',
         error: { status: 404 }
       });
     }
 
-    // 获取默认视频列表（最新发布，分页）
+    // 分页参数
     const page = parseInt(req.query.page) || 1;
-    const limit = 12; // 每页12个视频
+    const limit = 12;
     const skip = (page - 1) * limit;
 
-    let videos = await Media.find({ 
-      uploader: uploader._id, 
-      type: 'video',
-      isPublic: true 
-    })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .skip(skip)
-          .populate('uploader', 'uid name displayName username uploaderAvatarUrl');
+    // 并行查询：视频列表、总数、合集
+    const [videosRaw, totalVideos, collections] = await Promise.all([
+      Media.find({ uploader: uploader._id, type: 'video', isPublic: true })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip)
+        .populate('uploader', 'uid name displayName username uploaderAvatarUrl')
+        .lean(),
+      Media.countDocuments({ uploader: uploader._id, type: 'video', isPublic: true }),
+      Collection.find({ uid: uploader.uid, isPublic: true })
+        .sort({ order: 1, createdAt: -1 })
+        .populate('videoIds', 'title coverUrl thumbnail duration views')
+        .limit(6)
+        .lean()
+    ]);
 
     // 为SSR视频添加预览字段
-    videos = videos.map(v => {
-      const obj = v.toObject();
-      if (obj.bunnyId || obj.guid) {
+    const videos = (videosRaw || []).map(obj => {
+      if (obj && (obj.bunnyId || obj.guid)) {
         const guid = obj.bunnyId || obj.guid;
         obj.previewImage = `https://vz-48ed4217-ce4.b-cdn.net/${guid}/preview.webp`;
-        obj.previewUrl   = `https://vz-48ed4217-ce4.b-cdn.net/${guid}/preview.mp4`;
+        obj.previewUrl = `https://vz-48ed4217-ce4.b-cdn.net/${guid}/preview.mp4`;
       }
       return obj;
     });
 
-    // 获取视频总数（用于分页）
-    const totalVideos = await Media.countDocuments({ 
-      uploader: uploader._id, 
-      type: 'video',
-      isPublic: true 
-    });
-
-    // 获取合集列表
-    const collections = await Collection.find({ 
-      uid: uploader.uid, 
-      isPublic: true 
-    })
-    .sort({ order: 1, createdAt: -1 })
-    .populate('videoIds', 'title coverUrl thumbnail duration views')
-    .limit(6); // 最多显示6个合集
-
-    // 计算分页信息
-    const totalPages = Math.ceil(totalVideos / limit);
+    // 分页信息
+    const totalPages = Math.ceil(totalVideos / limit) || 1;
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
+    // 轻量私有缓存，减轻后端压力
+    res.set({
+      'Cache-Control': 'private, max-age=30',
+      'Vary': 'Cookie'
+    });
+
     res.render('space', {
-      layout: false, // 禁用布局，因为页面已包含完整HTML结构
+      layout: false,
       uploader,
       videos,
       collections,
@@ -99,7 +92,7 @@ exports.spacePage = async (req, res) => {
 
   } catch (error) {
     console.error('Space page error:', error);
-    res.status(500).render('error', { 
+    res.status(500).render('error', {
       message: '服务器错误',
       error: { status: 500 }
     });

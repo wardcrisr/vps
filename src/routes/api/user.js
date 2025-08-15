@@ -33,8 +33,8 @@ router.get('/info', authenticateToken, async (req, res) => {
         email: user.email,
         displayName: user.displayName,
         coins: user.coins || 0,
-        isVip: user.isVip || false,
-        vipExpireDate: user.vipExpireDate,
+        isPremium: user.isPremium || false,
+        premiumExpiry: user.premiumExpiry,
         role: user.role,
         joinDate: user.joinDate,
         totalDownloads: user.totalDownloads || 0
@@ -89,8 +89,8 @@ router.get('/coins', authenticateToken, async (req, res) => {
  */
 router.get('/vip-status', authenticateToken, async (req, res) => {
   try {
-    // 从数据库获取最新的VIP状态
-    const user = await User.findById(req.user._id).select('isVip vipExpireDate').lean();
+    // 从数据库获取最新的会员状态
+    const user = await User.findById(req.user._id).select('isPremium premiumExpiry').lean();
     
     if (!user) {
       return res.json({
@@ -100,15 +100,15 @@ router.get('/vip-status', authenticateToken, async (req, res) => {
     }
 
     const now = new Date();
-    const isVipActive = user.isVip && user.vipExpireDate && new Date(user.vipExpireDate) > now;
+    const isPremiumActive = user.isPremium && (!user.premiumExpiry || new Date(user.premiumExpiry) > now);
 
     return res.json({
       code: 0,
       msg: '获取成功',
       data: {
-        isVip: isVipActive,
-        vipExpireDate: user.vipExpireDate,
-        daysLeft: isVipActive ? Math.ceil((new Date(user.vipExpireDate) - now) / (1000 * 60 * 60 * 24)) : 0
+        isPremium: isPremiumActive,
+        premiumExpiry: user.premiumExpiry,
+        daysLeft: isPremiumActive && user.premiumExpiry ? Math.ceil((new Date(user.premiumExpiry) - now) / (1000 * 60 * 60 * 24)) : 0
       }
     });
 

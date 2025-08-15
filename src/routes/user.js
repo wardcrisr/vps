@@ -19,7 +19,7 @@ router.get('/', optionalAuth, async (req, res) => {
     if (!userData.coins && userData.coins !== 0) {
       console.log('🔄 需要补充用户金币数据，执行单次查询');
       const coinData = await User.findById(req.user._id)
-        .select('coins isVip vipExpireDate')
+        .select('coins isPremium premiumExpiry')
         .lean();
       userData = { ...userData, ...coinData };
     }
