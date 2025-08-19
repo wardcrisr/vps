@@ -21,7 +21,8 @@ router.post('/', async (req, res) => {
 
     const libraryId = process.env.BUNNY_VIDEO_LIBRARY;
     const apiKey = process.env.BUNNY_API_KEY;
-    const expires = Math.floor(Date.now() / 1000) + 3600; // 1h
+    // 为大文件上传提供更长的签名有效期（24小时）
+    const expires = Math.floor(Date.now() / 1000) + 24 * 60 * 60; // 24h
 
     const sigPayload = `${libraryId}${apiKey}${expires}${videoId}`;
     const signature = crypto.createHash('sha256').update(sigPayload).digest('hex');

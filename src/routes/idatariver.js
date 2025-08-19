@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { createRecharge, getOrderInfo } = require('../utils/idatariver');
+const querystring = require('querystring');
 const { authenticateToken } = require('./middleware/auth');
 const User = require('../models/User');
 
@@ -15,6 +16,9 @@ const VIP_PLANS = {
   quarterly: { days: 90, amount: 90, name: '包季会员' },
   yearly: { days: 365, amount: 300, name: '包年会员' }
 };
+
+// 月度VIP对应SKU（与前端 `skuIds[30]` 保持一致）
+const VIP_MONTHLY_SKU = process.env.IDR_SKU_ID_2 || process.env.IDR_SKU_VIP_MONTHLY || '';
 
 /**
  * 创建支付订单（支持VIP购买和金币充值）
@@ -51,11 +55,19 @@ router.post('/createorder', authenticateToken, async (req, res) => {
       orderType = 'vip';
       console.log(`[VIP支付] 用户 ${req.user.username} 尝试购买 ${desc}`);
     } else if (skuId) {
-      // 金币充值流程
-      const coinAmount = Math.round(amount / 100); // 将分转换为元，再作为金币数量
-      desc = `金币充值 - ${coinAmount}金币`;
-      orderType = 'coin';
-      console.log(`[金币充值] 用户 ${req.user.username} 尝试充值 ${desc}`);
+      // 当使用月度VIP的SKU下单时，按VIP购买处理
+      if (VIP_MONTHLY_SKU && String(skuId) === String(VIP_MONTHLY_SKU)) {
+        const plan = VIP_PLANS.monthly;
+        desc = `${plan.name} - ${plan.days}天VIP会员`;
+        orderType = 'vip';
+        console.log(`[VIP支付] 用户 ${req.user.username} 通过SKU(${skuId}) 购买 ${desc}`);
+      } else {
+        // 金币充值流程
+        const coinAmount = Math.round(amount / 100); // 将分转换为元，再作为金币数量
+        desc = `金币充值 - ${coinAmount}金币`;
+        orderType = 'coin';
+        console.log(`[金币充值] 用户 ${req.user.username} 尝试充值 ${desc}`);
+      }
     } else {
       return res.json({
         code: 1,
@@ -64,7 +76,11 @@ router.post('/createorder', authenticateToken, async (req, res) => {
     }
 
     // 调用idatariver创建支付订单
-    const result = await createRecharge(amount, contactInfo || req.user.username, desc, skuId);
+    // 直接透传 contactInfo（通常为注册邮箱）；若缺失则回退到用户邮箱/用户名
+    const safeContact = (contactInfo || req.user.email || req.user.username || 'anonymous')
+      .toString()
+      .slice(0, 80);
+    const result = await createRecharge(amount, safeContact, desc, skuId);
 
     if (result && result.payUrl) {
       console.log(`[${orderType === 'vip' ? 'VIP支付' : '金币充值'}] 订单创建成功，订单号: ${result.orderId}`);
@@ -79,9 +95,9 @@ router.post('/createorder', authenticateToken, async (req, res) => {
 
       // 如果是VIP购买，添加套餐信息
       if (orderType === 'vip') {
-        const plan = VIP_PLANS[planType];
+        const plan = VIP_PLANS[planType] || VIP_PLANS.monthly;
         responseData.planInfo = {
-          type: planType,
+          type: planType || 'monthly',
           days: plan.days,
           amount: plan.amount,
           name: plan.name
@@ -147,27 +163,73 @@ router.get('/orderinfo', authenticateToken, async (req, res) => {
  * 支付成功回调
  * POST /api/idatariver/webhook
  */
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   try {
     console.log('[VIP支付] 收到支付回调:', req.body);
     
     // 解析回调数据
     let callbackData;
     try {
-      callbackData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      // 统一拿到原始文本
+      let rawText;
+      if (Buffer.isBuffer(req.body)) {
+        rawText = req.body.toString('utf8');
+      } else if (typeof req.body === 'string') {
+        rawText = req.body;
+      } else if (typeof req.body === 'object' && req.body !== null && Object.keys(req.body).length > 0) {
+        // 已被上游 json/urlencoded 解析过
+        callbackData = req.body;
+      }
+
+      if (!callbackData) {
+        // 根据 content-type 再次尝试解析
+        const contentType = (req.headers['content-type'] || '').toLowerCase();
+        if (rawText && rawText.trim().length > 0) {
+          if (contentType.includes('application/json') || rawText.trim().startsWith('{') || rawText.trim().startsWith('[')) {
+            callbackData = JSON.parse(rawText);
+          } else if (contentType.includes('application/x-www-form-urlencoded')) {
+            callbackData = querystring.parse(rawText);
+          } else {
+            // 尝试先按 JSON，失败再按表单
+            try {
+              callbackData = JSON.parse(rawText);
+            } catch {
+              callbackData = querystring.parse(rawText);
+            }
+          }
+        }
+      }
     } catch (e) {
       console.error('[VIP支付] 回调数据解析失败:', e);
-      return res.status(400).json({ error: 'Invalid JSON' });
+      return res.status(400).json({ error: 'Invalid payload' });
     }
 
     // 验证回调数据
-    if (!callbackData.orderId && !callbackData.id) {
-      console.error('[VIP支付] 回调缺少订单号');
+    // 兼容多层结构字段
+    const tryGet = (obj, paths) => {
+      for (const p of paths) {
+        try {
+          const val = p.split('.').reduce((o, k) => (o ? o[k] : undefined), obj);
+          if (val !== undefined && val !== null && String(val).length > 0) return val;
+        } catch (_) {}
+      }
+      return undefined;
+    };
+
+    const orderIdCandidate = tryGet(callbackData, [
+      'orderId','id','result.orderId','result.id','data.orderId','data.id','order.id','order.orderId'
+    ]);
+
+    if (!orderIdCandidate) {
+      console.error('[VIP支付] 回调缺少订单号，payload=', JSON.stringify(callbackData));
       return res.status(400).json({ error: 'Missing order ID' });
     }
 
-    const orderId = callbackData.orderId || callbackData.id;
-    const status = callbackData.status || callbackData.orderStatus;
+    const orderId = orderIdCandidate;
+    const status = tryGet(callbackData, ['status','orderStatus','result.status','data.status']);
+    const rawDesc = tryGet(callbackData, ['description','desc','result.description','result.desc','data.description','data.desc']) || '';
+    const contactInfo = tryGet(callbackData, ['contactInfo','contact','result.contactInfo','data.contactInfo']) || '';
+    const skuIdFromCallback = tryGet(callbackData, ['skuId','sku','result.skuId','data.skuId']) || '';
 
     console.log(`[VIP支付] 订单 ${orderId} 状态: ${status}`);
 
@@ -179,11 +241,28 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         console.log('[支付回调] 订单详情:', JSON.stringify(orderDetail, null, 2));
         
         // 根据订单描述判断是VIP购买还是金币充值
-        const description = orderDetail.description || orderDetail.desc || '';
+        const description = orderDetail.description || orderDetail.desc || rawDesc || '';
+        const skuId = orderDetail.result?.skuId || orderDetail.skuId || skuIdFromCallback || '';
+        const contact = orderDetail.result?.contactInfo || orderDetail.contactInfo || contactInfo || '';
         
-        if (description.includes('VIP会员')) {
-          // VIP购买处理逻辑
-          console.log(`[VIP支付] 订单 ${orderId} 支付成功，VIP状态更新完成`);
+        if (description.includes('VIP会员') || (VIP_MONTHLY_SKU && String(skuId) === String(VIP_MONTHLY_SKU))) {
+          // VIP购买处理逻辑：通过 contactInfo 定位用户（优先邮箱，回退用户名）
+          if (contact) {
+            const user = await User.findOne({ $or: [ { email: contact }, { username: contact } ] });
+            if (user) {
+              const now = new Date();
+              const base = user.premiumExpiry && user.premiumExpiry > now ? user.premiumExpiry : now;
+              const newExpiry = new Date(base.getTime() + VIP_PLANS.monthly.days * 24 * 60 * 60 * 1000);
+              user.isPremium = true;
+              user.premiumExpiry = newExpiry;
+              await user.save();
+              console.log(`[VIP支付] 用户 ${user.username}(${user._id}) 月度VIP开通成功，到期时间: ${newExpiry.toISOString()}`);
+            } else {
+              console.warn(`[VIP支付] 未找到与 contactInfo 匹配的用户: ${contact}`);
+            }
+          } else {
+            console.warn('[VIP支付] 回调缺少 contactInfo，无法自动更新VIP状态');
+          }
         } else if (description.includes('金币充值')) {
           // 金币充值处理逻辑
           console.log(`[金币充值] 订单 ${orderId} 支付成功，开始处理金币充值`);
@@ -271,7 +350,7 @@ router.post('/checkpayment', authenticateToken, async (req, res) => {
           user.premiumExpiry = newExpiry;
           await user.save();
           
-          console.log(`[VIP支付] 用户 ${user.username} VIP状态更新成功，到期时间: ${newVipExpire}`);
+          console.log(`[VIP支付] 用户 ${user.username} VIP状态更新成功，到期时间: ${newExpiry}`);
           
           return res.json({
             code: 0,

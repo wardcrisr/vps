@@ -354,6 +354,57 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
     }
+    /* VIP 简洁卡片布局 */
+    .vip-area {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .vip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    .vip-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .vip-expiry-chip {
+      font-size: 12px;
+      color: #2e7d32;
+      background: #e8f5e9;
+      padding: 4px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .vip-help-tip {
+      font-size: 18px;
+      color: #666;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+    /* VIP 按钮区域与提示文案 */
+    .vip-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .vip-tip {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      text-align: right;
+      max-width: 260px;
+    }
     
     /* 金币充值区域 */
     .recharge-section {
@@ -428,11 +479,9 @@
     
     /* 响应式设计 */
     @media (max-width: 576px) {
-      /* VIP状态行移动端优化 */
-      .vip-status-row {
-        gap: 8px;
-      }
-      
+      .vip-row { gap: 8px; }
+      .vip-help-tip { font-size: 11px; }
+
       .vip-status-text {
         gap: 6px;
         flex-shrink: 1;
@@ -446,13 +495,7 @@
         font-size: 13px;
       }
       
-      .vip-upgrade-btn {
-        padding: 8px 12px;
-        font-size: 11px;
-        border-radius: 18px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
+      .vip-upgrade-btn { padding: 10px 14px; font-size: 13px; border-radius: 18px; white-space: nowrap; }
       
       /* 金币充值按钮 */
       .recharge-buttons {
@@ -1043,23 +1086,24 @@
         </div>
       </div>
       
-      <!-- VIP会员状态 - 一行显示 -->
-      <div class="vip-status-row">
-        <div class="vip-status-text">
-          <span class="vip-label">VIP会员</span>
-          <% if (user.isPremium && (!user.premiumExpiry || new Date(user.premiumExpiry) > new Date())) { %>
-            <span class="vip-expired" style="color: #4CAF50;">
-              <%= user.premiumExpiry ? new Date(user.premiumExpiry).toLocaleDateString('zh-CN') : '永久' %>
-            </span>
+      <!-- VIP会员区域 - 简洁布局 -->
+      <div class="vip-area">
+        <div class="vip-row">
+          <div class="vip-info">
+            <span class="vip-label">VIP会员</span>
+            <% if (user.isPremium && (!user.premiumExpiry || new Date(user.premiumExpiry) > new Date())) { %>
+              <span class="vip-expiry-chip">到期 <%= user.premiumExpiry ? new Date(user.premiumExpiry).toLocaleDateString('zh-CN') : '永久' %></span>
+            <% } else { %>
+              <span class="vip-expiry-chip" style="color:#666;background:#f0f0f0;">未开通</span>
+            <% } %>
+          </div>
+          <% if (!user.isPremium || (user.premiumExpiry && new Date(user.premiumExpiry) <= new Date())) { %>
+            <button class="vip-upgrade-btn" onclick="openMonthlyVip()">开通月度会员</button>
           <% } else { %>
-            <span class="vip-expired">未开通</span>
+            <button class="vip-upgrade-btn" onclick="openMonthlyVip()" style="background: #4CAF50;">续费月度会员</button>
           <% } %>
         </div>
-        <% if (!user.isPremium || (user.premiumExpiry && new Date(user.premiumExpiry) <= new Date())) { %>
-          <button class="vip-upgrade-btn" onclick="openMonthlyVip()">开通月度会员</button>
-        <% } else { %>
-          <button class="vip-upgrade-btn" onclick="openMonthlyVip()" style="background: #4CAF50;">续费月度会员</button>
-        <% } %>
+        <div class="vip-help-tip">如遇开通会员或充值金币失败，请点击首页右下角蓝色小组件与客服联系!</div>
       </div>
     </div>
 
@@ -1069,27 +1113,27 @@
         <h3>金币充值</h3>
       </div>
       <div class="recharge-buttons">
-        <button class="recharge-btn" onclick="directRecharge(10, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[10] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[10]) ? skuIds[10] : '' %>" onclick="directRecharge(10, this.dataset.sku)">
           <span class="amount">10</span>
           <span class="unit">金币</span>
         </button>
-        <button class="recharge-btn" onclick="directRecharge(30, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[30] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[30]) ? skuIds[30] : '' %>" onclick="directRecharge(30, this.dataset.sku)">
           <span class="amount">30</span>
           <span class="unit">金币</span>
         </button>
-        <button class="recharge-btn" onclick="directRecharge(50, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[50] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[50]) ? skuIds[50] : '' %>" onclick="directRecharge(50, this.dataset.sku)">
           <span class="amount">50</span>
           <span class="unit">金币</span>
         </button>
-        <button class="recharge-btn" onclick="directRecharge(100, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[100] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[100]) ? skuIds[100] : '' %>" onclick="directRecharge(100, this.dataset.sku)">
           <span class="amount">100</span>
           <span class="unit">金币</span>
         </button>
-        <button class="recharge-btn" onclick="directRecharge(200, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[200] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[200]) ? skuIds[200] : '' %>" onclick="directRecharge(200, this.dataset.sku)">
           <span class="amount">200</span>
           <span class="unit">金币</span>
         </button>
-        <button class="recharge-btn" onclick="directRecharge(300, '<%= typeof skuIds !== 'undefined' && skuIds ? skuIds[300] || '' : '' %>')">
+        <button class="recharge-btn" data-sku="<%= (skuIds && skuIds[300]) ? skuIds[300] : '' %>" onclick="directRecharge(300, this.dataset.sku)">
           <span class="amount">300</span>
           <span class="unit">金币</span>
         </button>
@@ -1427,10 +1471,10 @@
         ">
           <h3 style="margin-bottom: 20px; color: #333;">充值信息确认</h3>
           <p style="margin-bottom: 20px; line-height: 1.6; color: #666;">
-            请输入QQ/邮箱用于后续查询订单，<br>
+            请输入创建账号时绑定的邮箱否则无法开通会员，<br>
             <span style="color: red; font-weight: bold;">点击确定前请关闭VPN</span>
           </p>
-          <input type="text" id="contactInput" placeholder="请输入QQ号或邮箱地址" style="
+          <input type="text" id="contactInput" placeholder="创建账号时绑定的邮箱" style="
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;

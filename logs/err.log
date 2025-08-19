@@ -1611,3 +1611,614 @@
 2025-08-15T11:00:46: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
 2025-08-15T11:01:11: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
 2025-08-15T11:01:19: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-15T11:10:29: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-15T11:10:46: [video-detail] Video 687a28e576cc513163d5b2b4 缺少描述，已回退为标题
+2025-08-15T11:13:42: [video-detail] Video 687a344176cc513163d5b378 缺少描述，已回退为标题
+2025-08-15T11:15:59: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:615:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-15T11:19:13: [video-detail] Video 687a3b1076cc513163d5b3ca 缺少描述，已回退为标题
+2025-08-15T11:20:34: [bunnyWebhook] No Media found for bunnyId: deea8a07-fca3-47c1-8029-5341130d562b
+2025-08-15T11:21:03: [bunnyWebhook] No Media found for bunnyId: deea8a07-fca3-47c1-8029-5341130d562b
+2025-08-15T11:25:17: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-15T11:25:56: [video-detail] Video 6878357a76cc513163d5897d 缺少描述，已回退为标题
+2025-08-15T11:26:13: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-15T11:31:54: [video-detail] Video 687a28e576cc513163d5b2b4 缺少描述，已回退为标题
+2025-08-15T11:33:05: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:615:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-15T11:33:57: [video-detail] Video 687a28e576cc513163d5b2b4 缺少描述，已回退为标题
+2025-08-15T11:51:18: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-15T12:10:22: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-15T12:32:43: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-15T12:58:34: [video-detail] Video 687ba93876cc513163d5cfca 缺少描述，已回退为标题
+2025-08-15T15:23:40: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-15T15:23:40: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-15T15:24:07: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-15T15:25:18: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-15T15:25:43: [video-detail] Video 687bd31276cc513163d5d385 缺少描述，已回退为标题
+2025-08-15T15:25:46: [video-detail] Video 687bd31276cc513163d5d385 缺少描述，已回退为标题
+2025-08-15T15:26:21: [video-detail] Video 687b7c0276cc513163d5cbec 缺少描述，已回退为标题
+2025-08-15T16:48:35: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-15T16:49:10: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-15T17:32:14: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:615:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-15T17:57:55: [video-detail] Video 687be2073f6e8808195f706c 缺少描述，已回退为标题
+2025-08-15T17:58:33: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-15T17:58:44: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-15T18:43:34: [video-detail] Video 6878cf3c76cc513163d596b3 缺少描述，已回退为标题
+2025-08-15T20:13:34: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-15T20:35:49: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-15T20:54:36: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-15T21:18:54: [bunnyWebhook] No Media found for bunnyId: 6db17e45-193c-4007-96d3-3a7ce35f92dc
+2025-08-15T21:19:00: [bunnyWebhook] No Media found for bunnyId: 6db17e45-193c-4007-96d3-3a7ce35f92dc
+2025-08-15T21:21:10: [bunnyWebhook] No Media found for bunnyId: e7960b4e-dee1-442b-9d25-66f805e71128
+2025-08-15T21:21:16: [bunnyWebhook] No Media found for bunnyId: e7960b4e-dee1-442b-9d25-66f805e71128
+2025-08-15T21:22:37: [bunnyWebhook] No Media found for bunnyId: 62ef7d14-2b69-41e7-b0d7-2ca6c6490b0d
+2025-08-15T21:22:44: [bunnyWebhook] No Media found for bunnyId: 62ef7d14-2b69-41e7-b0d7-2ca6c6490b0d
+2025-08-15T21:23:41: [bunnyWebhook] No Media found for bunnyId: 8bb636c4-4dd2-4100-a12c-834feb234a6d
+2025-08-15T21:23:46: [bunnyWebhook] No Media found for bunnyId: 8bb636c4-4dd2-4100-a12c-834feb234a6d
+2025-08-15T21:54:20: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-15T21:55:07: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-15T22:06:46: [video-detail] Video 687d41773f6e8808195f8a5a 缺少描述，已回退为标题
+2025-08-15T22:17:42: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-15T23:11:47: [video-detail] Video 687bc70776cc513163d5d283 缺少描述，已回退为标题
+2025-08-16T00:16:47: [video-detail] Video 687a0bc076cc513163d5b045 缺少描述，已回退为标题
+2025-08-16T00:16:50: [video-detail] Video 687d336f3f6e8808195f899c 缺少描述，已回退为标题
+2025-08-16T00:17:38: [video-detail] Video 687d30a13f6e8808195f8975 缺少描述，已回退为标题
+2025-08-16T00:49:41: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-16T00:58:54: [video-detail] Video 687a344176cc513163d5b378 缺少描述，已回退为标题
+2025-08-16T01:18:37: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-16T02:34:29: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T02:35:07: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-16T02:35:35: [video-detail] Video 687be3353f6e8808195f707e 缺少描述，已回退为标题
+2025-08-16T02:35:51: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-16T02:35:55: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-16T02:36:15: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-16T02:38:32: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-16T02:39:37: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-16T03:06:23: [video-detail] Video 687d4ec33f6e8808195f8b13 缺少描述，已回退为标题
+2025-08-16T03:10:26: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-16T03:18:25: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-16T03:19:04: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-16T03:22:02: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-16T04:12:06: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-16T04:23:12: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-16T04:26:21: [video-detail] Video 687a0dff76cc513163d5b0a2 缺少描述，已回退为标题
+2025-08-16T06:17:25: [bunnyWebhook] No Media found for bunnyId: 8e7cfb24-6534-47e5-833c-493dd37b8909
+2025-08-16T06:17:30: [bunnyWebhook] No Media found for bunnyId: 8e7cfb24-6534-47e5-833c-493dd37b8909
+2025-08-16T06:18:41: [bunnyWebhook] No Media found for bunnyId: 1da09372-c112-4a89-bfb5-7bb3a3b96541
+2025-08-16T06:18:45: [bunnyWebhook] No Media found for bunnyId: 1da09372-c112-4a89-bfb5-7bb3a3b96541
+2025-08-16T06:19:13: [bunnyWebhook] No Media found for bunnyId: 5eb5c11e-00a0-4b9e-a800-8267efc2f1a0
+2025-08-16T06:19:17: [bunnyWebhook] No Media found for bunnyId: 5eb5c11e-00a0-4b9e-a800-8267efc2f1a0
+2025-08-16T06:20:01: [bunnyWebhook] No Media found for bunnyId: 8e9c3b8c-c69a-48d6-8b37-6d0cec59dd18
+2025-08-16T06:20:07: [bunnyWebhook] No Media found for bunnyId: 8e9c3b8c-c69a-48d6-8b37-6d0cec59dd18
+2025-08-16T06:21:35: [bunnyWebhook] No Media found for bunnyId: 3941167e-b34a-4916-bf0b-92bb5d1628b1
+2025-08-16T06:21:45: [bunnyWebhook] No Media found for bunnyId: 3941167e-b34a-4916-bf0b-92bb5d1628b1
+2025-08-16T06:40:34: [bunnyWebhook] No Media found for bunnyId: a283f828-209b-4212-9270-a796e1f4c1c9
+2025-08-16T06:40:47: [bunnyWebhook] No Media found for bunnyId: a283f828-209b-4212-9270-a796e1f4c1c9
+2025-08-16T06:41:42: [bunnyWebhook] No Media found for bunnyId: b67b9923-ce8b-40b8-8f69-a0e4f3d675ef
+2025-08-16T06:41:46: [bunnyWebhook] No Media found for bunnyId: b67b9923-ce8b-40b8-8f69-a0e4f3d675ef
+2025-08-16T06:42:28: [bunnyWebhook] No Media found for bunnyId: 6ce73aee-6ba7-4593-ab88-e00cf7343c5f
+2025-08-16T06:42:33: [bunnyWebhook] No Media found for bunnyId: 6ce73aee-6ba7-4593-ab88-e00cf7343c5f
+2025-08-16T06:43:16: [bunnyWebhook] No Media found for bunnyId: 07d5e35e-a357-474c-83d4-4e1a11852e07
+2025-08-16T06:43:21: [bunnyWebhook] No Media found for bunnyId: 07d5e35e-a357-474c-83d4-4e1a11852e07
+2025-08-16T06:48:24: [video-detail] Video 68768b7276cc513163d566b6 缺少描述，已回退为标题
+2025-08-16T06:48:44: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-16T07:25:24: [video-detail] Video 687bb6fd76cc513163d5d10d 缺少描述，已回退为标题
+2025-08-16T08:52:46: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T09:26:23: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-16T09:29:16: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-16T09:29:34: [video-detail] Video 687a28e576cc513163d5b2b4 缺少描述，已回退为标题
+2025-08-16T09:30:24: [video-detail] Video 687a37c676cc513163d5b3a4 缺少描述，已回退为标题
+2025-08-16T09:30:59: [video-detail] Video 6879404476cc513163d5a0eb 缺少描述，已回退为标题
+2025-08-16T09:31:59: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-16T09:35:57: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-16T09:37:10: [video-detail] Video 6879404476cc513163d5a0eb 缺少描述，已回退为标题
+2025-08-16T10:05:07: [video-detail] Video 6879404476cc513163d5a0eb 缺少描述，已回退为标题
+2025-08-16T12:11:41: [bunnyWebhook] No Media found for bunnyId: 2436047c-5b8f-4c5b-abad-52a28e31eef1
+2025-08-16T12:11:56: [bunnyWebhook] No Media found for bunnyId: 2436047c-5b8f-4c5b-abad-52a28e31eef1
+2025-08-16T12:38:49: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-16T12:44:50: [video-detail] Video 6876a60476cc513163d5696b 缺少描述，已回退为标题
+2025-08-16T12:45:53: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-16T12:46:07: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-16T12:48:06: [video-detail] Video 687a017976cc513163d5af9d 缺少描述，已回退为标题
+2025-08-16T13:31:25: [video-detail] Video 687bd31276cc513163d5d385 缺少描述，已回退为标题
+2025-08-16T14:23:51: [video-detail] Video 687a3b1076cc513163d5b3ca 缺少描述，已回退为标题
+2025-08-16T14:53:24: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-16T15:05:57: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-16T15:12:06: [video-detail] Video 6876a60476cc513163d5696b 缺少描述，已回退为标题
+2025-08-16T15:43:46: [bunnyWebhook] No Media found for bunnyId: 0df50cd7-c136-444a-9a37-60244c50ef09
+2025-08-16T15:44:28: [bunnyWebhook] No Media found for bunnyId: 0df50cd7-c136-444a-9a37-60244c50ef09
+2025-08-16T15:52:36: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-16T16:36:57: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-16T16:40:27: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-16T16:41:10: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-16T16:42:02: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-16T16:43:09: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-16T16:44:03: [video-detail] Video 687be3353f6e8808195f707e 缺少描述，已回退为标题
+2025-08-16T16:47:50: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-16T16:52:09: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T16:55:11: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T17:07:15: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-16T18:07:53: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T18:10:45: [video-detail] Video 687d41773f6e8808195f8a5a 缺少描述，已回退为标题
+2025-08-16T18:38:25: [video-detail] Video 68795ab276cc513163d5a28b 缺少描述，已回退为标题
+2025-08-16T18:46:40: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-16T19:14:53: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-16T19:17:12: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T19:17:50: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-16T19:18:42: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-16T19:19:18: [video-detail] Video 687be2dc3f6e8808195f707a 缺少描述，已回退为标题
+2025-08-16T19:35:27: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-16T19:36:27: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-16T20:43:14: [video-detail] Video 687a37c676cc513163d5b3a4 缺少描述，已回退为标题
+2025-08-16T21:14:03: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-16T21:19:14: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-16T21:34:25: [video-detail] Video 687d4ec33f6e8808195f8b13 缺少描述，已回退为标题
+2025-08-16T21:48:41: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-16T22:42:53: [video-detail] Video 687d4ec33f6e8808195f8b13 缺少描述，已回退为标题
+2025-08-16T23:11:07: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-16T23:22:54: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-17T00:41:13: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T01:02:06: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T01:05:04: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-17T01:05:29: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-17T01:17:53: [video-detail] Video 687d41773f6e8808195f8a5a 缺少描述，已回退为标题
+2025-08-17T01:19:41: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T01:20:09: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T01:20:34: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T01:20:38: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-17T01:20:48: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-17T01:20:54: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-17T01:21:06: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-17T01:21:30: [video-detail] Video 6878357a76cc513163d5897d 缺少描述，已回退为标题
+2025-08-17T01:22:05: [video-detail] Video 687b886776cc513163d5ccfb 缺少描述，已回退为标题
+2025-08-17T01:23:25: [video-detail] Video 687b6a6176cc513163d5ca4d 缺少描述，已回退为标题
+2025-08-17T01:24:45: [video-detail] Video 6879fbe676cc513163d5af2b 缺少描述，已回退为标题
+2025-08-17T01:24:53: [video-detail] Video 687a0bc076cc513163d5b045 缺少描述，已回退为标题
+2025-08-17T01:25:00: [video-detail] Video 687a06d376cc513163d5aff4 缺少描述，已回退为标题
+2025-08-17T01:25:10: [video-detail] Video 687a3d7676cc513163d5b3ec 缺少描述，已回退为标题
+2025-08-17T01:25:10: [video-detail] Video 687bc8aa76cc513163d5d2b4 缺少描述，已回退为标题
+2025-08-17T01:25:33: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-17T01:25:40: [video-detail] Video 687a344176cc513163d5b378 缺少描述，已回退为标题
+2025-08-17T01:25:52: [video-detail] Video 687a212a76cc513163d5b245 缺少描述，已回退为标题
+2025-08-17T01:26:11: [video-detail] Video 687bc42876cc513163d5d222 缺少描述，已回退为标题
+2025-08-17T01:27:32: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-17T01:30:28: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-17T02:04:21: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T02:25:33: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-17T02:36:14: [video-detail] Video 687a28e576cc513163d5b2b4 缺少描述，已回退为标题
+2025-08-17T02:53:09: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T02:53:39: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-17T02:53:55: [video-detail] Video 68768b7276cc513163d566b6 缺少描述，已回退为标题
+2025-08-17T02:54:12: [video-detail] Video 6876a60476cc513163d5696b 缺少描述，已回退为标题
+2025-08-17T02:54:31: [video-detail] Video 68777c8876cc513163d57a9c 缺少描述，已回退为标题
+2025-08-17T02:54:44: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-17T02:55:03: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-17T02:55:26: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-17T02:55:42: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-17T02:57:02: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T02:58:34: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-17T02:59:58: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-17T03:04:01: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-17T03:23:14: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T03:42:54: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T04:11:05: [video-detail] Video 687a017976cc513163d5af9d 缺少描述，已回退为标题
+2025-08-17T04:51:48: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-17T04:55:22: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-17T04:56:09: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-17T04:56:25: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-17T07:36:14: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-17T08:08:36: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-17T08:08:37: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-17T08:08:47: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-17T08:32:22: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-17T08:33:59: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-17T08:40:27: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T10:03:43: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-17T10:10:39: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T10:11:07: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T10:31:08: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T10:33:16: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-17T10:42:21: [bunnyWebhook] No Media found for bunnyId: f93908be-5f17-47ed-aabd-1b1c285d91c3
+2025-08-17T10:42:38: [bunnyWebhook] No Media found for bunnyId: f93908be-5f17-47ed-aabd-1b1c285d91c3
+2025-08-17T10:49:02: [bunnyWebhook] No Media found for bunnyId: 07c69f34-fa6c-49dd-a66d-93bb892e6fa0
+2025-08-17T10:49:13: [bunnyWebhook] No Media found for bunnyId: 07c69f34-fa6c-49dd-a66d-93bb892e6fa0
+2025-08-17T10:55:10: [bunnyWebhook] No Media found for bunnyId: 77b54e0e-4226-4f80-bb3a-cc18a839c31f
+2025-08-17T10:55:46: [bunnyWebhook] No Media found for bunnyId: 77b54e0e-4226-4f80-bb3a-cc18a839c31f
+2025-08-17T10:56:55: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T10:57:21: [VIP支付] 回调缺少订单号
+2025-08-17T10:58:11: [VIP支付] 回调缺少订单号
+2025-08-17T10:58:31: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T10:59:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:00:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:00:20: [bunnyWebhook] No Media found for bunnyId: f3c38748-30ce-46ac-8afd-30dd097fc216
+2025-08-17T11:00:30: [bunnyWebhook] No Media found for bunnyId: f3c38748-30ce-46ac-8afd-30dd097fc216
+2025-08-17T11:00:44: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T11:01:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:02:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:06:07: [bunnyWebhook] No Media found for bunnyId: 26f51219-3a75-432d-9fe5-49b1bdbefbab
+2025-08-17T11:06:36: [bunnyWebhook] No Media found for bunnyId: 26f51219-3a75-432d-9fe5-49b1bdbefbab
+2025-08-17T11:07:08: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T11:07:28: [VIP支付] 回调缺少订单号
+2025-08-17T11:08:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:08:30: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T11:08:46: [VIP支付] 回调缺少订单号
+2025-08-17T11:09:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:09:12: [VIP支付] 回调缺少订单号
+2025-08-17T11:09:22: [bunnyWebhook] No Media found for bunnyId: be069ca0-ac98-4ad9-b494-921195d45793
+2025-08-17T11:09:41: [bunnyWebhook] No Media found for bunnyId: be069ca0-ac98-4ad9-b494-921195d45793
+2025-08-17T11:10:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:10:12: [VIP支付] 回调缺少订单号
+2025-08-17T11:10:26: [bunnyWebhook] No Media found for bunnyId: 16efa62f-cea0-4bec-8794-0fde208d40c1
+2025-08-17T11:10:30: [bunnyWebhook] No Media found for bunnyId: 16efa62f-cea0-4bec-8794-0fde208d40c1
+2025-08-17T11:10:51: [bunnyWebhook] No Media found for bunnyId: 16efa62f-cea0-4bec-8794-0fde208d40c1
+2025-08-17T11:11:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:11:12: [VIP支付] 回调缺少订单号
+2025-08-17T11:12:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:12:12: [VIP支付] 回调缺少订单号
+2025-08-17T11:13:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:37:17: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T11:38:22: [VIP支付] 回调缺少订单号
+2025-08-17T11:39:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:40:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:41:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:42:11: [VIP支付] 回调缺少订单号
+2025-08-17T11:43:11: [VIP支付] 回调缺少订单号
+2025-08-17T12:01:11: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-17T12:02:04: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-17T12:14:11: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T12:24:16: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-17T12:25:39: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-17T12:35:01: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T12:35:08: [video-detail] Video 687b6a6176cc513163d5ca4d 缺少描述，已回退为标题
+2025-08-17T12:35:56: [video-detail] Video 687b79f676cc513163d5cbc7 缺少描述，已回退为标题
+2025-08-17T12:36:48: [video-detail] Video 687b7c0276cc513163d5cbec 缺少描述，已回退为标题
+2025-08-17T12:37:49: [video-detail] Video 687bb1e576cc513163d5d07d 缺少描述，已回退为标题
+2025-08-17T12:39:26: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T12:40:32: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-17T14:01:51: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-17T14:09:30: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T14:12:54: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-17T14:20:58: [video-detail] Video 687bc42876cc513163d5d222 缺少描述，已回退为标题
+2025-08-17T14:54:17: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T14:54:40: [VIP支付] 回调缺少订单号
+2025-08-17T14:55:11: [VIP支付] 回调缺少订单号
+2025-08-17T14:56:11: [VIP支付] 回调缺少订单号
+2025-08-17T14:56:43: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-17T14:57:11: [VIP支付] 回调缺少订单号
+2025-08-17T14:58:11: [VIP支付] 回调缺少订单号
+2025-08-17T14:59:11: [VIP支付] 回调缺少订单号
+2025-08-17T15:29:09: 全局错误捕获: Error: Failed to lookup view "upload" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:606:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'upload',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-17T15:40:05: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-17T15:45:16: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-17T17:20:55: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-17T17:29:54: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T17:35:53: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T17:36:07: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-17T17:36:49: [video-detail] Video 687b7c0276cc513163d5cbec 缺少描述，已回退为标题
+2025-08-17T17:36:57: [video-detail] Video 687b6a6176cc513163d5ca4d 缺少描述，已回退为标题
+2025-08-17T17:40:41: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-17T18:07:05: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-17T18:09:51: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-17T18:10:25: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-17T18:10:39: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-17T18:26:47: [video-detail] Video 687be23d3f6e8808195f7071 缺少描述，已回退为标题
+2025-08-17T18:32:51: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-17T18:41:07: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-17T18:42:39: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-17T18:46:11: [video-detail] Video 687d336f3f6e8808195f899c 缺少描述，已回退为标题
+2025-08-17T20:03:13: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-17T20:03:34: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-17T20:11:29: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T20:12:30: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T20:13:05: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T20:13:21: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-17T20:14:55: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-17T20:14:58: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T20:24:29: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-17T20:29:41: (node:598898) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-17T20:33:47: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T20:34:04: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T20:35:25: [VIP支付] 回调缺少订单号
+2025-08-17T20:36:11: [VIP支付] 回调缺少订单号
+2025-08-17T20:37:11: [VIP支付] 回调缺少订单号
+2025-08-17T20:38:11: [VIP支付] 回调缺少订单号
+2025-08-17T20:39:11: [VIP支付] 回调缺少订单号
+2025-08-17T20:40:11: [VIP支付] 回调缺少订单号
+2025-08-17T21:24:18: [video-detail] Video 687be26e3f6e8808195f7074 缺少描述，已回退为标题
+2025-08-17T21:24:48: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-17T21:31:04: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T21:42:31: (node:607460) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-17T22:10:07: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-17T22:11:51: [video-detail] Video 687d34ad3f6e8808195f89aa 缺少描述，已回退为标题
+2025-08-17T22:34:52: (node:613309) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-17T22:38:28: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-17T22:39:16: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-17T22:43:31: [video-detail] Video 687d41773f6e8808195f8a5a 缺少描述，已回退为标题
+2025-08-17T22:44:09: [video-detail] Video 687d30a13f6e8808195f8975 缺少描述，已回退为标题
+2025-08-17T23:16:58: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-17T23:37:31: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-17T23:43:04: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-17T23:44:04: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-17T23:46:50: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-17T23:47:12: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-17T23:56:41: [video-detail] Video 687b6a6176cc513163d5ca4d 缺少描述，已回退为标题
+2025-08-18T00:09:38: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T00:17:36: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T00:17:44: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T00:17:46: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T00:20:54: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T00:21:13: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-18T00:21:22: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-18T00:27:49: [video-detail] Video 6875e09976cc513163d552ee 缺少描述，已回退为标题
+2025-08-18T00:28:11: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-18T00:52:32: [video-detail] Video 6878cf3c76cc513163d596b3 缺少描述，已回退为标题
+2025-08-18T01:16:50: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-18T01:16:50: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-18T01:16:50: [video-detail] Video 6875e02776cc513163d552e6 缺少描述，已回退为标题
+2025-08-18T03:17:33: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-18T04:46:55: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T05:38:51: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-18T05:40:05: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T06:34:35: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-18T06:36:36: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-18T06:36:57: [video-detail] Video 6879093f76cc513163d59d03 缺少描述，已回退为标题
+2025-08-18T07:10:05: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-18T07:24:29: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T07:26:51: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T07:27:38: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T07:40:05: [video-detail] Video 68795ab276cc513163d5a28b 缺少描述，已回退为标题
+2025-08-18T08:52:28: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:615:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-18T09:00:04: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-18T09:09:47: [video-detail] Video 687be3353f6e8808195f707e 缺少描述，已回退为标题
+2025-08-18T09:14:10: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-18T09:14:11: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-18T09:18:50: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-18T09:18:51: [video-detail] Video 687a444576cc513163d5b468 缺少描述，已回退为标题
+2025-08-18T09:19:05: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-18T10:07:24: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-18T10:48:18: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-18T11:11:41: [video-detail] Video 687be2073f6e8808195f706c 缺少描述，已回退为标题
+2025-08-18T11:35:40: [video-detail] Video 687ad20276cc513163d5bf47 缺少描述，已回退为标题
+2025-08-18T11:44:30: [video-detail] Video 687be54a3f6e8808195f709d 缺少描述，已回退为标题
+2025-08-18T11:47:41: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T13:13:15: [video-detail] Video 687683a176cc513163d56612 缺少描述，已回退为标题
+2025-08-18T13:17:48: [video-detail] Video 6879e93d76cc513163d5ae21 缺少描述，已回退为标题
+2025-08-18T13:18:03: [video-detail] Video 6879e93d76cc513163d5ae21 缺少描述，已回退为标题
+2025-08-18T13:18:24: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-18T13:18:50: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-18T13:19:15: [video-detail] Video 6879093f76cc513163d59d03 缺少描述，已回退为标题
+2025-08-18T13:22:55: [video-detail] Video 687ad47d76cc513163d5bf69 缺少描述，已回退为标题
+2025-08-18T13:42:23: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T14:13:34: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-18T15:57:29: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-18T15:58:01: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-18T15:58:41: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-18T15:59:33: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-18T15:59:48: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-18T16:00:00: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-18T16:02:39: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-18T16:03:09: [video-detail] Video 687be54a3f6e8808195f709d 缺少描述，已回退为标题
+2025-08-18T16:04:01: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-18T16:04:22: [video-detail] Video 687be2dc3f6e8808195f707a 缺少描述，已回退为标题
+2025-08-18T16:04:43: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-18T16:11:45: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-18T16:11:47: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-18T16:12:45: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-18T16:12:46: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-18T16:14:00: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-18T16:14:52: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-18T16:15:13: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-18T16:18:14: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-18T16:18:52: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-18T16:20:47: [video-detail] Video 6877fa7c76cc513163d58508 缺少描述，已回退为标题
+2025-08-18T16:20:50: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-18T16:20:50: [video-detail] Video 6877e55576cc513163d58398 缺少描述，已回退为标题
+2025-08-18T16:20:53: [video-detail] Video 6878284c76cc513163d5885b 缺少描述，已回退为标题
+2025-08-18T16:30:59: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-18T16:31:01: [video-detail] Video 687a9c0b76cc513163d5bb9d 缺少描述，已回退为标题
+2025-08-18T16:33:41: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T17:39:30: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T17:40:52: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T17:40:59: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T17:42:48: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T17:43:42: [video-detail] Video 687be2dc3f6e8808195f707a 缺少描述，已回退为标题
+2025-08-18T17:45:11: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T18:17:54: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T18:19:42: [video-detail] Video 687a2b5776cc513163d5b2df 缺少描述，已回退为标题
+2025-08-18T18:20:18: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T18:21:35: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T18:21:51: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-18T18:55:42: [video-detail] Video 687d34ad3f6e8808195f89aa 缺少描述，已回退为标题
+2025-08-18T18:58:21: [video-detail] Video 6876026876cc513163d555e9 缺少描述，已回退为标题
+2025-08-18T19:05:40: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T19:06:38: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T19:07:09: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-18T19:09:52: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-18T19:25:51: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-18T20:54:14: [video-detail] Video 6875e10276cc513163d552f9 缺少描述，已回退为标题
+2025-08-18T21:23:49: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-18T21:40:11: [video-detail] Video 687bc8aa76cc513163d5d2b4 缺少描述，已回退为标题
+2025-08-18T21:51:17: [video-detail] Video 687a2f3276cc513163d5b315 缺少描述，已回退为标题
+2025-08-18T22:13:15: [video-detail] Video 687d4bcd3f6e8808195f8add 缺少描述，已回退为标题
+2025-08-18T22:57:03: [video-detail] Video 687d206e3f6e8808195f8875 缺少描述，已回退为标题
+2025-08-18T22:57:09: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-18T22:57:21: [video-detail] Video 687be6ab3f6e8808195f70b6 缺少描述，已回退为标题
+2025-08-18T23:28:02: [video-detail] Video 687d30a13f6e8808195f8975 缺少描述，已回退为标题
+2025-08-19T00:22:09: [video-detail] Video 687d1ea93f6e8808195f885e 缺少描述，已回退为标题
+2025-08-19T00:48:15: [video-detail] Video 687be46f3f6e8808195f708d 缺少描述，已回退为标题
+2025-08-19T00:49:05: [video-detail] Video 687c5bd93f6e8808195f7ae4 缺少描述，已回退为标题
+2025-08-19T00:58:19: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-19T00:58:21: [video-detail] Video 68778dc876cc513163d57c21 缺少描述，已回退为标题
+2025-08-19T01:59:36: [video-detail] Video 687b6a6176cc513163d5ca4d 缺少描述，已回退为标题
+2025-08-19T02:37:08: (node:630395) [MONGOOSE] Warning: Duplicate schema index on {"bunnyId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2025-08-19T02:40:10: [video-detail] Video 687c509e3f6e8808195f79a5 缺少描述，已回退为标题
+2025-08-19T02:49:15: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T03:19:22: [iDataRiver] merchant/createOrder returned no payUrl, fallback
+2025-08-19T03:35:15: [bunnyWebhook] No Media found for bunnyId: e5277005-8b2d-41dd-a733-ad2200ed71b4
+2025-08-19T03:36:07: [bunnyWebhook] No Media found for bunnyId: e5277005-8b2d-41dd-a733-ad2200ed71b4
+2025-08-19T03:54:30: [bunnyWebhook] No Media found for bunnyId: 943164ef-89b4-4a99-b0b3-91af144cf5e1
+2025-08-19T03:55:07: [bunnyWebhook] No Media found for bunnyId: 943164ef-89b4-4a99-b0b3-91af144cf5e1
+2025-08-19T04:02:11: [bunnyWebhook] No Media found for bunnyId: d9486c2e-b73a-4884-8524-22130ec89712
+2025-08-19T04:02:13: [bunnyWebhook] No Media found for bunnyId: d9486c2e-b73a-4884-8524-22130ec89712
+2025-08-19T04:23:37: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:24:05: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:24:28: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:25:08: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:25:22: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:25:59: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:26:18: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:26:34: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:29:13: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:30:16: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:30:20: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:31:29: [video-detail] Video 687a828c76cc513163d5b969 缺少描述，已回退为标题
+2025-08-19T04:37:13: [video-detail] Video 687d41773f6e8808195f8a5a 缺少描述，已回退为标题
+2025-08-19T05:23:54: [video-detail] Video 687a3b1076cc513163d5b3ca 缺少描述，已回退为标题
+2025-08-19T05:24:34: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-19T05:25:07: [video-detail] Video 6879e93d76cc513163d5ae21 缺少描述，已回退为标题
+2025-08-19T05:25:27: [video-detail] Video 6879404476cc513163d5a0eb 缺少描述，已回退为标题
+2025-08-19T05:35:54: [video-detail] Video 6879404476cc513163d5a0eb 缺少描述，已回退为标题
+2025-08-19T05:38:03: [video-detail] Video 687a37c676cc513163d5b3a4 缺少描述，已回退为标题
+2025-08-19T05:38:26: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-19T05:41:06: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-19T05:43:47: [video-detail] Video 687a142676cc513163d5b141 缺少描述，已回退为标题
+2025-08-19T06:03:08: [video-detail] Video 6877d5aa76cc513163d5826a 缺少描述，已回退为标题
+2025-08-19T06:22:21: [video-detail] Video 687b886776cc513163d5ccfb 缺少描述，已回退为标题
+2025-08-19T07:30:13: [video-detail] Video 6878497676cc513163d58aff 缺少描述，已回退为标题
+2025-08-19T07:54:20: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-19T08:21:40: [video-detail] Video 68766f2576cc513163d5649f 缺少描述，已回退为标题
+2025-08-19T08:24:20: [video-detail] Video 6877b77e76cc513163d57fc4 缺少描述，已回退为标题
+2025-08-19T08:32:41: [bunnyWebhook] No Media found for bunnyId: d4794148-dc9a-41d5-bb4a-697cdc62a8de
+2025-08-19T08:32:51: [bunnyWebhook] No Media found for bunnyId: d4794148-dc9a-41d5-bb4a-697cdc62a8de
+2025-08-19T08:38:26: [bunnyWebhook] No Media found for bunnyId: b7b5e9b4-5b16-40b1-84e2-5310630c55f0
+2025-08-19T08:38:29: [bunnyWebhook] No Media found for bunnyId: b7b5e9b4-5b16-40b1-84e2-5310630c55f0
+2025-08-19T08:45:58: [bunnyWebhook] No Media found for bunnyId: c6fe69f5-968a-4716-9bb9-8c9c8215e934
+2025-08-19T08:46:04: [bunnyWebhook] No Media found for bunnyId: c6fe69f5-968a-4716-9bb9-8c9c8215e934
+2025-08-19T08:55:21: [bunnyWebhook] No Media found for bunnyId: e5bf6bbb-3c01-496b-82d7-32b9fec9522e
+2025-08-19T08:55:29: [bunnyWebhook] No Media found for bunnyId: e5bf6bbb-3c01-496b-82d7-32b9fec9522e
+2025-08-19T09:46:50: [video-detail] Video 687ba93876cc513163d5cfca 缺少描述，已回退为标题
+2025-08-19T09:49:46: 全局错误捕获: Error: Failed to lookup view "login" in views directory "/root/content-distribution/src/views"
+    at Function.render (/root/content-distribution/node_modules/express/lib/application.js:597:17)
+    at ServerResponse.render (/root/content-distribution/node_modules/express/lib/response.js:1049:7)
+    at res.render (/root/content-distribution/node_modules/express-ejs-layouts/lib/express-layouts.js:67:20)
+    at /root/content-distribution/src/app.js:615:7
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at next (/root/content-distribution/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/root/content-distribution/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/root/content-distribution/node_modules/express/lib/router/layer.js:95:5)
+    at /root/content-distribution/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/root/content-distribution/node_modules/express/lib/router/index.js:346:12) {
+  view: View {
+    defaultEngine: 'ejs',
+    ext: '.ejs',
+    name: 'login',
+    root: '/root/content-distribution/src/views',
+    engine: [Function (anonymous)],
+    path: undefined
+  }
+}
+2025-08-19T09:49:47: [video-detail] Video 687aac4b76cc513163d5bc99 缺少描述，已回退为标题
+2025-08-19T09:50:35: [video-detail] Video 687a987576cc513163d5bb51 缺少描述，已回退为标题
+2025-08-19T09:54:37: [bunnyWebhook] No Media found for bunnyId: 2d7adbea-4178-458f-accf-c0cce915614b
+2025-08-19T09:54:51: [bunnyWebhook] No Media found for bunnyId: 2d7adbea-4178-458f-accf-c0cce915614b
+2025-08-19T10:07:41: [bunnyWebhook] No Media found for bunnyId: 0a301ba0-e994-4ae8-907e-29ea9d00d0cb
+2025-08-19T10:08:09: [bunnyWebhook] No Media found for bunnyId: 0a301ba0-e994-4ae8-907e-29ea9d00d0cb
+2025-08-19T10:12:25: [bunnyWebhook] No Media found for bunnyId: e7d030ac-459b-49c5-bc02-97f0afbf774c
+2025-08-19T10:12:52: [bunnyWebhook] No Media found for bunnyId: e7d030ac-459b-49c5-bc02-97f0afbf774c
